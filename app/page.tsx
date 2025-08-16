@@ -1,11 +1,12 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Coins, Users, TrendingUp, Gamepad2, Gift, ArrowRight, Star, Zap, Crown, Sparkles } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Trophy, Gamepad2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 // Animated Counter Component
 function AnimatedCounter({ value, suffix = "", className = "" }: { value: number; suffix?: string; className?: string }) {

@@ -1,7 +1,8 @@
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Crown, Medal, Target, TrendingUp, Calendar, Users, Coins } from "lucide-react";
+import { Trophy, TrendingUp, Gift, Target, Crown, Calendar } from "lucide-react";
 
 export default function LeaderboardPage() {
   // Mock data - replace with real data from your backend

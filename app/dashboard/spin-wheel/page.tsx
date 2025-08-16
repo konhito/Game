@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Coins, Gift, Zap, Target, Star, Crown } from "lucide-react";
+import { Trophy, Gift, Target } from "lucide-react";
 
 const wheelSegments = [
   { id: 1, label: "2", points: 2, color: "bg-blue-500", icon: "🎯" },
@@ -182,7 +182,7 @@ export default function SpinWheelPage() {
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-yellow-400" />
+                  <Trophy className="w-5 h-5 text-yellow-400" />
                   Buy Extra Spins
                 </CardTitle>
                 <CardDescription className="text-gray-300">

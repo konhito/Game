@@ -1,8 +1,9 @@
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Coins, Users, TrendingUp, Gamepad2, Gift, Target, Zap, Calendar, Wallet } from "lucide-react";
+import { Trophy, Gamepad2, TrendingUp, Calendar, BarChart3, Zap } from "lucide-react";
 
 export default function DashboardPage() {
   // Mock data - replace with real data from your backend
@@ -69,7 +70,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">#{userStats.rank}</div>
-              <p className="text-xs text-gray-400 mt-1">On the leaderboard</p>
+              <p className="text-slate-600 text-sm">
+                You&apos;re currently ranked #{userStats.rank} on the leaderboard
+              </p>
             </CardContent>
           </Card>
 

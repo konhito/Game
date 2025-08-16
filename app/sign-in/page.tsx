@@ -177,7 +177,7 @@ export default function SignInPage() {
                 </Button>
 
                 <div className="text-center">
-                  <span className="text-slate-600">Don't have an account? </span>
+                  <span className="text-slate-600">Don&apos;t have an account? </span>
                   <Link
                     href="/sign-up"
                     className="text-violet-600 hover:text-violet-700 font-medium transition-colors"
