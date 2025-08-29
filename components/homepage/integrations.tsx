@@ -1,12 +1,9 @@
-import {
-  Shadcnui,
-  TailwindCSS,
-  BetterAuth,
-  Polar,
-  NeonPostgres,
-  Nextjs,
-} from "@/components/logos";
 import { Card } from "@/components/ui/card";
+import { Nextjs } from "@/components/logos/Nextjs";
+import { NeonPostgres } from "@/components/logos/NeonPostgres";
+import { Polar } from "@/components/logos/Polar";
+import { TailwindCSS } from "@/components/logos/TailwindCSS";
+import { Shadcnui } from "@/components/logos/Shadcnui";
 import * as React from "react";
 
 export default function Integrations() {
@@ -31,14 +28,6 @@ export default function Integrations() {
               link="https://nextjs.org"
             >
               <Nextjs />
-            </IntegrationCard>
-
-            <IntegrationCard
-              title="Better Auth"
-              description="Modern authentication library with session management, OAuth providers, and security features."
-              link="https://better-auth.com"
-            >
-              <BetterAuth />
             </IntegrationCard>
 
             <IntegrationCard

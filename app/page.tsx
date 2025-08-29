@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Gamepad2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight } from "lucide-react";
+import { Trophy, Share2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight, MessageCircle, ThumbsUp, Eye, UserPlus, Newspaper, Star } from "lucide-react";
 import Link from "next/link";
 
 // Animated Counter Component
@@ -38,12 +38,65 @@ export default function HomePage() {
     visible: { opacity: 1, y: 0 }
   };
 
+  // Sample news data
+  const newsItems = [
+    {
+      id: 1,
+      title: "New Social Media Challenge: Share Your Success Story",
+      excerpt: "Share your PineCoin journey and earn up to 50 points!",
+      date: "2 hours ago",
+      category: "Challenge"
+    },
+    {
+      id: 2,
+      title: "Weekly Leaderboard Winners Announced",
+      excerpt: "Congratulations to this week's top performers!",
+      date: "1 day ago",
+      category: "Leaderboard"
+    },
+    {
+      id: 3,
+      title: "New Video Content Available for Rewards",
+      excerpt: "Watch our latest videos and earn points instantly.",
+      date: "3 days ago",
+      category: "Content"
+    }
+  ];
+
+  // Sample testimonials
+  const testimonials = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      role: "Social Media Influencer",
+      content: "PineCoin has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
+      avatar: "👩‍💼",
+      rating: 5
+    },
+    {
+      id: 2,
+      name: "Mike Chen",
+      role: "Content Creator",
+      content: "The referral system is amazing. I've earned over 500 points just by sharing with friends!",
+      avatar: "👨‍💻",
+      rating: 5
+    },
+    {
+      id: 3,
+      name: "Emma Davis",
+      role: "Student",
+      content: "Perfect for students! I earn PineCoins while studying and sharing educational content.",
+      avatar: "👩‍🎓",
+      rating: 5
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full blur-3xl opacity-60"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-60"
           animate={{ 
             scale: [1, 1.2, 1],
             rotate: [0, 180, 360]
@@ -51,7 +104,7 @@ export default function HomePage() {
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
         <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-200 to-orange-200 rounded-full blur-3xl opacity-60"
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-200 to-emerald-200 rounded-full blur-3xl opacity-60"
           animate={{ 
             scale: [1.2, 1, 1.2],
             rotate: [360, 180, 0]
@@ -59,7 +112,7 @@ export default function HomePage() {
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
         />
         <motion.div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-green-200 to-blue-200 rounded-full blur-3xl opacity-40"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-40"
           animate={{ 
             scale: [1, 1.1, 1],
             rotate: [0, -180, -360]
@@ -67,63 +120,6 @@ export default function HomePage() {
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         />
       </div>
-
-      {/* Header */}
-      <motion.header 
-        className="relative z-10 border-b border-slate-200/50 backdrop-blur-md bg-white/70 sticky top-0"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <motion.div 
-              className="flex items-center space-x-3"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400 }}
-            >
-              <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                PineCoin Casino
-              </span>
-            </motion.div>
-            
-            <nav className="hidden md:flex items-center space-x-8">
-              {["Features", "Leaderboard", "About", "Sign In"].map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Link 
-                    href={item === "Sign In" ? "/sign-in" : `#${item.toLowerCase()}`}
-                    className="text-slate-600 hover:text-violet-600 transition-colors font-medium relative group"
-                  >
-                    {item}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
-
-            <motion.div 
-              className="flex items-center space-x-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Link href="/sign-up">
-                <Button className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                  Get Started
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </motion.header>
 
       {/* Hero Section */}
       <section className="relative py-24 px-4 text-center">
@@ -135,15 +131,25 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
+            {/* Logo Display */}
+            {/* <motion.div 
+              className="mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+          
+            </motion.div> */}
+            
             <motion.h1 
-              className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-slate-800 via-violet-700 to-purple-600 bg-clip-text text-transparent"
+              className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-600 bg-clip-text text-transparent"
               animate={{ 
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
               }}
               transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
               style={{ backgroundSize: "200% 200%" }}
             >
-              PineCoin Casino
+              PineCoin
             </motion.h1>
             <motion.div 
               className="flex items-center justify-center gap-3 mb-6"
@@ -151,9 +157,9 @@ export default function HomePage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Sparkles className="w-6 h-6 text-violet-500" />
-              <span className="text-xl text-slate-600 font-medium">The Ultimate Gaming Experience</span>
-              <Sparkles className="w-6 h-6 text-violet-500" />
+              <Sparkles className="w-6 h-6 text-emerald-500" />
+              <span className="text-xl text-slate-600 font-medium">Earn Rewards from Social Media Activities</span>
+              <Sparkles className="w-6 h-6 text-emerald-500" />
             </motion.div>
           </motion.div>
 
@@ -163,410 +169,292 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            Compete, Win, and Earn! Join the ultimate gaming platform where your skills and luck 
-            can earn you real rewards. Climb the leaderboard and claim your prizes!
+            Transform your social media engagement into real rewards. Share content, watch videos, 
+            refer friends, and earn PineCoins that you can convert to real money. 
+            Join thousands of users already earning from their online activities!
           </motion.p>
-          
-          {/* Exchange Rate Ticker with Animation */}
+
+          {/* Exchange Rate Display */}
           <motion.div 
-            className="bg-white/80 backdrop-blur-md rounded-3xl p-8 mb-12 max-w-4xl mx-auto border border-slate-200/50 shadow-xl"
-            initial={{ opacity: 0, y: 30 }}
+            className="mb-12"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, type: "spring", stiffness: 300 }}
-            whileHover={{ scale: 1.02, y: -5 }}
+            transition={{ delay: 0.5 }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <motion.div 
-                className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Coins className="w-6 h-6 text-amber-600" />
-                <div>
-                  <div className="font-semibold text-amber-800">Buy: ₦1,450</div>
-                  <div className="text-sm text-amber-600">Best Rate</div>
-                </div>
-              </motion.div>
-              <motion.div 
-                className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Coins className="w-6 h-6 text-emerald-600" />
-                <div>
-                  <div className="font-semibold text-emerald-800">Sell: ₦1,350</div>
-                  <div className="text-sm text-emerald-600">Instant</div>
-                </div>
-              </motion.div>
-              <motion.div 
-                className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <div>
-                  <div className="font-bold text-violet-800 text-lg">1 PineCoin = $1 USDT</div>
-                  <div className="text-sm text-violet-600">Fixed Rate</div>
-                </div>
-              </motion.div>
+            <div className="inline-flex items-center space-x-8 p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/50">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-emerald-600">₽1 = $0.95</div>
+                <div className="text-sm text-slate-500">Buy Rate</div>
+              </div>
+              <div className="w-px h-12 bg-slate-300"></div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">₽1 = $1.05</div>
+                <div className="text-sm text-slate-500">Sell Rate</div>
+              </div>
             </div>
           </motion.div>
 
           {/* CTA Buttons */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-6 justify-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
             <Link href="/sign-up">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Button size="lg" className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-bold px-10 py-4 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200">
-                  Start Playing Now
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </motion.div>
+              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                Start Earning Now
+              </Button>
             </Link>
-            <Link href="/dashboard">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Button size="lg" variant="outline" className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-violet-400 px-10 py-4 text-lg rounded-2xl backdrop-blur-sm font-semibold">
-                  View Leaderboard
-                </Button>
-              </motion.div>
+            <Link href="/sign-in">
+              <Button variant="outline" className="border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                Sign In
+              </Button>
             </Link>
           </motion.div>
+        </div>
+      </section>
 
-          {/* Stats */}
+      {/* Features Section */}
+      <section id="features" className="py-20 px-4 relative z-10">
+        <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto"
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              How You Earn PineCoins
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Multiple ways to earn rewards from your social media activities
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="visible"
+            viewport={{ once: true }}
           >
             {[
-              { value: 10000, suffix: "+", label: "Active Players", color: "from-amber-400 to-orange-500" },
-              { value: 500000, suffix: "+", label: "PineCoins Won", color: "from-emerald-400 to-green-500" },
-              { value: 1000000, suffix: "+", label: "Total Points", color: "from-blue-400 to-indigo-500" },
-              { value: 50000, suffix: "₦", label: "Weekly Prizes", color: "from-violet-400 to-purple-500" }
-            ].map((stat, index) => (
-              <motion.div 
-                key={index}
-                className="text-center p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+              {
+                icon: Share2,
+                title: "Share Content",
+                description: "Share posts on social media and earn 20 points per share",
+                points: "20 pts",
+                color: "from-emerald-500 to-emerald-600"
+              },
+              {
+                icon: Eye,
+                title: "Watch Videos",
+                description: "Watch sponsored content and earn 5 points per video",
+                points: "5 pts",
+                color: "from-blue-500 to-blue-600"
+              },
+              {
+                icon: UserPlus,
+                title: "Refer Friends",
+                description: "Invite friends and earn 10 points per successful referral",
+                points: "10 pts",
+                color: "from-emerald-600 to-emerald-700"
+              },
+              {
+                icon: Calendar,
+                title: "Daily Login",
+                description: "Log in daily to claim 5 points and maintain your streak",
+                points: "5 pts",
+                color: "from-blue-600 to-blue-700"
+              },
+              {
+                icon: MessageCircle,
+                title: "Engage & Comment",
+                description: "Comment and like posts to earn engagement points",
+                points: "2 pts",
+                color: "from-emerald-500 to-blue-500"
+              },
+              {
+                icon: Gift,
+                title: "Special Rewards",
+                description: "Complete challenges and earn bonus points",
+                points: "50+ pts",
+                color: "from-blue-500 to-emerald-500"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.title}
                 variants={itemVariants}
-                whileHover={{ y: -10, scale: 1.05 }}
+                whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                </div>
-                <p className="text-slate-600 font-medium">{stat.label}</p>
+                <Card className="h-full bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader className="text-center pb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                      <feature.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <CardTitle className="text-xl text-slate-800">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-slate-600 mb-4">{feature.description}</p>
+                    <Badge className={`bg-gradient-to-r ${feature.color} text-white px-4 py-2 text-sm font-semibold`}>
+                      {feature.points}
+                    </Badge>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section id="features" className="py-24 px-4 relative z-10">
+      {/* News Section */}
+      <section className="py-20 px-4 relative z-10 bg-white/50">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-20"
-            initial={{ opacity: 0, y: 30 }}
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-bold text-slate-800 mb-6">
-              Why Choose <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">PineCoin Casino</span>?
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              Latest News & Updates
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Experience the most engaging and rewarding gaming platform ever created
+              Stay updated with the latest features, challenges, and community news
             </p>
           </motion.div>
-          
+
           <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {/* Leaderboard Feature */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Trophy className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Weekly Leaderboard</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Compete for weekly rewards! Top 3 players get 50%, 30%, and 15% of the prize pool.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { icon: "🥇", place: "1st Place", reward: "50%", color: "bg-amber-500" },
-                      { icon: "🥈", place: "2nd Place", reward: "30%", color: "bg-slate-400" },
-                      { icon: "🥉", place: "3rd Place", reward: "15%", color: "bg-orange-500" },
-                      { icon: "🎲", place: "Random", reward: "5%", color: "bg-violet-500" }
-                    ].map((item, index) => (
-                      <motion.div 
-                        key={index}
-                        className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                        whileHover={{ x: 5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="text-2xl">{item.icon}</span>
-                          <span className="font-medium">{item.place}:</span>
-                        </span>
-                        <Badge className={`${item.color} text-white font-bold px-3 py-1 rounded-full`}>
-                          {item.reward}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Prize Pool Feature */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Gift className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Prize Pools</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Join exciting prize pools where one lucky winner takes home the entire pot!
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-emerald-600 mb-3">80%</div>
-                    <p className="text-slate-600 mb-6 font-medium">You keep the majority!</p>
-                    <div className="w-full bg-slate-200 rounded-full h-3 mb-3">
-                      <motion.div 
-                        className="bg-gradient-to-r from-emerald-400 to-green-500 h-3 rounded-full"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: "80%" }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                      />
+            {newsItems.map((news, index) => (
+              <motion.div
+                key={news.id}
+                variants={itemVariants}
+                whileHover={{ y: -5, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
+                        {news.category}
+                      </Badge>
+                      <span className="text-sm text-slate-500">{news.date}</span>
                     </div>
-                    <p className="text-sm text-slate-500">Platform keeps only 20%</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                    <CardTitle className="text-lg text-slate-800 line-clamp-2">
+                      {news.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-600 mb-4">{news.excerpt}</p>
+                    <Button variant="ghost" className="text-emerald-600 hover:text-emerald-700 p-0 h-auto font-medium">
+                      Read More <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
 
-            {/* Spinning Wheel Feature */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Gamepad2 className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Spinning Wheel</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Daily free spins with amazing rewards! Mystery boxes, points, and more!
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { icon: "🎯", text: "Daily Free Spin", bg: "from-blue-100 to-indigo-100" },
-                      { icon: "🔥", text: "3-Day Streak = 2 Extra Spins", bg: "from-orange-100 to-red-100" },
-                      { icon: "💎", text: "Buy Extra Spins with PineCoins", bg: "from-violet-100 to-purple-100" }
-                    ].map((item, index) => (
-                      <motion.div 
-                        key={index}
-                        className={`flex items-center justify-center gap-3 p-3 rounded-2xl bg-gradient-to-r ${item.bg} border border-slate-200`}
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <span className="text-2xl">{item.icon}</span>
-                        <span className="text-sm font-medium text-slate-700">{item.text}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Link href="/news">
+              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                View All News & Updates
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
 
-            {/* Points System */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-violet-400 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <TrendingUp className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Points System</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Earn points through various activities and climb the leaderboard!
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { icon: "🎁", action: "Signup", points: "20 pts", color: "bg-emerald-500" },
-                      { icon: "👥", action: "Referral", points: "10 pts", color: "bg-blue-500" },
-                      { icon: "📺", action: "Watch Ads", points: "5 pts", color: "bg-violet-500" },
-                      { icon: "📱", action: "Share Posts", points: "20 pts", color: "bg-orange-500" },
-                      { icon: "🌅", action: "Daily Login", points: "5 pts", color: "bg-pink-500" }
-                    ].map((item, index) => (
-                      <motion.div 
-                        key={index}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                        whileHover={{ x: 5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="text-lg">{item.icon}</span>
-                          <span className="font-medium">{item.action}:</span>
-                        </span>
-                        <Badge className={`${item.color} text-white font-bold px-3 py-1 rounded-full`}>
-                          {item.points}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              What Our Users Say
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Join thousands of satisfied users earning rewards from social media
+            </p>
+          </motion.div>
 
-            {/* Community */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-pink-400 to-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Users className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Community</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Connect with other players, share achievements, and compete together!
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-pink-600 mb-3">24/7</div>
-                    <p className="text-slate-600 mb-6 font-medium">Active Community</p>
-                    <div className="flex justify-center space-x-2">
-                      {[0, 0.2, 0.4].map((delay, index) => (
-                        <motion.div
-                          key={index}
-                          className="w-3 h-3 bg-pink-400 rounded-full"
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 1.5, repeat: Infinity, delay }}
-                        />
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                variants={itemVariants}
+                whileHover={{ y: -5, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Card className="h-full bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader className="text-center pb-4">
+                    <div className="text-4xl mb-4">{testimonial.avatar}</div>
+                    <div className="flex justify-center mb-2">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                       ))}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Rewards */}
-            <motion.div variants={itemVariants}>
-              <Card className="group bg-white/80 backdrop-blur-sm border-slate-200/50 text-slate-800 hover:bg-white hover:shadow-2xl transition-all duration-500 transform hover:scale-105 rounded-3xl overflow-hidden">
-                <CardHeader className="text-center pb-6">
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Coins className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <CardTitle className="text-2xl font-bold">Real Rewards</CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Convert your PineCoins to real money! 1 PineCoin = $1 USDT
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-amber-600 mb-3">$1 = ₦1,400</div>
-                    <p className="text-slate-600 mb-6 font-medium">Current Exchange Rate</p>
-                    <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-3 rounded-2xl">
-                      <p className="text-white font-bold text-sm">Instant Withdrawal</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                    <CardTitle className="text-lg text-slate-800">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-slate-600">{testimonial.role}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-slate-600 italic">"{testimonial.content}"</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4 text-center relative z-10">
-        <div className="max-w-5xl mx-auto">
-          <motion.div 
-            className="bg-gradient-to-r from-violet-50 to-purple-50 backdrop-blur-sm rounded-3xl p-16 border border-violet-200/50 shadow-2xl"
-            initial={{ opacity: 0, y: 30 }}
+      <section className="py-20 px-4 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 300 }}
             viewport={{ once: true }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-bold text-slate-800 mb-6">
-              Ready to Start <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">Winning</span>?
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              Ready to Start Earning?
             </h2>
-            <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-              Join thousands of players already competing and earning on PineCoin Casino!
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+              Join PineCoin today and start earning rewards from your social media activities. 
+              It's free to join and you can start earning immediately!
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/sign-up">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold px-10 py-4 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200">
-                    Create Account
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </motion.div>
-              </Link>
-              <Link href="/dashboard">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Button size="lg" variant="outline" className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-violet-400 px-10 py-4 text-lg rounded-2xl backdrop-blur-sm font-semibold">
-                    Explore Dashboard
-                  </Button>
-                </motion.div>
-              </Link>
-            </div>
+            <Link href="/sign-up">
+              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                Get Started Now
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>

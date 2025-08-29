@@ -1,0 +1,420 @@
+import config from './config';
+
+const API_BASE = config.API_BASE;
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  whatsapp?: string;
+  role: string;
+  image?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface AuthResponse {
+  message: string;
+  token: string;
+  user: User;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  whatsapp?: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+class AuthService {
+  private token: string | null = null;
+  private user: User | null = null;
+
+  constructor() {
+    // Load token and user from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          this.user = JSON.parse(userStr);
+        } catch (e) {
+          console.error('Failed to parse stored user:', e);
+        }
+      }
+    }
+  }
+
+  // Set token and user, save to localStorage
+  private setAuth(token: string, user: User) {
+    console.log('AuthService: Setting auth - token:', token ? 'present' : 'missing', 'user:', user);
+    this.token = token;
+    this.user = user;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_user', JSON.stringify(user));
+      
+      // Also set cookies for middleware access
+      document.cookie = `custom_auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `custom_user_data=${JSON.stringify(user)}; path=/; max-age=86400; SameSite=Lax`;
+      
+      console.log('AuthService: Saved to localStorage and cookies');
+      console.log('  localStorage auth_token:', localStorage.getItem('auth_token') ? 'present' : 'missing');
+      console.log('  localStorage auth_user:', localStorage.getItem('auth_user') ? 'present' : 'missing');
+      console.log('  cookies set:', document.cookie);
+    }
+  }
+
+  // Clear auth and remove from localStorage
+  private clearAuth() {
+    console.log('AuthService: Clearing auth');
+    this.token = null;
+    this.user = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      
+      // Also clear cookies
+      document.cookie = 'custom_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'custom_user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      console.log('AuthService: Cleared from localStorage and cookies');
+    }
+  }
+
+  // Refresh auth state from localStorage
+  refreshAuthState(): void {
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          this.user = JSON.parse(userStr);
+        } catch (e) {
+          console.error('Failed to parse stored user:', e);
+        }
+      }
+      console.log('AuthService: Refreshed state - token:', this.token ? 'present' : 'missing', 'user:', this.user ? 'present' : 'missing');
+    }
+  }
+
+  // Get current token
+  getToken(): string | null {
+    // Always read from localStorage to ensure we have the latest data
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+    }
+    return this.token;
+  }
+
+  // Get current user
+  getUser(): User | null {
+    // Always read from localStorage to ensure we have the latest data
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          this.user = JSON.parse(userStr);
+        } catch (e) {
+          console.error('Failed to parse stored user:', e);
+        }
+      }
+    }
+    return this.user;
+  }
+
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
+    // Always read from localStorage to ensure we have the latest data
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          this.user = JSON.parse(userStr);
+        } catch (e) {
+          console.error('Failed to parse stored user:', e);
+        }
+      }
+    }
+    return !!this.token && !!this.user;
+  }
+
+  // Register new user with email/password
+  async register(data: RegisterRequest): Promise<AuthResponse> {
+    try {
+      const response = await fetch(`${API_BASE}/api/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Registration failed');
+      }
+
+      const result: AuthResponse = await response.json();
+      this.setAuth(result.token, result.user);
+      return result;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  }
+
+  // Login user with email/password
+  async login(data: LoginRequest): Promise<AuthResponse> {
+    try {
+      const response = await fetch(`${API_BASE}/api/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Login failed');
+      }
+
+      const result: AuthResponse = await response.json();
+      this.setAuth(result.token, result.user);
+      return result;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  }
+
+  // Handle Google OAuth success
+  async handleGoogleAuth(googleUser: any): Promise<void> {
+    try {
+      // For Google OAuth, we'll store the user info locally
+      // You can also implement backend integration if needed
+      const user: User = {
+        id: Date.now(), // Temporary ID for Google users
+        name: googleUser.name || googleUser.displayName,
+        email: googleUser.email,
+        role: 'user',
+        created_at: new Date().toISOString(),
+      };
+
+      // Generate a temporary token for Google users
+      const token = `google_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      this.setAuth(token, user);
+    } catch (error) {
+      console.error('Google auth handling error:', error);
+      throw error;
+    }
+  }
+
+  // Logout user (works for both email and Google auth)
+  logout(): void {
+    this.clearAuth();
+  }
+
+  // Forgot password (email only)
+  async forgotPassword(data: ForgotPasswordRequest): Promise<{ message: string }> {
+    try {
+      const response = await fetch(`${API_BASE}/api/users/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Password reset request failed');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  }
+
+  // Reset password (email only)
+  async resetPassword(data: ResetPasswordRequest): Promise<{ message: string }> {
+    try {
+      const response = await fetch(`${API_BASE}/api/users/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Password reset failed');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
+  // Get user profile (requires authentication)
+  async getProfile(): Promise<User> {
+    if (!this.token) {
+      throw new Error('No authentication token');
+    }
+
+    // If it's a Google token, return the stored user
+    if (this.token.startsWith('google_')) {
+      if (!this.user) {
+        throw new Error('No user data found');
+      }
+      return this.user;
+    }
+
+    // For email auth, fetch from backend
+    try {
+      const response = await fetch(`${API_BASE}/api/users/profile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          this.clearAuth();
+          throw new Error('Authentication expired');
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch profile');
+      }
+
+      const user = await response.json();
+      this.user = user; // Update stored user
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
+      return user;
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
+  }
+
+  // Update user profile (requires authentication)
+  async updateProfile(data: Partial<User>): Promise<{ message: string; user: User }> {
+    if (!this.token) {
+      throw new Error('No authentication token');
+    }
+
+    // Google users can't update profile through backend
+    if (this.token.startsWith('google_')) {
+      throw new Error('Profile updates not supported for Google OAuth users');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          this.clearAuth();
+          throw new Error('Authentication expired');
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
+      }
+
+      const result = await response.json();
+      this.user = result.user; // Update stored user
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_user', JSON.stringify(result.user));
+      }
+      return result;
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  }
+
+  // Change password (email only)
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    if (!this.token) {
+      throw new Error('No authentication token');
+    }
+
+    // Google users can't change password through backend
+    if (this.token.startsWith('google_')) {
+      throw new Error('Password changes not supported for Google OAuth users');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/users/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          this.clearAuth();
+          throw new Error('Authentication expired');
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to change password');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
+    }
+  }
+
+  // Check if current user is from Google OAuth
+  isGoogleUser(): boolean {
+    return this.token ? this.token.startsWith('google_') : false;
+  }
+
+  // Check if current user is from email authentication
+  isEmailUser(): boolean {
+    return this.token ? !this.token.startsWith('google_') : false;
+  }
+}
+
+// Create and export a singleton instance
+export const authService = new AuthService();
+

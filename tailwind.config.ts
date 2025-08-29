@@ -61,6 +61,13 @@ const config = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
+        // Custom brand colors
+        brand: {
+          primary: "#059669", // Emerald 600
+          secondary: "#3b82f6", // Blue 500
+          accent: "#10b981", // Emerald 500
+          muted: "#f8fafc", // Slate 50
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

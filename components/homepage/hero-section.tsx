@@ -1,8 +1,45 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function HeroSection() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated using custom auth cookies
+    const checkAuth = () => {
+      try {
+        const cookies = document.cookie.split(';');
+        const hasAuthToken = cookies.some(cookie => 
+          cookie.trim().startsWith('custom_auth_token=')
+        );
+        const hasUserData = cookies.some(cookie => 
+          cookie.trim().startsWith('custom_user_data=')
+        );
+        
+        setIsAuthenticated(hasAuthToken && hasUserData);
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuth();
+    
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
     <section className="py-20">
       <div className="relative z-10 mx-auto w-full max-w-2xl px-6 lg:px-0">
@@ -17,7 +54,7 @@ export default function HeroSection() {
           </p>
           <div className="flex flex-col items-center gap-2 *:w-full sm:flex-row sm:justify-center sm:*:w-auto">
             <Button asChild variant="default" size="sm">
-              <Link href="/dashboard" prefetch={true}>
+              <Link href={isAuthenticated ? "/dashboard" : "/sign-up"} prefetch={true}>
                 <span className="text-nowrap">Get Started</span>
               </Link>
             </Button>

@@ -87,12 +87,14 @@ export function Sidebar({ className }: SidebarProps) {
 
   const SidebarContent = () => (
     <div className="flex h-full w-full flex-col gap-2">
-      <div className="flex h-[60px] items-center border-b px-2">
-        <Link href="/dashboard" className="flex items-center gap-2 font-bold">
-          <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+      <div className="flex h-[60px] items-center border-b px-4 bg-gradient-to-r from-background to-muted/20">
+        <Link href="/dashboard" className="flex items-center gap-3 font-bold hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
             🎯
           </div>
-          <span className="text-lg">PineCoin Casino</span>
+          <span className="text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            PineCoin Casino
+          </span>
         </Link>
       </div>
       <ScrollArea className="flex-1 px-3">
@@ -105,12 +107,17 @@ export function Sidebar({ className }: SidebarProps) {
             >
               <span
                 className={cn(
-                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  item.isActive ? "bg-accent" : "transparent"
+                  "group flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
+                  item.isActive 
+                    ? "bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 text-emerald-700 border border-emerald-200/50 shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon className="mr-2 h-4 w-4" />
-                <span>{item.title}</span>
+                <item.icon className={cn(
+                  "mr-3 h-4 w-4 transition-colors",
+                  item.isActive ? "text-emerald-600" : "text-muted-foreground group-hover:text-foreground"
+                )} />
+                <span className="font-medium">{item.title}</span>
               </span>
             </Link>
           ))}
@@ -118,19 +125,33 @@ export function Sidebar({ className }: SidebarProps) {
       </ScrollArea>
       
       {/* Quick Stats */}
-      <div className="p-3 border-t">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Daily Streak</span>
-            <span className="font-medium">🔥 3 days</span>
+      <div className="p-4 border-t bg-gradient-to-b from-muted/20 to-transparent">
+        <div className="space-y-3">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Quick Stats
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Spins Left</span>
-            <span className="font-medium">🎯 3</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Points Today</span>
-            <span className="font-medium text-green-600">+25</span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-2">
+                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                Daily Streak
+              </span>
+              <span className="font-semibold text-orange-600">🔥 3 days</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                Spins Left
+              </span>
+              <span className="font-semibold text-blue-600">🎯 3</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                Points Today
+              </span>
+              <span className="font-semibold text-green-600">+25</span>
+            </div>
           </div>
         </div>
       </div>
@@ -156,7 +177,7 @@ export function Sidebar({ className }: SidebarProps) {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-background lg:border-r">
+      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-background/95 lg:backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:border-r lg:shadow-sm">
         <SidebarContent />
       </div>
       <div className="hidden lg:block lg:w-64" />

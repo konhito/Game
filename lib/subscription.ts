@@ -31,14 +31,14 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetailsResul
       headers: await headers(),
     });
 
-    if (!session?.user?.id) {
+    if (!session?.session?.userId) {
       return { hasSubscription: false };
     }
 
     const userSubscriptions = await db
       .select()
       .from(subscription)
-      .where(eq(subscription.userId, session.user.id));
+      .where(eq(subscription.userId, session.session.userId));
 
     if (!userSubscriptions.length) {
       return { hasSubscription: false };
@@ -72,7 +72,7 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetailsResul
             currentPeriodEnd: latestSubscription.currentPeriodEnd,
             cancelAtPeriodEnd: latestSubscription.cancelAtPeriodEnd,
             canceledAt: latestSubscription.canceledAt,
-            organizationId: null,
+            organizationId: null, // Not used in current schema
           },
           error: isCanceled ? "Subscription has been canceled" : isExpired ? "Subscription has expired" : "Subscription is not active",
           errorType: isCanceled ? "CANCELED" : isExpired ? "EXPIRED" : "GENERAL",
@@ -95,7 +95,7 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetailsResul
         currentPeriodEnd: activeSubscription.currentPeriodEnd,
         cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
         canceledAt: activeSubscription.canceledAt,
-        organizationId: null,
+        organizationId: null, // Not used in current schema
       },
     };
   } catch (error) {

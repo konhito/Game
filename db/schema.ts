@@ -6,7 +6,25 @@ import {
   timestamp,
   uuid,
   numeric,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+
+// Enums
+export const activityTypeEnum = pgEnum("activity_type", [
+  "daily_login",
+  "wheel_spin",
+  "ad_watch",
+  "referral",
+  "challenge",
+  "prize_pool",
+]);
+
+export const wheelResultEnum = pgEnum("wheel_result", [
+  "points",
+  "pinecoins",
+  "bonus_spins",
+  "nothing",
+]);
 
 // Better Auth Tables - Standard naming
 export const user = pgTable("user", {
@@ -59,10 +77,75 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
-// Subscription table for Polar webhook data
+// Casino Game Tables
+export const userStats = pgTable("user_stats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  totalPoints: integer("total_points").notNull().default(0),
+  weeklyPoints: integer("weekly_points").notNull().default(0),
+  totalPineCoins: numeric("total_pine_coins", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  dailyLoginStreak: integer("daily_login_streak").notNull().default(0),
+  lastLoginDate: timestamp("last_login_date"),
+  spinsRemaining: integer("spins_remaining").notNull().default(3),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const userActivity = pgTable("user_activity", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: activityTypeEnum("type").notNull(),
+  points: integer("points").notNull().default(0),
+  description: text("description"),
+  metadata: text("metadata"), // JSON string for additional data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const wheelSpin = pgTable("wheel_spin", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  result: wheelResultEnum("result").notNull(),
+  points: integer("points").notNull().default(0),
+  pineCoins: numeric("pine_coins", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  bonusSpins: integer("bonus_spins").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const leaderboard = pgTable("leaderboard", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  weeklyPoints: integer("weekly_points").notNull().default(0),
+  totalPoints: integer("total_points").notNull().default(0),
+  rank: integer("rank"),
+  weekStart: timestamp("week_start").notNull(),
+  weekEnd: timestamp("week_end").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const dailyReward = pgTable("daily_reward", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  claimed: boolean("claimed").notNull().default(false),
+  points: integer("points").notNull().default(5),
+  date: timestamp("date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Subscription table for payment processing
 export const subscription = pgTable("subscription", {
   id: text("id").primaryKey(),
-  createdAt: timestamp("createdAt").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
   modifiedAt: timestamp("modifiedAt"),
   amount: integer("amount").notNull(),
   currency: text("currency").notNull(),
@@ -81,7 +164,7 @@ export const subscription = pgTable("subscription", {
   checkoutId: text("checkoutId").notNull(),
   customerCancellationReason: text("customerCancellationReason"),
   customerCancellationComment: text("customerCancellationComment"),
-  metadata: text("metadata"), // JSON string
-  customFieldData: text("customFieldData"), // JSON string
-  userId: text("userId").references(() => user.id),
+  metadata: text("metadata"),
+  customFieldData: text("customFieldData"),
+  userId: text("userId").references(() => user.id, { onDelete: "no action" }),
 });
