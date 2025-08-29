@@ -115,6 +115,22 @@ export default function AdminDashboard() {
     );
   }
 
+  // Ensure all required properties exist with default values
+  const safeStats = {
+    total_users: stats.total_users || 0,
+    total_tasks: stats.total_tasks || 0,
+    total_submissions: stats.total_submissions || 0,
+    pending_submissions: stats.pending_submissions || 0,
+    approved_submissions: stats.approved_submissions || 0,
+    rejected_submissions: stats.rejected_submissions || 0,
+    total_revenue: stats.total_revenue || 0,
+    active_users_today: stats.active_users_today || 0,
+    tasks_created_today: stats.tasks_created_today || 0,
+    submissions_today: stats.submissions_today || 0,
+    top_performing_users: stats.top_performing_users || [],
+    recent_activities: stats.recent_activities || []
+  };
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -143,7 +159,7 @@ export default function AdminDashboard() {
               <CardContent className="p-4 text-center">
                 <Eye className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                 <h3 className="font-medium">Review Proofs</h3>
-                <p className="text-sm text-gray-600">{stats.pending_submissions} pending</p>
+                <p className="text-sm text-gray-600">{safeStats.pending_submissions} pending</p>
               </CardContent>
             </Card>
           </Link>
@@ -153,7 +169,7 @@ export default function AdminDashboard() {
               <CardContent className="p-4 text-center">
                 <Users className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                 <h3 className="font-medium">Manage Users</h3>
-                <p className="text-sm text-gray-600">{stats.total_users} users</p>
+                <p className="text-sm text-gray-600">{safeStats.total_users} users</p>
               </CardContent>
             </Card>
           </Link>
@@ -163,7 +179,7 @@ export default function AdminDashboard() {
               <CardContent className="p-4 text-center">
                 <ClipboardList className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
                 <h3 className="font-medium">Manage Tasks</h3>
-                <p className="text-sm text-gray-600">{stats.total_tasks} tasks</p>
+                <p className="text-sm text-gray-600">{safeStats.total_tasks} tasks</p>
               </CardContent>
             </Card>
           </Link>
@@ -180,9 +196,9 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total_users}</div>
+              <div className="text-2xl font-bold">{safeStats.total_users}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+{stats.active_users_today}</span> active today
+                <span className="text-green-600">+{safeStats.active_users_today}</span> active today
               </p>
             </CardContent>
           </Card>
@@ -193,9 +209,9 @@ export default function AdminDashboard() {
               <ClipboardList className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total_tasks}</div>
+              <div className="text-2xl font-bold">{safeStats.total_tasks}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+{stats.tasks_created_today}</span> created today
+                <span className="text-green-600">+{safeStats.tasks_created_today}</span> created today
               </p>
             </CardContent>
           </Card>
@@ -206,9 +222,9 @@ export default function AdminDashboard() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pending_submissions}</div>
+              <div className="text-2xl font-bold">{safeStats.pending_submissions}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-orange-600">+{stats.submissions_today}</span> submitted today
+                <span className="text-orange-600">+{safeStats.submissions_today}</span> submitted today
               </p>
             </CardContent>
           </Card>
@@ -219,7 +235,7 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₽{stats.total_revenue}</div>
+              <div className="text-2xl font-bold">₽{safeStats.total_revenue}</div>
               <p className="text-xs text-muted-foreground">
                 From approved tasks
               </p>
@@ -238,15 +254,15 @@ export default function AdminDashboard() {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total_submissions}</div>
+              <div className="text-2xl font-bold">{safeStats.total_submissions}</div>
               <div className="flex items-center space-x-2 mt-2">
                 <Badge variant="outline" className="text-xs">
                   <CheckCircle className="h-3 w-3 mr-1" />
-                  {stats.approved_submissions} approved
+                  {safeStats.approved_submissions} approved
                 </Badge>
                 <Badge variant="outline" className="text-xs">
                   <XCircle className="h-3 w-3 mr-1" />
-                  {stats.rejected_submissions} rejected
+                  {safeStats.rejected_submissions} rejected
                 </Badge>
               </div>
             </CardContent>
@@ -259,12 +275,12 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.total_submissions > 0 
-                  ? Math.round((stats.approved_submissions / stats.total_submissions) * 100)
+                {safeStats.total_submissions > 0 
+                  ? Math.round((safeStats.approved_submissions / safeStats.total_submissions) * 100)
                   : 0}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {stats.approved_submissions} out of {stats.total_submissions} submissions
+                {safeStats.approved_submissions} out of {safeStats.total_submissions} submissions
               </p>
             </CardContent>
           </Card>
@@ -275,7 +291,7 @@ export default function AdminDashboard() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.pending_submissions}</div>
+              <div className="text-2xl font-bold text-orange-600">{safeStats.pending_submissions}</div>
               <p className="text-xs text-muted-foreground">
                 Require admin attention
               </p>
@@ -290,11 +306,11 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold mb-4">Top Performing Users</h2>
           <Card>
             <CardContent className="p-6">
-              {stats.top_performing_users.length === 0 ? (
+              {!safeStats.top_performing_users || safeStats.top_performing_users.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No user data available</p>
               ) : (
                 <div className="space-y-4">
-                  {stats.top_performing_users.slice(0, 5).map((user, index) => (
+                  {safeStats.top_performing_users.slice(0, 5).map((user, index) => (
                     <div key={user.id} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-sm font-medium text-emerald-600">
@@ -329,11 +345,11 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
           <Card>
             <CardContent className="p-6">
-              {stats.recent_activities.length === 0 ? (
+              {!safeStats.recent_activities || safeStats.recent_activities.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No recent activities</p>
               ) : (
                 <div className="space-y-4">
-                  {stats.recent_activities.slice(0, 5).map((activity) => (
+                  {safeStats.recent_activities.slice(0, 5).map((activity) => (
                     <div key={activity.id} className="flex items-start space-x-3">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
