@@ -28,11 +28,23 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
+    console.log('🔍 Admin layout: Checking authentication...');
     const currentUser = authService.getUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    console.log('👤 Current user:', currentUser);
+    
+    if (!currentUser) {
+      console.log('❌ No user found, redirecting to dashboard');
       router.push('/dashboard');
       return;
     }
+    
+    if (currentUser.role !== 'admin') {
+      console.log('❌ User is not admin, redirecting to dashboard');
+      router.push('/dashboard');
+      return;
+    }
+    
+    console.log('✅ User is admin, setting user state');
     setUser(currentUser);
     setLoading(false);
   }, [router]);

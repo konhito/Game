@@ -58,6 +58,13 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check if user is authenticated before fetching stats
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setError('Please sign in to access the admin dashboard');
+      setLoading(false);
+      return;
+    }
     fetchDashboardStats();
   }, []);
 

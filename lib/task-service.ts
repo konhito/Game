@@ -409,19 +409,36 @@ class TaskService {
   // Admin: Get dashboard stats
   async getAdminDashboardStats(): Promise<TaskResponse> {
     try {
+      console.log('🔍 Fetching admin dashboard stats from:', `${API_BASE}/api/admin/dashboard/stats`);
+      
+      const headers = this.getAuthHeaders();
+      console.log('🔑 Headers being sent:', headers);
+      
       const response = await fetch(`${API_BASE}/api/admin/dashboard/stats`, {
         method: 'GET',
-        headers: this.getAuthHeaders(),
+        headers,
+        credentials: 'include', // Include cookies for CORS
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch dashboard stats');
+        let errorMessage = 'Failed to fetch dashboard stats';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.log('Could not parse error response:', parseError);
+        }
+        throw new Error(`${errorMessage} (Status: ${response.status})`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ Dashboard stats received:', data);
+      return data;
     } catch (error) {
-      console.error('Get admin dashboard stats error:', error);
+      console.error('❌ Get admin dashboard stats error:', error);
       throw error;
     }
   }
