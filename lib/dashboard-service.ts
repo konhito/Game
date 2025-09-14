@@ -235,31 +235,71 @@ class DashboardService {
     }
   }
 
-  // Get user activities
+  // Get user activities with retry logic
   async getUserActivities(userId: number, limit: number = 10): Promise<ApiResponse<{ activities: UserActivity[] }>> {
-    try {
-      const response = await fetch(`${API_BASE}/api/users/activities?limit=${limit}`, {
-        headers: this.getAuthHeaders(),
-      });
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    const attemptRequest = async (): Promise<ApiResponse<{ activities: UserActivity[] }>> => {
+      try {
+        console.log(`🔍 DashboardService: Getting user activities for user: ${userId} (attempt ${retryCount + 1})`);
+        console.log('🌐 API URL:', `${API_BASE}/api/users/activities?limit=${limit}`);
+        console.log('🔐 Auth headers:', this.getAuthHeaders());
+        
+        const response = await fetch(`${API_BASE}/api/users/activities?limit=${limit}`, {
+          headers: this.getAuthHeaders(),
+        });
 
-      if (!response.ok) {
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', response.headers);
+
+        if (!response.ok) {
+          if (response.status === 429 && retryCount < maxRetries) {
+            retryCount++;
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+            console.log(`⏳ Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return attemptRequest();
+          }
+          
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch (parseError) {
+            // If response is not JSON, create a generic error
+            errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+          }
+          console.error('❌ API Error:', errorData);
+          throw new Error(`Failed to fetch user activities: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('📊 Activities response:', result);
+        
+        if (result.success && result.data && result.data.activities) {
+          return {
+            success: true,
+            data: { activities: result.data.activities }
+          };
+        } else {
+          console.error('❌ Invalid response format:', result);
+          throw new Error('Invalid response format from backend');
+        }
+      } catch (error) {
+        if (retryCount < maxRetries && (error.message.includes('429') || error.message.includes('rate limit'))) {
+          retryCount++;
+          const delay = Math.pow(2, retryCount) * 1000;
+          console.log(`⏳ Request failed, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return attemptRequest();
+        }
+        
+        console.error('DashboardService: Error in getUserActivities:', error);
         throw new Error('Failed to fetch user activities');
       }
-
-      const result = await response.json();
-      
-      if (result.success && result.data && result.data.activities) {
-        return {
-          success: true,
-          data: { activities: result.data.activities }
-        };
-      } else {
-        throw new Error('Invalid response format from backend');
-      }
-    } catch (error) {
-      console.error('DashboardService: Error in getUserActivities:', error);
-      throw new Error('Failed to fetch user activities');
-    }
+    };
+    
+    return attemptRequest();
   }
 
   // Get leaderboard

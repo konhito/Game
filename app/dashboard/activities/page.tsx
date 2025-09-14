@@ -30,6 +30,7 @@ import {
   AlertCircle,
   RefreshCw
 } from 'lucide-react';
+import { AIVerificationBadge, AIVerificationDetails } from '@/components/ui/ai-verification-badge';
 import { dashboardService } from '@/lib/dashboard-service';
 import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
@@ -76,6 +77,15 @@ interface TaskActivity {
   user_name: string;
   proof_image?: string;
   proof_description?: string;
+  admin_notes?: string;
+  reviewed_by?: number;
+  reviewed_at?: string;
+  ai_verification?: {
+    verified: boolean;
+    confidence: number;
+    reason: string;
+    provider?: 'openai' | 'gemini' | 'basic';
+  };
 }
 
 interface AvailableTask {
@@ -137,9 +147,37 @@ export default function ActivitiesPage() {
     try {
       const userData = JSON.parse(userStr);
       setUser(userData);
-      fetchActivities(userData.id);
-      fetchTasks(userData.id);
-      fetchAvailableTasks();
+      
+      // Stagger API calls to prevent rate limiting
+      const loadData = async () => {
+        console.log('🔄 Loading dashboard data with staggered requests...');
+        
+        try {
+          // First load activities
+          await fetchActivities(userData.id);
+          
+          // Wait 500ms before next request
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Then load tasks
+          await fetchTasks(userData.id);
+          
+          // Wait 500ms before next request
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Finally load available tasks
+          await fetchAvailableTasks();
+          
+          console.log('✅ All dashboard data loaded');
+        } catch (error) {
+          console.error('❌ Error loading dashboard data:', error);
+        } finally {
+          // Always set loading to false, regardless of success or failure
+          setLoading(false);
+        }
+      };
+      
+      loadData();
     } catch (error) {
       console.error('Failed to parse user data:', error);
       router.push('/sign-in');
@@ -148,51 +186,73 @@ export default function ActivitiesPage() {
 
   const fetchActivities = async (userId: number) => {
     try {
+      console.log('🔍 fetchActivities called for user:', userId);
       const result = await dashboardService.getUserActivities(userId, 50);
+      console.log('📊 Activities result:', result);
+      
       if (result.success) {
         setActivities(result.data.activities || []);
+        console.log('✅ Activities loaded:', result.data.activities?.length || 0);
       } else {
+        console.error('❌ Activities failed:', result.error);
         setError(result.error || 'Failed to fetch activities');
+        // Set empty array to prevent infinite loading
+        setActivities([]);
       }
     } catch (err) {
-      console.error('Failed to fetch activities:', err);
+      console.error('❌ Failed to fetch activities:', err);
       setError('Failed to fetch activities');
-    } finally {
-      setLoading(false);
+      // Set empty array to prevent infinite loading
+      setActivities([]);
     }
   };
 
   const fetchTasks = async (userId: number) => {
     try {
+      console.log('🔍 Fetching user task history for user:', userId);
       const result = await taskService.getUserTaskHistory({ limit: 50 });
+      console.log('📊 User task history result:', result);
+      
       if (result.success) {
         // Transform tasks to include user information
         const tasksWithUsers = (result.data.tasks || []).map((task: any) => ({
           ...task,
-          title: task.title || task.task?.title || 'Untitled Task',
-          platform: task.platform || task.task?.platform || 'Unknown Platform',
-          task_type: task.task_type || task.task?.task_type || 'Unknown Type',
-          reward_points: task.reward_points || task.task?.reward_points || 0,
-          reward_coins: task.reward_coins || task.task?.reward_coins || 0,
+          // Data is now flattened from backend, no need for task.task nesting
+          title: task.title || 'Untitled Task',
+          platform: task.platform || 'Unknown Platform',
+          task_type: task.task_type || 'Unknown Type',
+          reward_points: task.reward_points || 0,
+          reward_coins: task.reward_coins || 0,
           user_name: user?.name || "User",
           completed_at: task.completed_at || null,
           proof_image: task.proof_image || null,
-          proof_description: task.proof_description || null
+          proof_description: task.proof_description || null,
+          ai_verification: task.ai_verification || null
         }));
+        console.log('✅ User tasks loaded:', tasksWithUsers.length);
         setTasks(tasksWithUsers);
         calculateTaskStats();
+      } else {
+        console.error('❌ Failed to fetch user tasks:', result.error);
+        setTasks([]);
       }
     } catch (err) {
-      console.error('Failed to fetch tasks:', err);
+      console.error('❌ Failed to fetch user tasks:', err);
+      setTasks([]);
     }
   };
 
   const fetchAvailableTasks = async () => {
     try {
       setRefreshingTasks(true);
+      console.log('🔄 Fetching available tasks...');
       const result = await taskService.getAvailableTasks({ limit: 20 });
       if (result.success) {
+        console.log('📋 Available tasks from API:', result.data.tasks);
+        console.log('📋 Task IDs from API:', result.data.tasks.map((t: any) => t.id));
         setAvailableTasks(result.data.tasks || []);
+      } else {
+        console.error('❌ Failed to fetch tasks:', result.error);
       }
     } catch (err) {
       console.error('Failed to fetch available tasks:', err);
@@ -238,6 +298,14 @@ export default function ActivitiesPage() {
   };
 
   const openProofDialog = (task: TaskActivity) => {
+    console.log('🔍 Opening proof dialog for task:', task);
+    console.log('🔍 Task ID being set:', task.id);
+    // Only allow proof submission for started tasks
+    if (task.status !== 'started') {
+      setError('You must start the task before submitting proof.');
+      toast.error('You must start the task before submitting proof.');
+      return;
+    }
     setSelectedTask(task);
     setProofImage(null);
     setProofDescription('');
@@ -251,7 +319,9 @@ export default function ActivitiesPage() {
     setProofDescription('');
   };
 
-  const openTaskDialog = (task: AvailableTask) => {
+  const openTaskDialog = (task: AvailableTask | TaskActivity) => {
+    console.log('🔍 Opening task dialog for task:', task);
+    console.log('🔍 Task ID being set:', task.id);
     setSelectedTask(task);
     setShowTaskDialog(true);
   };
@@ -264,20 +334,30 @@ export default function ActivitiesPage() {
   const startTask = async (taskId: number) => {
     setStartingTask(true);
     try {
+      console.log('🚀 Starting task:', taskId);
       const result = await taskService.startTask(taskId);
+      console.log('📊 Start task result:', result);
+      
       if (result.success) {
         toast.success('Task started successfully!');
-        // Refresh both task lists to ensure UI is up to date
-        await Promise.all([
-          fetchTasks(user.id),
-          fetchAvailableTasks()
-        ]);
+        // Refresh user's task history to show the started task
+        await fetchTasks(user.id);
+        
+        // Update selectedTask status if it's the same task
+        if (selectedTask && selectedTask.id === taskId) {
+          setSelectedTask({
+            ...selectedTask,
+            status: 'started'
+          });
+        }
+        
         closeTaskDialog();
       } else {
+        console.error('❌ Failed to start task:', result.error);
         toast.error(result.error || 'Failed to start task');
       }
     } catch (err) {
-      console.error('Failed to start task:', err);
+      console.error('❌ Failed to start task:', err);
       toast.error('Failed to start task. Please try again.');
     } finally {
       setStartingTask(false);
@@ -293,6 +373,13 @@ export default function ActivitiesPage() {
     console.log('🚀 Starting proof submission for task:', selectedTask.id);
     console.log('📝 Proof description:', proofDescription);
     console.log('🖼️ Has proof image:', !!proofImage);
+
+    // Validate that this is a started task (should be checked before opening dialog)
+    if (selectedTask.status !== 'started') {
+      setError('You must start the task before submitting proof.');
+      toast.error('You must start the task before submitting proof.');
+      return;
+    }
 
     setUploading(true);
     try {
@@ -324,12 +411,20 @@ export default function ActivitiesPage() {
         
         if (result.success) {
           console.log('✅ Proof submitted successfully!');
-          toast.success('Proof submitted successfully! Your task is now under review.');
-          // Refresh both task lists to ensure UI is up to date
-          await Promise.all([
-            fetchTasks(user.id),
-            fetchAvailableTasks()
-          ]);
+          
+          // Show different messages based on AI verification
+          if (result.ai_verification) {
+            if (result.ai_verification.verified) {
+              toast.success(`🎉 Task approved by AI! ${result.message}`);
+            } else {
+              toast.error(`❌ Task rejected by AI: ${result.ai_verification.reason}`);
+            }
+          } else {
+            toast.success('Proof submitted successfully! Your task is now under review.');
+          }
+          
+          // Refresh user's task history to show updated status
+          await fetchTasks(user.id);
           closeProofDialog();
           setError(null);
         } else {
@@ -348,12 +443,20 @@ export default function ActivitiesPage() {
         
         if (result.success) {
           console.log('✅ Proof submitted successfully!');
-          toast.success('Proof submitted successfully! Your task is now under review.');
-          // Refresh both task lists to ensure UI is up to date
-          await Promise.all([
-            fetchTasks(user.id),
-            fetchAvailableTasks()
-          ]);
+          
+          // Show different messages based on AI verification
+          if (result.ai_verification) {
+            if (result.ai_verification.verified) {
+              toast.success(`🎉 Task approved by AI! ${result.message}`);
+            } else {
+              toast.error(`❌ Task rejected by AI: ${result.ai_verification.reason}`);
+            }
+          } else {
+            toast.success('Proof submitted successfully! Your task is now under review.');
+          }
+          
+          // Refresh user's task history to show updated status
+          await fetchTasks(user.id);
           closeProofDialog();
           setError(null);
         } else {
@@ -534,7 +637,10 @@ export default function ActivitiesPage() {
           <Button 
             size="sm" 
             variant="outline" 
-            onClick={() => fetchAvailableTasks()}
+            onClick={() => {
+              console.log('🔄 Force refreshing tasks...');
+              fetchAvailableTasks();
+            }}
             disabled={refreshingTasks}
             className="rounded-xl"
           >
@@ -557,6 +663,7 @@ export default function ActivitiesPage() {
                   <div>
                     <h3 className="font-semibold text-slate-900 line-clamp-2 mb-2">{task.title}</h3>
                     <p className="text-sm text-slate-600 line-clamp-2">{task.description}</p>
+                    <p className="text-xs text-gray-500">Task ID: {task.id}</p>
                   </div>
                   
                   <div className="space-y-3">
@@ -587,8 +694,8 @@ export default function ActivitiesPage() {
                     size="sm"
                   >
                     <Play className="h-4 w-4 mr-2" />
-                    Start/Restart Task
-                                     </Button>
+                    Start Task
+                  </Button>
                  </div>
                </CardContent>
              </Card>
@@ -760,10 +867,22 @@ export default function ActivitiesPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                                                 <h3 className="font-medium text-slate-900 line-clamp-1">{task.title || 'Untitled Task'}</h3>
-                                                 <Badge className={`${getTaskStatusColor(task.status || 'unknown')} rounded-lg`}>
-                           {task.status || 'unknown'}
-                         </Badge>
+                        <h3 className="font-medium text-slate-900 line-clamp-1">{task.title || 'Untitled Task'}</h3>
+                        <Badge className={`${getTaskStatusColor(task.status || 'unknown')} rounded-lg`}>
+                          {task.status || 'unknown'}
+                        </Badge>
+                      </div>
+                      
+                      {/* AI Verification Status */}
+                      <div className="mb-2">
+                        <AIVerificationBadge
+                          verified={task.ai_verification?.verified}
+                          confidence={task.ai_verification?.confidence}
+                          reason={task.ai_verification?.reason}
+                          status={task.status as 'approved' | 'rejected' | 'pending'}
+                          reviewedBy={task.reviewed_by}
+                          provider={task.ai_verification?.provider}
+                        />
                       </div>
                                              <p className="text-sm text-slate-600 mb-2">
                          {task.user_name || 'User'} • {task.platform || 'Unknown'} • {task.task_type || 'Unknown'}
@@ -784,19 +903,52 @@ export default function ActivitiesPage() {
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
-                                             {(task.status === 'started' || task.status === 'unknown') && (
-                         <Button 
-                           size="sm" 
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             openProofDialog(task);
-                           }}
-                           className="rounded-lg"
-                         >
-                           <Upload className="h-4 w-4 mr-2" />
-                           Submit Proof
-                         </Button>
-                       )}
+                      {task.status === 'started' && (
+                        <Button 
+                          size="sm" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openProofDialog(task);
+                          }}
+                          className="rounded-lg"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Submit Proof
+                        </Button>
+                      )}
+                      {task.status === 'pending' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="rounded-lg"
+                          disabled
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Under Review
+                        </Button>
+                      )}
+                      {task.status === 'approved' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="rounded-lg bg-green-50 text-green-700 border-green-200"
+                          disabled
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Approved
+                        </Button>
+                      )}
+                      {task.status === 'rejected' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="rounded-lg bg-red-50 text-red-700 border-red-200"
+                          disabled
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Rejected
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -881,6 +1033,27 @@ export default function ActivitiesPage() {
                   </div>
                 </div>
               )}
+
+              {/* AI Verification Details - Only show for TaskActivity */}
+              {'ai_verification' in selectedItem && selectedItem.ai_verification && (
+                <div>
+                  <AIVerificationDetails
+                    verified={selectedItem.ai_verification.verified}
+                    confidence={selectedItem.ai_verification.confidence}
+                    reason={selectedItem.ai_verification.reason}
+                  />
+                </div>
+              )}
+
+              {/* Admin Notes - Only show for TaskActivity */}
+              {'admin_notes' in selectedItem && selectedItem.admin_notes && (
+                <div>
+                  <Label className="text-sm font-medium">Admin Notes</Label>
+                  <div className="mt-2 p-3 bg-yellow-50 rounded-lg">
+                    <p className="text-sm text-slate-700">{selectedItem.admin_notes}</p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -952,7 +1125,7 @@ export default function ActivitiesPage() {
           <DialogHeader>
             <DialogTitle>Submit Task Proof</DialogTitle>
             <DialogDescription>
-              Upload proof that you've completed the task. This will be reviewed by an admin.
+              Upload proof that you've completed the task. AI will automatically verify your submission.
             </DialogDescription>
           </DialogHeader>
           

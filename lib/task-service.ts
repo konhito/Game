@@ -87,6 +87,11 @@ export interface TaskResponse {
   data: any;
   message?: string;
   error?: string;
+  ai_verification?: {
+    verified: boolean;
+    confidence: number;
+    reason: string;
+  };
 }
 
 class TaskService {
@@ -186,21 +191,109 @@ class TaskService {
     }
   }
 
+  // Get current task status for a specific task with retry logic
+  async getCurrentTaskStatus(taskId: number): Promise<TaskResponse> {
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    const attemptRequest = async (): Promise<TaskResponse> => {
+      try {
+        console.log(`🔍 Getting current task status for task: ${taskId} (attempt ${retryCount + 1})`);
+        console.log('🌐 API URL:', `${API_BASE}/api/tasks/status/${taskId}`);
+        console.log('🔐 Auth headers:', this.getAuthHeaders());
+        
+        const response = await fetch(`${API_BASE}/api/tasks/status/${taskId}`, {
+          method: 'GET',
+          headers: this.getAuthHeaders(),
+        });
+
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', response.headers);
+
+        if (!response.ok) {
+          if (response.status === 429 && retryCount < maxRetries) {
+            retryCount++;
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+            console.log(`⏳ Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return attemptRequest();
+          }
+          
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch (parseError) {
+            // If response is not JSON, create a generic error
+            errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+          }
+          console.error('❌ API Error:', errorData);
+          throw new Error(errorData.error || `Failed to get task status: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Task status retrieved:', result);
+        return result;
+      } catch (error) {
+        if (retryCount < maxRetries && (error instanceof Error && (error.message.includes('429') || error.message.includes('rate limit')))) {
+          retryCount++;
+          const delay = Math.pow(2, retryCount) * 1000;
+          console.log(`⏳ Request failed, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return attemptRequest();
+        }
+        
+        console.error('Get task status error:', error);
+        throw error;
+      }
+    };
+    
+    return attemptRequest();
+  }
+
   // Complete a task
   async completeTask(data: CompleteTaskRequest): Promise<TaskResponse> {
     try {
+      console.log('🤖 Completing task with AI verification...');
+      console.log('📝 Request data:', data);
+      console.log('🌐 API URL:', `${API_BASE}/api/tasks/complete`);
+      console.log('🔐 Auth headers:', this.getAuthHeaders());
+      
       const response = await fetch(`${API_BASE}/api/tasks/complete`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(data),
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', response.headers);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to complete task');
+        let errorData;
+        try {
+          const responseText = await response.text();
+          console.log('📄 Raw response text:', responseText);
+          errorData = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response:', parseError);
+          // If response is not JSON, create a generic error
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
+        console.error('❌ Complete task API error:', errorData);
+        throw new Error(errorData.error || `Failed to complete task: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ Complete task success:', result);
+      
+      // Log AI verification result if present
+      if (result.ai_verification) {
+        console.log('🤖 AI Verification Result:', result.ai_verification);
+        console.log(`   Verified: ${result.ai_verification.verified}`);
+        console.log(`   Confidence: ${result.ai_verification.confidence}%`);
+        console.log(`   Reason: ${result.ai_verification.reason}`);
+      }
+
+      return result;
     } catch (error) {
       console.error('Complete task error:', error);
       throw error;
@@ -592,6 +685,63 @@ class TaskService {
       return await response.json();
     } catch (error) {
       console.error('Get admin audit log error:', error);
+      throw error;
+    }
+  }
+
+  // Admin: Get AI verification records
+  async getAIVerificationRecords(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    confidence_min?: number;
+    user_id?: number;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<TaskResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.confidence_min) queryParams.append('confidence_min', params.confidence_min.toString());
+      if (params?.user_id) queryParams.append('user_id', params.user_id.toString());
+      if (params?.start_date) queryParams.append('start_date', params.start_date);
+      if (params?.end_date) queryParams.append('end_date', params.end_date);
+
+      const response = await fetch(`${API_BASE}/api/admin/ai-verification?${queryParams}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch AI verification records');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Get AI verification records error:', error);
+      throw error;
+    }
+  }
+
+  // Admin: Retry AI verification
+  async retryAIVerification(verificationId: number): Promise<TaskResponse> {
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/ai-verification/${verificationId}/retry`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to retry AI verification');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Retry AI verification error:', error);
       throw error;
     }
   }

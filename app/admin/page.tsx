@@ -20,7 +20,9 @@ import {
   Eye,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Bot,
+  Brain
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
@@ -36,6 +38,11 @@ interface DashboardStats {
   active_users_today: number;
   tasks_created_today: number;
   submissions_today: number;
+  ai_approved_submissions?: number;
+  ai_rejected_submissions?: number;
+  manual_approved_submissions?: number;
+  manual_rejected_submissions?: number;
+  ai_verification_rate?: number;
   top_performing_users: Array<{
     id: number;
     name: string;
@@ -127,6 +134,11 @@ export default function AdminDashboard() {
     active_users_today: stats.active_users_today || 0,
     tasks_created_today: stats.tasks_created_today || 0,
     submissions_today: stats.submissions_today || 0,
+    ai_approved_submissions: stats.ai_approved_submissions || 0,
+    ai_rejected_submissions: stats.ai_rejected_submissions || 0,
+    manual_approved_submissions: stats.manual_approved_submissions || 0,
+    manual_rejected_submissions: stats.manual_rejected_submissions || 0,
+    ai_verification_rate: stats.ai_verification_rate || 0,
     top_performing_users: stats.top_performing_users || [],
     recent_activities: stats.recent_activities || []
   };
@@ -300,6 +312,64 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* AI Verification Statistics */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">AI Verification Statistics</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">AI Approved</CardTitle>
+              <Bot className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{safeStats.ai_approved_submissions}</div>
+              <p className="text-xs text-muted-foreground">
+                Automatically approved by AI
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">AI Rejected</CardTitle>
+              <Bot className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{safeStats.ai_rejected_submissions}</div>
+              <p className="text-xs text-muted-foreground">
+                Automatically rejected by AI
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manual Approved</CardTitle>
+              <Shield className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{safeStats.manual_approved_submissions}</div>
+              <p className="text-xs text-muted-foreground">
+                Manually approved by admin
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">AI Verification Rate</CardTitle>
+              <Brain className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{safeStats.ai_verification_rate}%</div>
+              <p className="text-xs text-muted-foreground">
+                Percentage handled by AI
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Performing Users */}
         <div>
@@ -443,6 +513,34 @@ export default function AdminDashboard() {
                   <div>
                     <h3 className="font-medium">Audit Log</h3>
                     <p className="text-sm text-gray-600">Monitor admin actions and changes</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/ai-verification">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <Bot className="h-6 w-6 text-purple-600" />
+                  <div>
+                    <h3 className="font-medium">AI Verification Monitor</h3>
+                    <p className="text-sm text-gray-600">Monitor AI verification performance and user submissions</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/duplicate-images">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <AlertTriangle className="h-6 w-6 text-orange-600" />
+                  <div>
+                    <h3 className="font-medium">Duplicate Images</h3>
+                    <p className="text-sm text-gray-600">Review and manage duplicate image submissions</p>
                   </div>
                 </div>
               </CardContent>
