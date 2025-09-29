@@ -5,17 +5,80 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Calendar, User, ArrowLeft, ArrowRight, TrendingUp, Star, Zap } from "lucide-react";
+import { Search, Filter, Calendar, User, ArrowLeft, ArrowRight, TrendingUp, Star, Zap, Eye } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface NewsArticle {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featured_image: string | null;
+  author_name: string;
+  published_at: string;
+  views: number;
+  featured: boolean;
+  tags: string[];
+}
 
 export default function NewsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [featuredArticle, setFeaturedArticle] = useState<NewsArticle | null>(null);
 
-  // Sample news data - replace with real data from your backend
-  const newsItems = [
+  // Fetch news articles from CMS
+  useEffect(() => {
+    fetchNewsArticles();
+  }, [searchTerm, selectedCategory, currentPage]);
+
+  const fetchNewsArticles = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('limit', '10');
+      if (searchTerm) params.append('search', searchTerm);
+      if (selectedCategory !== 'All') params.append('tag', selectedCategory);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news?${params}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        setNewsItems(result.data.articles);
+      }
+    } catch (error) {
+      console.error('Error fetching news articles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch featured article
+  useEffect(() => {
+    fetchFeaturedArticle();
+  }, []);
+
+  const fetchFeaturedArticle = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news?featured=true&limit=1`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.data.articles.length > 0) {
+          setFeaturedArticle(result.data.articles[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching featured article:', error);
+    }
+  };
+
+  // Sample news data - fallback if API fails
+  const fallbackNewsItems = [
     {
       id: 1,
       title: "New Social Media Challenge: Share Your Success Story",
@@ -92,12 +155,17 @@ export default function NewsPage() {
 
   const categories = ["All", "Challenge", "Leaderboard", "Content", "Platform", "Referrals", "Community"];
 
-  // Filter news based on search and category
-  const filteredNews = newsItems.filter(item => {
+  // Use dynamic data or fallback
+  const displayNews = newsItems.length > 0 ? newsItems : fallbackNewsItems;
+  
+  // Filter news based on search and category (for fallback data)
+  const filteredNews = displayNews.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+                         (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+    const matchesCategory = selectedCategory === "All" || 
+                           (item.tags && item.tags.includes(selectedCategory)) ||
+                           (item as any).category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -247,8 +315,14 @@ export default function NewsPage() {
             <TrendingUp className="w-6 h-6 text-emerald-500 mr-2" />
             Latest News
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedNews.map((news) => (
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedNews.map((news) => (
               <motion.div
                 key={news.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -258,12 +332,12 @@ export default function NewsPage() {
                 <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
-                      <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category)} text-white`}>
-                        {news.category}
+                      <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
+                        {(news as any).category || (news.tags && news.tags[0]) || 'News'}
                       </Badge>
                       <div className="flex items-center text-sm text-slate-500">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {news.date}
+                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : (news as any).date}
                       </div>
                     </div>
                     <CardTitle className="text-lg text-slate-800 line-clamp-2">
@@ -271,13 +345,19 @@ export default function NewsPage() {
                     </CardTitle>
                     <div className="flex items-center text-sm text-slate-500">
                       <User className="w-4 h-4 mr-1" />
-                      {news.author} • {news.readTime}
+                      {news.author_name || (news as any).author} • {(news as any).readTime || '2 min read'}
+                      {news.views && (
+                        <>
+                          <Eye className="w-4 h-4 ml-2 mr-1" />
+                          {news.views} views
+                        </>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 mb-4">{news.excerpt}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {news.tags.slice(0, 3).map((tag, index) => (
+                      {(news.tags || []).slice(0, 3).map((tag, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           #{tag}
                         </Badge>
@@ -290,7 +370,8 @@ export default function NewsPage() {
                 </Card>
               </motion.div>
             ))}
-          </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Pagination */}

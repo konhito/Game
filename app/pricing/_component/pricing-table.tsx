@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { authService } from "@/lib/auth-service";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -49,8 +49,8 @@ export default function PricingTable({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const session = await authClient.getSession();
-        setIsAuthenticated(!!session.data?.user);
+        const isAuth = authService.isAuthenticated();
+        setIsAuthenticated(isAuth);
       } catch {
         setIsAuthenticated(false);
       }
@@ -65,10 +65,8 @@ export default function PricingTable({
     }
 
     try {
-      await authClient.checkout({
-        products: [productId],
-        slug: slug,
-      });
+      // TODO: Implement checkout functionality
+      console.log("Checkout not implemented yet", { productId, slug });
     } catch (error) {
       console.error("Checkout failed:", error);
       // TODO: Add user-facing error notification
@@ -78,7 +76,8 @@ export default function PricingTable({
 
   const handleManageSubscription = async () => {
     try {
-      await authClient.customer.portal();
+      // TODO: Implement subscription management
+      console.log("Subscription management not implemented yet");
     } catch (error) {
       console.error("Failed to open customer portal:", error);
       toast.error("Failed to open subscription management");

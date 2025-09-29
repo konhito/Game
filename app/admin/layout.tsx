@@ -14,7 +14,10 @@ import {
   BarChart3, 
   LogOut,
   Plus,
-  Eye
+  Eye,
+  Coins,
+  Settings,
+  Newspaper
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -105,6 +108,18 @@ export default function AdminLayout({
       href: '/admin/activities',
       icon: Eye,
       description: 'Monitor user activities'
+    },
+    {
+      title: 'Point System',
+      href: '/admin/point-system',
+      icon: Coins,
+      description: 'Configure rewards and bonuses'
+    },
+    {
+      title: 'News Management',
+      href: '/admin/news',
+      icon: Newspaper,
+      description: 'Manage news articles and content'
     }
   ];
 

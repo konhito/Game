@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, Gamepad2, Trophy, Gift, Users, Loader2 } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
 
@@ -296,10 +296,10 @@ export default function SignInPage() {
           >
             <div className="text-center lg:text-left">
               <h2 className="text-3xl font-bold text-slate-800 mb-4">
-                Join the Ultimate Casino Experience
+                Share and Earn Money
               </h2>
               <p className="text-slate-600 text-lg mb-8">
-                Spin the wheel, climb the leaderboard, and win big with PineCoins!
+                Share social media links, complete tasks, and earn real money with PineCoins!
               </p>
             </div>
 
@@ -308,12 +308,12 @@ export default function SignInPage() {
                 whileHover={{ scale: 1.02 }}
                 className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <Trophy className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
+                  <Share2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Weekly Leaderboard</h3>
-                  <p className="text-slate-600 text-sm">Compete for top spots and win rewards</p>
+                  <h3 className="font-semibold text-slate-800">Share Social Media Links</h3>
+                  <p className="text-slate-600 text-sm">Post links on your social media and earn money</p>
                 </div>
               </motion.div>
 
@@ -321,12 +321,12 @@ export default function SignInPage() {
                 whileHover={{ scale: 1.02 }}
                 className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <Gift className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
+                  <DollarSign className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Daily Spins</h3>
-                  <p className="text-slate-600 text-sm">Free spins every day with amazing rewards</p>
+                  <h3 className="font-semibold text-slate-800">Earn Real Money</h3>
+                  <p className="text-slate-600 text-sm">Convert your points to real cash rewards</p>
                 </div>
               </motion.div>
 
@@ -335,11 +335,11 @@ export default function SignInPage() {
                 className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <Users className="w-6 h-6 text-white" />
+                  <Target className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Referral Rewards</h3>
-                  <p className="text-slate-600 text-sm">Earn points by inviting friends</p>
+                  <h3 className="font-semibold text-slate-800">Complete Tasks</h3>
+                  <p className="text-slate-600 text-sm">Simple social media tasks for guaranteed earnings</p>
                 </div>
               </motion.div>
             </div>

@@ -14,7 +14,8 @@ import {
   Target, 
   Settings, 
   Menu,
-  BarChart3
+  BarChart3,
+  Newspaper
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,16 +37,22 @@ export function Sidebar({ className }: SidebarProps) {
       isActive: pathname === "/dashboard",
     },
     {
+      title: "News",
+      href: "/news",
+      icon: Newspaper,
+      isActive: pathname === "/news",
+    },
+    {
       title: "Leaderboard",
       href: "/dashboard/leaderboard",
       icon: Trophy,
       isActive: pathname === "/dashboard/leaderboard",
     },
     {
-      title: "Spinning Wheel",
-      href: "/dashboard/spin-wheel",
-      icon: Gamepad2,
-      isActive: pathname === "/dashboard/spin-wheel",
+      title: "Daily Rewards",
+      href: "/dashboard/daily-rewards",
+      icon: Target,
+      isActive: pathname === "/dashboard/daily-rewards",
     },
     {
       title: "Activities",
@@ -54,10 +61,10 @@ export function Sidebar({ className }: SidebarProps) {
       isActive: pathname === "/dashboard/activities",
     },
     {
-      title: "Prize Pools",
-      href: "/dashboard/prize-pools",
+      title: "Rewards",
+      href: "/dashboard/rewards",
       icon: Gift,
-      isActive: pathname === "/dashboard/prize-pools",
+      isActive: pathname === "/dashboard/rewards",
     },
     {
       title: "Wallet",
@@ -93,7 +100,7 @@ export function Sidebar({ className }: SidebarProps) {
             🎯
           </div>
           <span className="text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            PineCoin Casino
+            PineCoin Media
           </span>
         </Link>
       </div>

@@ -621,11 +621,28 @@ class DashboardService {
     }
   }
 
-  // Spin the wheel (mock implementation)
-  async spinWheel(): Promise<ApiResponse<{ points: number; message: string }>> {
+  // Spin the wheel (integrated with point system)
+  async spinWheel(): Promise<ApiResponse<{ points: number; coins: number; message: string }>> {
     try {
-      // Mock wheel spin result
-      const wheelSegments = [
+      // Get spin wheel configuration from point system
+      const response = await fetch(`${API_BASE}/api/points/config`, {
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get spin wheel configuration');
+      }
+
+      const configData = await response.json();
+      const spinConfig = configData.data.configs.spin_wheel_config;
+      const spinRewards = configData.data.configs.spin_rewards;
+
+      if (!spinConfig?.enabled) {
+        throw new Error('Spin wheel is currently disabled');
+      }
+
+      // Use configured rewards or fallback to default
+      const wheelSegments = spinRewards?.rewards || [
         { points: 10, probability: 0.3 },
         { points: 25, probability: 0.25 },
         { points: 50, probability: 0.2 },
@@ -646,14 +663,19 @@ class DashboardService {
         }
       }
 
+      // Calculate coins based on points (1 point = 0.1 coins)
+      const coins = Math.round(selectedReward.points * 0.1 * 100) / 100;
+
       return {
         success: true,
         data: {
           points: selectedReward.points,
-          message: `Congratulations! You won ${selectedReward.points} points!`
+          coins: coins,
+          message: `Congratulations! You won ${selectedReward.points} points and ${coins} coins!`
         }
       };
     } catch (error) {
+      console.error('DashboardService: Error spinning wheel:', error);
       throw new Error('Failed to spin wheel');
     }
   }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, Gamepad2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2 } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
 
@@ -149,10 +149,10 @@ export default function SignUpPage() {
                 <span className="text-3xl text-white">₽</span>
               </div>
               <h1 className="text-4xl font-bold text-slate-800 mb-4">
-                Join the PineCoin Community
+                Share and Earn Money
               </h1>
               <p className="text-slate-600 text-lg">
-                Create your account and start earning points, spinning wheels, and climbing the leaderboard!
+                Create your account and start sharing social media links to earn real money!
               </p>
             </div>
 
@@ -162,11 +162,11 @@ export default function SignUpPage() {
                 className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <CheckCircle className="w-7 h-7 text-white" />
+                  <Share2 className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Instant Rewards</h3>
-                  <p className="text-slate-600">Get 20 points just for signing up!</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Share Social Media</h3>
+                  <p className="text-slate-600">Post links on your social platforms and earn money</p>
                 </div>
               </motion.div>
 
@@ -175,11 +175,11 @@ export default function SignUpPage() {
                 className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <Star className="w-7 h-7 text-white" />
+                  <DollarSign className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Daily Bonuses</h3>
-                  <p className="text-slate-600">Free spins and login rewards every day</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Real Money Rewards</h3>
+                  <p className="text-slate-600">Convert your earnings to real cash</p>
                 </div>
               </motion.div>
 
@@ -188,11 +188,11 @@ export default function SignUpPage() {
                 className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <Zap className="w-7 h-7 text-white" />
+                  <Target className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Fast Growth</h3>
-                  <p className="text-slate-600">Earn points through referrals and activities</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Simple Tasks</h3>
+                  <p className="text-slate-600">Easy social media tasks for guaranteed earnings</p>
                 </div>
               </motion.div>
             </div>
@@ -203,22 +203,22 @@ export default function SignUpPage() {
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-emerald-600">20</div>
-                <div className="text-sm text-emerald-600">Signup Points</div>
+                <div className="text-2xl font-bold text-emerald-600">$20</div>
+                <div className="text-sm text-emerald-600">Signup Bonus</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-violet-600">10</div>
-                <div className="text-sm text-violet-600">Referral Points</div>
+                <div className="text-2xl font-bold text-violet-600">$5</div>
+                <div className="text-sm text-violet-600">Per Share</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-amber-600">5</div>
-                <div className="text-sm text-amber-600">Daily Login</div>
+                <div className="text-2xl font-bold text-amber-600">$10</div>
+                <div className="text-sm text-amber-600">Daily Tasks</div>
               </motion.div>
             </div>
           </motion.div>
@@ -240,7 +240,7 @@ export default function SignUpPage() {
                     Create Your Account
                   </CardTitle>
                   <CardDescription className="text-slate-600 mt-2">
-                    Join thousands of players and start winning today
+                    Join thousands of users and start earning money today
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -425,11 +425,11 @@ export default function SignUpPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 p-6 bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 rounded-xl text-center"
+              className="mt-6 p-6 bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200 rounded-xl text-center"
             >
-              <div className="text-2xl font-bold text-amber-800 mb-2">🎉 Welcome Bonus!</div>
-              <p className="text-amber-700">
-                Get <span className="font-semibold">20 points</span> instantly when you create your account
+              <div className="text-2xl font-bold text-emerald-800 mb-2">💰 Welcome Bonus!</div>
+              <p className="text-emerald-700">
+                Get <span className="font-semibold">$20</span> instantly when you create your account
               </p>
             </motion.div>
           </motion.div>

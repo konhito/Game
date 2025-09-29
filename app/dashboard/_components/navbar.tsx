@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, Coins, LogOut, Settings, User, Wallet, Menu, Home, Trophy, Gamepad2, Gift, Target, BarChart3, Shield } from "lucide-react";
+import { Bell, Coins, LogOut, Settings, User, Wallet, Menu, Home, Trophy, Gamepad2, Gift, Target, BarChart3, Shield, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -32,6 +32,72 @@ export function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch real user stats from backend
+  const fetchUserStats = async (userId: number) => {
+    try {
+      console.log('Navbar: Fetching user stats for user ID:', userId);
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        console.log('Navbar: No auth token found');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/users/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Navbar: User stats response:', result);
+        
+        if (result.success && result.data && result.data.user) {
+          const userStats = result.data.user;
+          setUser(prevUser => ({
+            ...prevUser,
+            name: prevUser?.name || "Player",
+            email: prevUser?.email || "player@example.com",
+            avatar: prevUser?.avatar || null,
+            role: prevUser?.role || "user",
+            pineCoins: parseFloat(userStats.total_coins) || 0,
+            points: userStats.total_points || 0,
+          }));
+          console.log('Navbar: Updated user with real stats:', userStats);
+        }
+      } else {
+        console.error('Navbar: Failed to fetch user stats:', response.status);
+        // Set default values if API fails
+        setUser(prevUser => ({
+          ...prevUser,
+          name: prevUser?.name || "Player",
+          email: prevUser?.email || "player@example.com",
+          avatar: prevUser?.avatar || null,
+          role: prevUser?.role || "user",
+          pineCoins: 0,
+          points: 0,
+        }));
+      }
+    } catch (error) {
+      console.error('Navbar: Error fetching user stats:', error);
+      // Set default values if API fails
+      setUser(prevUser => ({
+        ...prevUser,
+        name: prevUser?.name || "Player",
+        email: prevUser?.email || "player@example.com",
+        avatar: prevUser?.avatar || null,
+        role: prevUser?.role || "user",
+        pineCoins: 0,
+        points: 0,
+      }));
+    } finally {
+      // Set loading to false after stats are fetched
+      setLoading(false);
+    }
+  };
+
   // Simplified navigation - only essential items
   const navigation: Array<{
     title: string;
@@ -47,16 +113,22 @@ export function Navbar() {
       isActive: pathname === "/dashboard",
     },
     {
+      title: "News",
+      href: "/news",
+      icon: Newspaper,
+      isActive: pathname === "/news",
+    },
+    {
       title: "Activities",
       href: "/dashboard/activities",
       icon: Target,
       isActive: pathname === "/dashboard/activities",
     },
     {
-      title: "Prize Pools",
-      href: "/dashboard/prize-pools",
+      title: "Rewards",
+      href: "/dashboard/rewards",
       icon: Gift,
-      isActive: pathname === "/dashboard/prize-pools",
+      isActive: pathname === "/dashboard/rewards",
     },
   ];
 
@@ -89,10 +161,13 @@ export function Navbar() {
               name: userData.name || userData.email?.split('@')[0] || "Player",
               email: userData.email || "player@example.com",
               avatar: userData.image || null,
-              pineCoins: 125.50, // Mock data - replace with real data
-              points: 1250, // Mock data - replace with real data
+              pineCoins: 0, // Will be updated from real data
+              points: 0, // Will be updated from real data
               role: userData.role || "user",
             });
+            
+            // Fetch real user stats from backend
+            fetchUserStats(userData.id);
             return;
           } catch (error) {
             console.error('Navbar: Error parsing localStorage user data:', error);
@@ -119,11 +194,14 @@ export function Navbar() {
             setUser({
               name: userData.name || userData.email?.split('@')[0] || "Player",
               email: userData.email || "player@example.com",
-              avatar: null, // Use null since image is not in minimal cookie
-              pineCoins: 125.50, // Mock data - replace with real data
-              points: 1250, // Mock data - replace with real data
+              avatar: userData.image || null,
+              pineCoins: 0, // Will be updated from real data
+              points: 0, // Will be updated from real data
               role: userData.role || "user",
             });
+            
+            // Fetch real user stats from backend
+            fetchUserStats(userData.id);
             return;
           } catch (parseError) {
             console.error('Navbar: Failed to parse cookie data:', parseError);
@@ -183,7 +261,7 @@ export function Navbar() {
                 <span className="text-2xl font-bold text-white">₽</span>
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                PineCoin 
+              PineCrest
               </span>
             </div>
             
@@ -217,7 +295,7 @@ export function Navbar() {
                 <span className="text-2xl font-bold text-white">₽</span>
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                PineCoin
+              PineCrest
               </span>
             </div>
           </Link>
@@ -259,11 +337,15 @@ export function Navbar() {
             <div className="hidden md:flex items-center space-x-3">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm">
                 <Coins className="w-4 h-4 text-yellow-600" />
-                <span className="font-semibold text-yellow-800">${user.pineCoins}</span>
+                <span className="font-semibold text-yellow-800">
+                  {user.pineCoins === 0 && loading ? '...' : `$${user.pineCoins.toFixed(2)}`}
+                </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm">
                 <div className="w-4 h-4 text-blue-600">🎯</div>
-                <span className="font-semibold text-blue-800">{user.points} pts</span>
+                <span className="font-semibold text-blue-800">
+                  {user.points === 0 && loading ? '...' : `${user.points} pts`}
+                </span>
               </div>
             </div>
 
@@ -332,9 +414,15 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
-                  <Link href="/dashboard/spin-wheel" className="flex items-center gap-3 w-full">
-                    <Gamepad2 className="h-4 w-4 text-purple-600" />
-                    <span>Spin Wheel</span>
+                  <Link href="/dashboard/daily-rewards" className="flex items-center gap-3 w-full">
+                    <Target className="h-4 w-4 text-purple-600" />
+                    <span>Daily Rewards</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                  <Link href="/news" className="flex items-center gap-3 w-full">
+                    <Newspaper className="h-4 w-4 text-orange-600" />
+                    <span>News</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">

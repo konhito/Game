@@ -326,43 +326,7 @@ export default function DashboardPage() {
             <p className="text-slate-600 text-lg">Ready to climb the leaderboard and earn PineCoins?</p>
             
             {/* Live Stats Display in Welcome Header */}
-            <div className="mt-6 flex items-center justify-center gap-8">
-              {/* Points Display */}
-              <div className="text-center">
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span>Total Points</span>
-                </div>
-                <div className="text-2xl font-bold text-slate-800">{safeTotalPoints.toLocaleString()}</div>
-              </div>
-
-              {/* PineCoins Display */}
-              <div className="text-center">
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
-                  <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
-                  <span>PineCoins</span>
-                </div>
-                <div className="text-2xl font-bold text-slate-800">₽{Number(safeTotalCoins).toFixed(2)}</div>
-              </div>
-
-              {/* Streak Display */}
-              <div className="text-center">
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
-                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                  <span>Streak</span>
-                </div>
-                <div className="text-2xl font-bold text-slate-800">{safeCurrentStreak}</div>
-              </div>
-
-              {/* Spins Remaining */}
-              <div className="text-center">
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                  <span>Spins</span>
-                </div>
-                <div className="text-2xl font-bold text-slate-800">{safeSpinsRemaining}</div>
-              </div>
-            </div>
+            
 
             <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
               <Calendar className="w-4 h-4" />

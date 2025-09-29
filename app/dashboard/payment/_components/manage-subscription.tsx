@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authService } from "@/lib/auth-service";
 
 export default function ManageSubscription() {
   return (
@@ -9,7 +9,8 @@ export default function ManageSubscription() {
       variant="outline"
       onClick={async () => {
         try {
-          await authClient.customer.portal();
+          // TODO: Implement subscription management
+          console.log("Subscription management not implemented yet");
         } catch (error) {
           console.error("Failed to open customer portal:", error);
         }

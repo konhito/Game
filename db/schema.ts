@@ -77,7 +77,7 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
-// Casino Game Tables
+// Media Delivery Network Tables
 export const userStats = pgTable("user_stats", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("userId")

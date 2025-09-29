@@ -168,7 +168,7 @@ export default function SubmitImagePage() {
                 <span className="text-xl text-white font-bold">₽</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-800">PineCoin Casino</h1>
+                <h1 className="text-xl font-bold text-slate-800">PineCoin Media</h1>
                 <p className="text-sm text-slate-600">Submit Image for Review</p>
               </div>
             </div>
