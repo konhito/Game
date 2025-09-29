@@ -71,8 +71,21 @@ class AuthService {
       localStorage.setItem('auth_user', JSON.stringify(user));
       
       // Also set cookies for middleware access
-      document.cookie = `custom_auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `custom_user_data=${JSON.stringify(user)}; path=/; max-age=86400; SameSite=Lax`;
+      // Store only essential data in cookies to avoid truncation
+      const encodedToken = encodeURIComponent(token);
+      
+      // Create a minimal user object for cookies (avoid long URLs)
+      const minimalUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+        // Exclude image URL to prevent cookie truncation
+      };
+      const encodedUserData = encodeURIComponent(JSON.stringify(minimalUser));
+      
+      document.cookie = `custom_auth_token=${encodedToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `custom_user_data=${encodedUserData}; path=/; max-age=86400; SameSite=Lax`;
       
       console.log('AuthService: Saved to localStorage and cookies');
       console.log('  localStorage auth_token:', localStorage.getItem('auth_token') ? 'present' : 'missing');
@@ -209,20 +222,74 @@ class AuthService {
   // Handle Google OAuth success
   async handleGoogleAuth(googleUser: any): Promise<void> {
     try {
-      // For Google OAuth, we'll store the user info locally
-      // You can also implement backend integration if needed
+      console.log('Google OAuth user data:', googleUser);
+      
+      // First, try to authenticate with the backend to get a proper JWT token
+      try {
+        console.log('Attempting backend Google OAuth authentication...');
+        console.log('API Base URL:', config.API_BASE);
+        console.log('Google User Data:', {
+          googleId: googleUser.sub || googleUser.id,
+          name: googleUser.name || googleUser.displayName || 'Google User',
+          email: googleUser.email,
+          image: googleUser.picture || googleUser.photoURL,
+        });
+
+        const response = await fetch(`${config.API_BASE}/api/users/auth/google`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            googleId: googleUser.sub || googleUser.id,
+            name: googleUser.name || googleUser.displayName || 'Google User',
+            email: googleUser.email,
+            image: googleUser.picture || googleUser.photoURL,
+          }),
+        });
+
+        console.log('Backend response status:', response.status);
+        console.log('Backend response headers:', response.headers);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Backend response data:', result);
+          
+          if (result.success && result.token && result.user) {
+            console.log('Backend authentication successful:', result);
+            this.setAuth(result.token, result.user);
+            return;
+          } else {
+            console.error('Backend authentication failed - invalid response format:', result);
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('Backend authentication failed - HTTP error:', response.status, errorText);
+        }
+        
+        console.log('Backend authentication failed, falling back to local auth');
+      } catch (backendError) {
+        console.error('Backend not available, using local authentication:', backendError);
+      }
+      
+      // Fallback: Create user object from Google data for local storage
       const user: User = {
         id: Date.now(), // Temporary ID for Google users
-        name: googleUser.name || googleUser.displayName,
+        name: googleUser.name || googleUser.displayName || 'Google User',
         email: googleUser.email,
         role: 'user',
+        image: googleUser.picture || googleUser.photoURL,
         created_at: new Date().toISOString(),
       };
 
-      // Generate a temporary token for Google users
+      // Generate a temporary token for Google users (fallback)
       const token = `google_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
+      console.log('Setting Google auth (local fallback):', { token, user });
       this.setAuth(token, user);
+      
+      // Log the successful Google authentication
+      console.log('Google OAuth successful - user authenticated:', this.isAuthenticated());
     } catch (error) {
       console.error('Google auth handling error:', error);
       throw error;

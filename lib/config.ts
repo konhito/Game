@@ -1,11 +1,22 @@
 // Frontend Configuration
+console.log("Environment variables:", {
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE,
+  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME
+});
+
 export const config = {
   // API Configuration
-  API_BASE: 'https://casino-backend-obvo.onrender.com',
+  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com',
   
   // App Configuration
-  APP_NAME: 'Casino Dashboard',
+  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'PineCoin',
   APP_VERSION: '1.0.0',
+  
+  // Google OAuth Configuration
+  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+  APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   
   // Feature Flags
   FEATURES: {

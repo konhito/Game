@@ -77,7 +77,29 @@ export function Navbar() {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        // Check for custom auth cookies
+        // Check localStorage first (most reliable and complete)
+        const token = localStorage.getItem('auth_token');
+        const userStr = localStorage.getItem('auth_user');
+        
+        if (token && userStr) {
+          try {
+            const userData = JSON.parse(userStr);
+            console.log('Navbar: Found complete user data in localStorage:', userData);
+            setUser({
+              name: userData.name || userData.email?.split('@')[0] || "Player",
+              email: userData.email || "player@example.com",
+              avatar: userData.image || null,
+              pineCoins: 125.50, // Mock data - replace with real data
+              points: 1250, // Mock data - replace with real data
+              role: userData.role || "user",
+            });
+            return;
+          } catch (error) {
+            console.error('Navbar: Error parsing localStorage user data:', error);
+          }
+        }
+        
+        // Fallback to cookies if localStorage is empty (minimal data only)
         const cookies = document.cookie.split(';');
         const authTokenCookie = cookies.find(cookie => 
           cookie.trim().startsWith('custom_auth_token=')
@@ -87,25 +109,30 @@ export function Navbar() {
         );
         
         if (authTokenCookie && userDataCookie) {
-          const token = decodeURIComponent(authTokenCookie.split('=')[1]);
-          const userData = JSON.parse(decodeURIComponent(userDataCookie.split('=')[1]));
-          
-          if (userData) {
+          try {
+            const token = decodeURIComponent(authTokenCookie.split('=')[1]);
+            const userDataStr = decodeURIComponent(userDataCookie.split('=')[1]);
+            
+            console.log('Navbar: Using cookie data (minimal):', userDataStr);
+            
+            const userData = JSON.parse(userDataStr);
             setUser({
               name: userData.name || userData.email?.split('@')[0] || "Player",
               email: userData.email || "player@example.com",
-              avatar: userData.image || null,
+              avatar: null, // Use null since image is not in minimal cookie
               pineCoins: 125.50, // Mock data - replace with real data
               points: 1250, // Mock data - replace with real data
               role: userData.role || "user",
             });
-          } else {
-            router.push('/sign-in');
+            return;
+          } catch (parseError) {
+            console.error('Navbar: Failed to parse cookie data:', parseError);
           }
-        } else {
-          // No session, redirect to login
-          router.push('/sign-in');
         }
+        
+        // If both localStorage and cookies fail, redirect to login
+        console.log('Navbar: No valid authentication found, redirecting to sign-in');
+        router.push('/sign-in');
       } catch (error) {
         console.error('Auth check failed:', error);
         router.push('/sign-in');
