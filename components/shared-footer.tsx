@@ -20,11 +20,11 @@ export default function SharedFooter() {
               <div className="w-20 h-20 flex items-center justify-center">
                 <img 
                   src="/Logo1.png" 
-                  alt="PineCoin Logo" 
+                  alt="PineCrest Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-xl font-bold">PineCoin</span>
+              <span className="text-xl font-bold">PineCrest</span>
             </div>
             <p className="text-slate-300 mb-4">
               Earn rewards from your social media activities and convert them to real money.
@@ -62,7 +62,7 @@ export default function SharedFooter() {
         </div>
         
         <div className="border-t border-slate-700 mt-12 pt-8 text-center text-slate-400">
-          <p>&copy; 2024 PineCoin. All rights reserved. Earn rewards from social media activities.</p>
+          <p>&copy; 2024 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
         </div>
       </div>
     </footer>

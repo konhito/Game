@@ -12,19 +12,14 @@ export default function SharedHeader() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated using custom auth cookies
+    // Check if user is authenticated using localStorage
     const checkAuth = () => {
       try {
-        // Check for custom auth cookies
-        const cookies = document.cookie.split(';');
-        const hasAuthToken = cookies.some(cookie => 
-          cookie.trim().startsWith('custom_auth_token=')
-        );
-        const hasUserData = cookies.some(cookie => 
-          cookie.trim().startsWith('custom_user_data=')
-        );
+        // Check for auth token and user data in localStorage
+        const token = localStorage.getItem('auth_token');
+        const userStr = localStorage.getItem('auth_user');
         
-        setIsAuthenticated(hasAuthToken && hasUserData);
+        setIsAuthenticated(!!(token && userStr));
       } catch (error) {
         setIsAuthenticated(false);
       } finally {
@@ -40,7 +35,18 @@ export default function SharedHeader() {
     };
     
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events when localStorage is modified from the same tab
+    const handleAuthChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('authStateChanged', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
   }, []);
 
   // Hide header on dashboard pages - moved after all hooks
@@ -69,7 +75,7 @@ export default function SharedHeader() {
                 {/* <span className="absolute text-2xl font-bold text-emerald-600 opacity-0">₽</span> */}
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                PineCoin
+                PineCrest
               </span>
             </motion.div>
           </Link>

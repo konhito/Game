@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [spinResult, setSpinResult] = useState<{ points: number; message: string } | null>(null);
   const [backendConnected, setBackendConnected] = useState(false);
+  const [dailyRewardClaimed, setDailyRewardClaimed] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -124,6 +125,14 @@ export default function DashboardPage() {
       if (statsResponse.success && statsResponse.data.users && statsResponse.data.users.length > 0) {
         const userStats = statsResponse.data.users[0];
         setDashboardData(prev => ({ ...prev, userStats }));
+        
+        // Check if daily reward was already claimed today
+        if (userStats.last_daily_claim_date) {
+          const lastClaimDate = new Date(userStats.last_daily_claim_date);
+          const today = new Date();
+          const isSameDay = lastClaimDate.toDateString() === today.toDateString();
+          setDailyRewardClaimed(isSameDay);
+        }
       }
 
       // Fetch recent activities
@@ -242,6 +251,11 @@ export default function DashboardPage() {
   };
 
   const handleDailyReward = async () => {
+    if (dailyRewardClaimed) {
+      alert('Daily reward already claimed today! Come back tomorrow.');
+      return;
+    }
+
     try {
       // Mock daily reward
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -252,33 +266,137 @@ export default function DashboardPage() {
       const coins = totalReward * 0.05;
       
       // Update user stats on backend
-      await dashboardService.updateUserStatsAfterDailyReward(totalReward, coins);
+      const response = await dashboardService.updateUserStatsAfterDailyReward(totalReward, coins);
       
-      // Update local state
-      setDashboardData(prev => ({
-        ...prev,
-        userStats: prev.userStats ? {
-          ...prev.userStats,
-          total_points: prev.userStats.total_points + totalReward,
-          weekly_points: (prev.userStats.weekly_points || 0) + totalReward,
-          current_streak: (prev.userStats.current_streak || 0) + 1,
-          total_coins: prev.userStats.total_coins + coins
-        } : null
-      }));
+      if (response.success) {
+        // Update local state
+        setDashboardData(prev => ({
+          ...prev,
+          userStats: prev.userStats ? {
+            ...prev.userStats,
+            total_points: prev.userStats.total_points + totalReward,
+            weekly_points: (prev.userStats.weekly_points || 0) + totalReward,
+            current_streak: (prev.userStats.current_streak || 0) + 1,
+            total_coins: prev.userStats.total_coins + coins,
+            last_daily_claim_date: new Date().toISOString()
+          } : null
+        }));
 
-      alert(`🌅 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus)`);
+        setDailyRewardClaimed(true);
+        alert(`🌅 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus)`);
+      } else {
+        alert(response.error || 'Failed to claim daily reward. Please try again.');
+      }
     } catch (error) {
       console.error('Error claiming daily reward:', error);
-      alert('Failed to claim daily reward. Please try again.');
+      if (error instanceof Error && error.message.includes('already claimed')) {
+        setDailyRewardClaimed(true);
+        alert('Daily reward already claimed today! Come back tomorrow.');
+      } else {
+        alert('Failed to claim daily reward. Please try again.');
+      }
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-emerald-500" />
-          <p className="text-slate-600">Loading dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Welcome Header Skeleton */}
+            <div className="text-center mb-8">
+              <div className="h-10 bg-slate-200 rounded-lg w-96 mx-auto mb-2 animate-pulse"></div>
+              <div className="h-6 bg-slate-200 rounded-lg w-80 mx-auto mb-4 animate-pulse"></div>
+              <div className="h-4 bg-slate-200 rounded-lg w-48 mx-auto animate-pulse"></div>
+            </div>
+
+            {/* Stats Overview Skeleton */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <div className="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-slate-200 rounded w-20 mb-2 animate-pulse"></div>
+                    <div className="h-2 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-slate-200 rounded w-32 animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Big Spin Button Skeleton */}
+            <div className="text-center mb-8">
+              <div className="h-16 bg-slate-200 rounded-2xl w-80 mx-auto mb-2 animate-pulse"></div>
+              <div className="h-4 bg-slate-200 rounded w-48 mx-auto animate-pulse"></div>
+            </div>
+
+            {/* Main Actions Skeleton */}
+            <div className="grid lg:grid-cols-3 gap-6 mb-8">
+              {[...Array(3)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                      <div>
+                        <div className="h-5 bg-slate-200 rounded w-24 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-slate-200 rounded w-32 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center">
+                      <div className="h-12 bg-slate-200 rounded-full w-12 mx-auto mb-3 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-32 mx-auto mb-2 animate-pulse"></div>
+                      <div className="h-6 bg-slate-200 rounded w-20 mx-auto mb-4 animate-pulse"></div>
+                    </div>
+                    <div className="h-12 bg-slate-200 rounded-xl w-full animate-pulse"></div>
+                    <div className="h-16 bg-slate-200 rounded-lg w-full animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Leaderboard and Activities Skeleton */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {[...Array(2)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                      <div>
+                        <div className="h-5 bg-slate-200 rounded w-32 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-slate-200 rounded w-40 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[...Array(5)].map((_, itemIndex) => (
+                        <div key={itemIndex} className="flex items-center justify-between p-4 rounded-xl bg-slate-100">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
+                            <div>
+                              <div className="h-4 bg-slate-200 rounded w-24 mb-1 animate-pulse"></div>
+                              <div className="h-3 bg-slate-200 rounded w-16 animate-pulse"></div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="h-4 bg-slate-200 rounded w-16 mb-1 animate-pulse"></div>
+                            <div className="h-3 bg-slate-200 rounded w-12 animate-pulse"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-6 text-center">
+                      <div className="h-10 bg-slate-200 rounded w-40 mx-auto animate-pulse"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -550,11 +668,16 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                   <Button 
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                    className={`w-full font-bold py-3 rounded-xl shadow-lg transition-all duration-200 ${
+                      dailyRewardClaimed 
+                        ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl transform hover:scale-105'
+                    }`}
                     onClick={handleDailyReward}
+                    disabled={dailyRewardClaimed}
                   >
                     <Calendar className="w-5 h-5 mr-2" />
-                    Claim Daily Reward
+                    {dailyRewardClaimed ? 'Already Claimed Today' : 'Claim Daily Reward'}
                   </Button>
                   <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-3 border border-blue-200/50">
                     <div className="font-medium mb-1">⏰ Come back tomorrow!</div>
@@ -564,49 +687,85 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
-            {/* Quick Actions Card */}
+            {/* Progress & Goals Card */}
             <motion.div
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-violet-50 to-violet-100 border-violet-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-violet-200/30 rounded-full -translate-y-16 translate-x-16"></div>
+              <Card className="bg-gradient-to-br from-indigo-50 to-purple-100 border-indigo-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/30 rounded-full -translate-y-16 translate-x-16"></div>
                 <CardHeader className="relative z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Zap className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-slate-800 text-lg">Quick Actions</CardTitle>
+                      <CardTitle className="text-slate-800 text-lg">Progress & Goals</CardTitle>
                       <CardDescription className="text-slate-600">
-                        Earn points fast
+                        Track your achievements
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3 relative z-10">
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-violet-300 text-violet-700 hover:bg-violet-50 hover:border-violet-400 hover:scale-105 transition-all duration-200"
-                    onClick={() => router.push('/submit-image')}
-                  >
-                    <span className="mr-2">📸</span>
-                    Submit Image (+20 points)
-                  </Button>
-                  <Button variant="outline" className="w-full border-violet-300 text-violet-700 hover:bg-violet-50 hover:border-violet-400 hover:scale-105 transition-all duration-200">
-                    <span className="mr-2">📺</span>
-                    Watch Ad (+5 points)
-                  </Button>
-                  <Button variant="outline" className="w-full border-violet-300 text-violet-700 hover:bg-violet-50 hover:border-violet-400 hover:scale-105 transition-all duration-200">
-                    <span className="mr-2">📱</span>
-                    Share Post (+20 points)
-                  </Button>
-                  <Button variant="outline" className="w-full border-violet-300 text-violet-700 hover:bg-violet-50 hover:border-violet-400 hover:scale-105 transition-all duration-200">
-                    <span className="mr-2">👥</span>
-                    Invite Friends (+10 points)
-                  </Button>
-                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 border border-violet-200/50">
-                    <div className="font-medium">⚡ Quick & Easy</div>
+                <CardContent className="space-y-4 relative z-10">
+                  {/* Level Progress */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-slate-700">Current Level</span>
+                      <span className="text-sm font-bold text-indigo-600">Level {Math.floor((safeTotalPoints || 0) / 100)}</span>
+                    </div>
+                    <Progress 
+                      value={((safeTotalPoints || 0) % 100)} 
+                      className="h-2 bg-indigo-200" 
+                    />
+                    <p className="text-xs text-slate-500">
+                      {100 - ((safeTotalPoints || 0) % 100)} points to next level
+                    </p>
+                  </div>
+
+                  {/* Weekly Goal */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-slate-700">Weekly Goal</span>
+                      <span className="text-sm font-bold text-purple-600">{safeWeeklyPoints}/500 pts</span>
+                    </div>
+                    <Progress 
+                      value={(safeWeeklyPoints || 0) / 5} 
+                      className="h-2 bg-purple-200" 
+                    />
+                    <p className="text-xs text-slate-500">
+                      {500 - (safeWeeklyPoints || 0)} points remaining this week
+                    </p>
+                  </div>
+
+                  {/* Streak Info */}
+                  <div className="bg-white/60 rounded-lg p-3 border border-indigo-200/50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">🔥</span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">{safeCurrentStreak} Day Streak</p>
+                          <p className="text-xs text-slate-600">Keep it going!</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-orange-600">+{Math.min(safeCurrentStreak * 5, 50)}</p>
+                        <p className="text-xs text-slate-500">bonus points</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Next Milestone */}
+                  <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-3 border border-indigo-200/50">
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-slate-800 mb-1">Next Milestone</p>
+                      <p className="text-xs text-slate-600">
+                        {nextRewardAt > 0 
+                          ? `${nextRewardAt.toLocaleString()} points to unlock special rewards!`
+                          : '🎉 Max level reached!'
+                        }
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -656,18 +815,22 @@ export default function DashboardPage() {
                           </span>
                           <div>
                             <p className="font-semibold text-slate-800">{player.name}</p>
-                            <p className="text-sm text-slate-500">#{player.rank || 'N/A'}</p>
+                            <p className="text-sm text-slate-500">#{player.rank || index + 1}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-slate-800 text-lg">{((player.weekly_points || player.total_points) || 0).toLocaleString()}</p>
-                          <p className="text-sm text-slate-500">points</p>
+                          <p className="font-bold text-slate-800 text-lg">{(player.total_points || 0).toLocaleString()}</p>
+                          <p className="text-sm text-slate-500">+{(player.weekly_points || 0)} this week</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
                   <div className="mt-6 text-center">
-                    <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200">
+                    <Button 
+                      variant="outline" 
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200"
+                      onClick={() => router.push('/dashboard/leaderboard')}
+                    >
                       <Trophy className="w-4 h-4 mr-2" />
                       View Full Leaderboard
                     </Button>
@@ -888,7 +1051,7 @@ export default function DashboardPage() {
                   
                   {/* Pointer */}
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-red-500"></div>
+                    <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-red-500"></div>
                   </div>
                 </div>
               </div>

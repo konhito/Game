@@ -43,7 +43,7 @@ export default function HomePage() {
     {
       id: 1,
       title: "New Social Media Challenge: Share Your Success Story",
-      excerpt: "Share your PineCoin journey and earn up to 50 points!",
+      excerpt: "Share your PineCrest journey and earn up to 50 points!",
       date: "2 hours ago",
       category: "Challenge"
     },
@@ -69,7 +69,7 @@ export default function HomePage() {
       id: 1,
       name: "Sarah Johnson",
       role: "Social Media Influencer",
-      content: "PineCoin has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
+      content: "PineCrest has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
       avatar: "👩‍💼",
       rating: 5
     },
@@ -149,7 +149,7 @@ export default function HomePage() {
               transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
               style={{ backgroundSize: "200% 200%" }}
             >
-              PineCoin
+              PineCrest
             </motion.h1>
             <motion.div 
               className="flex items-center justify-center gap-3 mb-6"
@@ -447,7 +447,7 @@ export default function HomePage() {
               Ready to Start Earning?
             </h2>
             <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-              Join PineCoin today and start earning rewards from your social media activities. 
+              Join PineCrest today and start earning rewards from your social media activities. 
               It's free to join and you can start earning immediately!
             </p>
             <Link href="/sign-up">

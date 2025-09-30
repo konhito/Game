@@ -191,6 +191,38 @@ export default function AdminNewsPage() {
     }
   };
 
+  const handleTogglePublish = async (article: NewsArticle) => {
+    const newStatus = article.status === 'published' ? 'draft' : 'published';
+    const action = newStatus === 'published' ? 'publish' : 'unpublish';
+    
+    if (!confirm(`Are you sure you want to ${action} this article?`)) return;
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/${article.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          published_at: newStatus === 'published' ? new Date().toISOString() : null
+        }),
+      });
+
+      if (response.ok) {
+        fetchArticles();
+      } else {
+        console.error(`Failed to ${action} article`);
+        alert(`Failed to ${action} article. Please try again.`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing article:`, error);
+      alert(`Error ${action}ing article. Please try again.`);
+    }
+  };
+
   const startEdit = (article: NewsArticle) => {
     setEditingArticle(article);
     setFormData({
@@ -320,6 +352,27 @@ export default function AdminNewsPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant={article.status === 'published' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleTogglePublish(article)}
+                        className={article.status === 'published' 
+                          ? 'bg-green-600 hover:bg-green-700 text-white' 
+                          : 'text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300'
+                        }
+                      >
+                        {article.status === 'published' ? (
+                          <>
+                            <Lock className="w-4 h-4 mr-1" />
+                            Unpublish
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="w-4 h-4 mr-1" />
+                            Publish
+                          </>
+                        )}
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

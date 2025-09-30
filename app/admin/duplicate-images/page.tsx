@@ -112,9 +112,58 @@ export default function DuplicateImagesPage() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
-        <p className="mt-4 text-lg">Loading duplicate images...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header Skeleton */}
+            <div className="mb-8">
+              <div className="h-8 bg-slate-200 rounded-lg w-64 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-slate-200 rounded-lg w-96 animate-pulse"></div>
+            </div>
+
+            {/* Stats Cards Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[...Array(3)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-slate-200 rounded animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-32 animate-pulse"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-slate-200 rounded w-16 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-slate-200 rounded w-24 animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Duplicate Images Grid Skeleton */}
+            <Card className="bg-white/80 border-slate-200/50 shadow-lg">
+              <CardHeader>
+                <div className="h-6 bg-slate-200 rounded w-48 animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, index) => (
+                    <div key={index} className="border rounded-lg p-4 bg-slate-50">
+                      <div className="h-48 bg-slate-200 rounded-lg mb-4 animate-pulse"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div>
+                        <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse"></div>
+                        <div className="flex gap-2 mt-3">
+                          <div className="h-8 bg-slate-200 rounded w-20 animate-pulse"></div>
+                          <div className="h-8 bg-slate-200 rounded w-20 animate-pulse"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

@@ -94,9 +94,100 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
-        <p className="mt-4 text-lg">Loading dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header Skeleton */}
+            <div className="mb-8">
+              <div className="h-8 bg-slate-200 rounded-lg w-64 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-slate-200 rounded-lg w-96 animate-pulse"></div>
+            </div>
+
+            {/* Stats Cards Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(8)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-slate-200 rounded animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-slate-200 rounded w-16 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-slate-200 rounded w-20 animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* AI Verification Section Skeleton */}
+            <Card className="bg-white/80 border-slate-200/50 shadow-lg mb-8">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-6 bg-slate-200 rounded w-48 animate-pulse"></div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, index) => (
+                    <div key={index} className="text-center p-4 rounded-lg bg-slate-100">
+                      <div className="h-8 bg-slate-200 rounded w-16 mx-auto mb-2 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-24 mx-auto animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions Skeleton */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                      <div>
+                        <div className="h-5 bg-slate-200 rounded w-32 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-slate-200 rounded w-40 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-10 bg-slate-200 rounded w-full animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Top Performers Skeleton */}
+            <Card className="bg-white/80 border-slate-200/50 shadow-lg">
+              <CardHeader>
+                <div className="h-6 bg-slate-200 rounded w-40 animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
+                        <div>
+                          <div className="h-4 bg-slate-200 rounded w-24 mb-1 animate-pulse"></div>
+                          <div className="h-3 bg-slate-200 rounded w-16 animate-pulse"></div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="h-4 bg-slate-200 rounded w-16 mb-1 animate-pulse"></div>
+                        <div className="h-3 bg-slate-200 rounded w-12 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

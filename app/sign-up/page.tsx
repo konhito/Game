@@ -233,7 +233,7 @@ export default function SignUpPage() {
             <Card className="bg-white/80 border-slate-200/50 backdrop-blur-sm shadow-xl">
               <CardHeader className="text-center space-y-4">
                 <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                  <Gamepad2 className="w-8 h-8 text-white" />
+                  <Users className="w-8 h-8 text-white" />
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold text-slate-800">

@@ -240,6 +240,9 @@ export function Navbar() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('authStateChanged'));
       }
       
       router.push('/');

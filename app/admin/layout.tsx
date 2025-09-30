@@ -54,6 +54,12 @@ export default function AdminLayout({
 
   const handleLogout = () => {
     authService.logout();
+    
+    // Dispatch custom event to notify other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
+    }
+    
     router.push('/');
   };
 

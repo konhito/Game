@@ -87,6 +87,9 @@ class AuthService {
       document.cookie = `custom_auth_token=${encodedToken}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `custom_user_data=${encodedUserData}; path=/; max-age=86400; SameSite=Lax`;
       
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
+      
       console.log('AuthService: Saved to localStorage and cookies');
       console.log('  localStorage auth_token:', localStorage.getItem('auth_token') ? 'present' : 'missing');
       console.log('  localStorage auth_user:', localStorage.getItem('auth_user') ? 'present' : 'missing');
@@ -106,6 +109,9 @@ class AuthService {
       // Also clear cookies
       document.cookie = 'custom_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'custom_user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
       
       console.log('AuthService: Cleared from localStorage and cookies');
     }

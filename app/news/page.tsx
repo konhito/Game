@@ -294,9 +294,11 @@ export default function NewsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700">
-                      Read Full Article
-                    </Button>
+                    <Link href={`/news/${news.slug || (news as any).id}`}>
+                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700">
+                        Read Full Article
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -317,8 +319,49 @@ export default function NewsPage() {
           </h2>
           
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            <div className="space-y-6">
+              {/* Featured Article Skeleton */}
+              <Card className="bg-white/80 border-slate-200/50 shadow-lg">
+                <div className="relative">
+                  <div className="h-64 bg-slate-200 rounded-t-lg animate-pulse"></div>
+                  <div className="absolute top-4 left-4">
+                    <div className="h-6 bg-slate-300 rounded-full w-20 animate-pulse"></div>
+                  </div>
+                </div>
+                <CardContent className="p-6">
+                  <div className="h-8 bg-slate-200 rounded w-3/4 mb-3 animate-pulse"></div>
+                  <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-slate-200 rounded w-5/6 mb-4 animate-pulse"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>
+                    </div>
+                    <div className="h-4 bg-slate-200 rounded w-20 animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* News Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, index) => (
+                  <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                    <div className="h-48 bg-slate-200 rounded-t-lg animate-pulse"></div>
+                    <CardContent className="p-4">
+                      <div className="h-6 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-4 animate-pulse"></div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-slate-200 rounded-full animate-pulse"></div>
+                          <div className="h-3 bg-slate-200 rounded w-16 animate-pulse"></div>
+                        </div>
+                        <div className="h-8 bg-slate-200 rounded w-20 animate-pulse"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -363,9 +406,11 @@ export default function NewsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50">
-                      Read More
-                    </Button>
+                    <Link href={`/news/${news.slug || (news as any).id}`}>
+                      <Button variant="outline" className="w-full border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50">
+                        Read More
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               </motion.div>

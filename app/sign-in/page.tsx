@@ -177,7 +177,7 @@ export default function SignInPage() {
                     Welcome Back!
                   </CardTitle>
                   <CardDescription className="text-slate-600 mt-2">
-                    Sign in to your PineCoin account and continue earning rewards
+                    Sign in to your PineCrest account and continue earning rewards
                   </CardDescription>
                 </div>
               </CardHeader>

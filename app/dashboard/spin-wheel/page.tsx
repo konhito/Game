@@ -128,7 +128,7 @@ export default function SpinWheelPage() {
                   
                   {/* Center pointer */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-b-[40px] border-l-transparent border-r-transparent border-b-white"></div>
+                    <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[40px] border-l-transparent border-r-transparent border-t-white"></div>
                   </div>
                 </div>
 

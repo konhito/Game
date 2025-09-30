@@ -16,6 +16,8 @@ export interface UserStats {
   spins_remaining?: number;
   weekly_points?: number;
   last_login_date?: string;
+  last_daily_claim_date?: string;
+  last_spin_reset_date?: string;
   created_at: string;
   updated_at: string;
 }
