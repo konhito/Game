@@ -418,61 +418,61 @@ export default function ActivitiesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
         <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Header Skeleton */}
             <div className="mb-8">
-              <div className="h-8 bg-slate-200 rounded-lg w-48 mb-2 animate-pulse"></div>
-              <div className="h-5 bg-slate-200 rounded-lg w-96 animate-pulse"></div>
+              <div className="h-8 bg-gradient-to-r from-purple-200 to-pink-200 rounded-lg w-48 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-gradient-to-r from-indigo-200 to-purple-200 rounded-lg w-96 animate-pulse"></div>
             </div>
 
             {/* Available Tasks Skeleton */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="h-8 bg-slate-200 rounded w-64 mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-slate-200 rounded w-96 animate-pulse"></div>
+                  <div className="h-8 bg-gradient-to-r from-purple-200 to-pink-200 rounded w-64 mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gradient-to-r from-indigo-200 to-purple-200 rounded w-96 animate-pulse"></div>
                 </div>
-                <div className="h-9 bg-slate-200 rounded w-24 animate-pulse"></div>
+                <div className="h-9 bg-gradient-to-r from-purple-200 to-pink-200 rounded w-24 animate-pulse"></div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, index) => (
-                  <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
+                  <Card key={index} className="bg-white/90 border-purple-200/50 shadow-xl backdrop-blur-sm">
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="h-6 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
-                            <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
-                            <div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-6 bg-gradient-to-r from-purple-200 to-pink-200 rounded w-full mb-2 animate-pulse"></div>
+                            <div className="h-4 bg-gradient-to-r from-indigo-200 to-purple-200 rounded w-full mb-2 animate-pulse"></div>
+                            <div className="h-4 bg-gradient-to-r from-pink-200 to-indigo-200 rounded w-3/4 animate-pulse"></div>
                           </div>
-                          <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-200 to-pink-200 rounded-xl animate-pulse"></div>
                         </div>
                         <div className="flex gap-2">
-                          <div className="h-6 bg-slate-200 rounded-full w-20 animate-pulse"></div>
-                          <div className="h-6 bg-slate-200 rounded-full w-16 animate-pulse"></div>
+                          <div className="h-6 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full w-20 animate-pulse"></div>
+                          <div className="h-6 bg-gradient-to-r from-indigo-200 to-purple-200 rounded-full w-16 animate-pulse"></div>
                         </div>
-                        <div className="bg-slate-100 rounded-xl p-4">
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
+                              <div className="w-8 h-8 bg-gradient-to-br from-purple-200 to-pink-200 rounded-lg animate-pulse"></div>
                               <div>
-                                <div className="h-3 bg-slate-200 rounded w-12 mb-1 animate-pulse"></div>
-                                <div className="h-5 bg-slate-200 rounded w-16 animate-pulse"></div>
+                                <div className="h-3 bg-gradient-to-r from-purple-200 to-pink-200 rounded w-12 mb-1 animate-pulse"></div>
+                                <div className="h-5 bg-gradient-to-r from-indigo-200 to-purple-200 rounded w-16 animate-pulse"></div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
+                              <div className="w-8 h-8 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-lg animate-pulse"></div>
                               <div>
-                                <div className="h-3 bg-slate-200 rounded w-16 mb-1 animate-pulse"></div>
-                                <div className="h-4 bg-slate-200 rounded w-12 animate-pulse"></div>
+                                <div className="h-3 bg-gradient-to-r from-pink-200 to-indigo-200 rounded w-16 mb-1 animate-pulse"></div>
+                                <div className="h-4 bg-gradient-to-r from-purple-200 to-pink-200 rounded w-12 animate-pulse"></div>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="h-12 bg-slate-200 rounded-xl w-full animate-pulse"></div>
+                        <div className="h-12 bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl w-full animate-pulse"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -486,427 +486,487 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center space-x-4">
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm" className="rounded-xl">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Available Tasks</h1>
-          <p className="text-slate-600 mt-2">
-            Discover and start new tasks to earn points and rewards
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-
-      {/* Available Tasks Section */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center">
-                <ClipboardList className="h-5 w-5 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="rounded-xl border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-2xl blur-xl"></div>
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-200/50 shadow-xl">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                  Available Tasks
+                </h1>
+                <p className="text-slate-600 mt-3 text-lg">
+                  Discover and start new tasks to earn points and rewards
+                </p>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-purple-700">Live Tasks</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-indigo-700">AI Verified</span>
+                  </div>
+                </div>
               </div>
-              Available Tasks
-              <Badge variant="secondary" className="ml-2 bg-slate-100 text-slate-700 hover:bg-slate-200">
-                {availableTasks.length} available
-              </Badge>
-            </h2>
-            <p className="text-slate-600 mt-1">Discover new tasks and start earning rewards</p>
+            </div>
           </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => {
-              console.log('🔄 Force refreshing tasks...');
-              fetchAvailableTasks();
-            }}
-            disabled={refreshingTasks}
-            className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
-            {refreshingTasks ? 'Refreshing...' : 'Refresh'}
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {refreshingTasks && (
-            <div className="col-span-full text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-              <p className="text-slate-500 text-lg">Updating available tasks...</p>
+
+          {error && (
+            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                </div>
+                <p className="text-red-700 font-medium">{error}</p>
+              </div>
             </div>
           )}
-          {!refreshingTasks && availableTasks.map((task) => (
-            <Card key={task.id} className="group hover:shadow-lg hover:scale-[1.01] transition-all duration-300 border shadow-sm bg-white overflow-hidden">
-              <div className="absolute inset-0 bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <CardContent className="p-6 relative">
-                <div className="space-y-4">
-                  {/* Task Header */}
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 text-lg line-clamp-2 group-hover:text-slate-700 transition-colors">
-                          {task.title}
-                        </h3>
-                        <p className="text-sm text-slate-600 line-clamp-3 mt-2 leading-relaxed">
-                          {task.description}
-                        </p>
-                      </div>
-                      <div className="ml-3 flex-shrink-0">
-                        <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center shadow-sm">
-                          <TrendingUp className="h-6 w-6 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Task Details */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                        {task.platform}
-                      </Badge>
-                      <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                        {task.task_type}
-                      </Badge>
-                    </div>
-                    
-                    {/* Rewards & Stats */}
-                    <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-slate-500 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500 font-medium">Reward</p>
-                            <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-slate-500 rounded-lg flex items-center justify-center">
-                            <User className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-slate-500 font-medium">Participants</p>
-                            <p className="text-sm font-bold text-slate-900">
-                              {task.current_participants}/{task.max_participants || '∞'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {task.reward_coins > 0 && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
-                          <div className="w-6 h-6 bg-slate-500 rounded-full flex items-center justify-center">
-                            <span className="text-xs text-white font-bold">₽</span>
-                          </div>
-                          <span className="text-sm font-medium text-slate-700">
-                            +{task.reward_coins} PineCoins
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Action Button */}
-                  <Button 
-                    onClick={() => openTaskDialog(task)} 
-                    className="w-full rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold py-3 shadow-sm hover:shadow-md transition-all duration-300"
-                    size="lg"
-                  >
-                    <Play className="h-5 w-5 mr-2" />
-                    Start Task
-                  </Button>
-                 </div>
-               </CardContent>
-             </Card>
-           ))}
-           
-           {!refreshingTasks && availableTasks.length === 0 && (
-            <Card className="col-span-full border shadow-sm bg-white">
-              <CardContent className="p-16 text-center">
-                <div className="w-24 h-24 bg-slate-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <ClipboardList className="h-12 w-12 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-700 mb-2">No Available Tasks</h3>
-                <p className="text-slate-500 text-lg mb-6">Check back later for new opportunities!</p>
-                <Button 
-                  onClick={fetchAvailableTasks}
-                  variant="outline" 
-                  className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Check Again
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
 
-      {/* Started Tasks Section - For Proof Submission */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center">
-                <Upload className="h-5 w-5 text-white" />
+          {/* Available Tasks Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-xl blur-sm"></div>
+                <div className="relative bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-purple-200/50 shadow-lg">
+                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <ClipboardList className="h-6 w-6 text-white" />
+                    </div>
+                    Available Tasks
+                    <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 hover:from-purple-200 hover:to-pink-200 border-purple-200">
+                      {availableTasks.length} available
+                    </Badge>
+                  </h2>
+                  <p className="text-slate-600 mt-2 text-lg">Discover new tasks and start earning rewards</p>
+                </div>
               </div>
-              Submit Proof
-            </h2>
-            <p className="text-slate-600 mt-1">Upload proof for tasks you've started</p>
-          </div>
-        </div>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  console.log('🔄 Force refreshing tasks...');
+                  fetchAvailableTasks();
+                }}
+                disabled={refreshingTasks}
+                className="rounded-xl border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 shadow-lg"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
+                {refreshingTasks ? 'Refreshing...' : 'Refresh'}
+              </Button>
+            </div>
         
-{startedTasks.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {startedTasks.map((task) => (
-              <Card key={task.id} className="bg-white border shadow-sm hover:shadow-md transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {/* Task Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 text-lg mb-2">{task.title}</h3>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                            {task.platform}
-                          </Badge>
-                          <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                            {task.task_type}
-                          </Badge>
-                          <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                            Started
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="ml-3 flex-shrink-0">
-                        <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center shadow-sm">
-                          <Upload className="h-6 w-6 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Task Details */}
-                    <div className="bg-slate-50 rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-slate-500 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500 font-medium">Reward</p>
-                            <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
-                          </div>
-                        </div>
-                        {task.reward_coins > 0 && (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-slate-500 rounded-full flex items-center justify-center">
-                              <span className="text-xs text-white font-bold">₽</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {refreshingTasks && (
+                <div className="col-span-full text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <p className="text-slate-500 text-lg">Updating available tasks...</p>
+                </div>
+              )}
+              {!refreshingTasks && availableTasks.map((task, index) => {
+                const colors = [
+                  'from-purple-500 to-pink-500',
+                  'from-indigo-500 to-purple-500',
+                  'from-pink-500 to-rose-500',
+                  'from-blue-500 to-indigo-500',
+                  'from-emerald-500 to-teal-500',
+                  'from-orange-500 to-red-500'
+                ];
+                const cardColor = colors[index % colors.length];
+                
+                return (
+                  <Card key={task.id} className="group hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${cardColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                    <CardContent className="p-6 relative">
+                      <div className="space-y-4">
+                        {/* Task Header */}
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-slate-900 text-lg line-clamp-2 group-hover:text-slate-700 transition-colors">
+                                {task.title}
+                              </h3>
+                              <p className="text-sm text-slate-600 line-clamp-3 mt-2 leading-relaxed">
+                                {task.description}
+                              </p>
                             </div>
-                            <span className="text-sm font-medium text-slate-700">
-                              +{task.reward_coins} PineCoins
-                            </span>
+                            <div className="ml-3 flex-shrink-0">
+                              <div className={`w-12 h-12 bg-gradient-to-br ${cardColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                                <TrendingUp className="h-6 w-6 text-white" />
+                              </div>
+                            </div>
                           </div>
-                        )}
+                        </div>
+                        
+                        {/* Task Details */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200 hover:from-purple-100 hover:to-pink-100">
+                              {task.platform}
+                            </Badge>
+                            <Badge variant="outline" className="bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-indigo-200 hover:from-indigo-100 hover:to-purple-100">
+                              {task.task_type}
+                            </Badge>
+                          </div>
+                          
+                          {/* Rewards & Stats */}
+                          <div className="bg-gradient-to-r from-slate-50 to-purple-50 rounded-xl p-4 space-y-3 border border-purple-100">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 bg-gradient-to-br ${cardColor} rounded-lg flex items-center justify-center shadow-md`}>
+                                  <TrendingUp className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Reward</p>
+                                  <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                                  <User className="h-4 w-4 text-white" />
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-slate-500 font-medium">Participants</p>
+                                  <p className="text-sm font-bold text-slate-900">
+                                    {task.current_participants}/{task.max_participants || '∞'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {task.reward_coins > 0 && (
+                              <div className="flex items-center gap-2 pt-2 border-t border-purple-200">
+                                <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                                  <span className="text-xs text-white font-bold">₽</span>
+                                </div>
+                                <span className="text-sm font-medium text-slate-700">
+                                  +{task.reward_coins} PineCoins
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <Button 
+                          onClick={() => openTaskDialog(task)} 
+                          className={`w-full rounded-xl bg-gradient-to-r ${cardColor} hover:shadow-lg text-white font-semibold py-3 shadow-md hover:shadow-xl transition-all duration-300 group-hover:scale-105`}
+                          size="lg"
+                        >
+                          <Play className="h-5 w-5 mr-2" />
+                          Start Task
+                        </Button>
+                       </div>
+                     </CardContent>
+                   </Card>
+                 );
+               })}
+           
+              {!refreshingTasks && availableTasks.length === 0 && (
+                <Card className="col-span-full border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+                  <CardContent className="p-16 text-center">
+                    <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                      <ClipboardList className="h-12 w-12 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-700 mb-2">No Available Tasks</h3>
+                    <p className="text-slate-500 text-lg mb-6">Check back later for new opportunities!</p>
+                    <Button 
+                      onClick={fetchAvailableTasks}
+                      variant="outline" 
+                      className="rounded-xl border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 shadow-lg"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Check Again
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+
+          {/* Started Tasks Section - For Proof Submission */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-purple-400/10 rounded-xl blur-sm"></div>
+                <div className="relative bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-indigo-200/50 shadow-lg">
+                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                    Submit Proof
+                  </h2>
+                  <p className="text-slate-600 mt-2 text-lg">Upload proof for tasks you've started</p>
+                </div>
+              </div>
+            </div>
+        
+            {startedTasks.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {startedTasks.map((task, index) => {
+                  const colors = [
+                    'from-indigo-500 to-purple-500',
+                    'from-purple-500 to-pink-500',
+                    'from-pink-500 to-rose-500',
+                    'from-blue-500 to-indigo-500'
+                  ];
+                  const cardColor = colors[index % colors.length];
+                  
+                  return (
+                    <Card key={task.id} className="group bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-500">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${cardColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                      <CardContent className="p-6 relative">
+                        <div className="space-y-4">
+                          {/* Task Header */}
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-slate-900 text-lg mb-2">{task.title}</h3>
+                              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                <Badge variant="outline" className="bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-indigo-200">
+                                  {task.platform}
+                                </Badge>
+                                <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200">
+                                  {task.task_type}
+                                </Badge>
+                                <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-200">
+                                  Started
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="ml-3 flex-shrink-0">
+                              <div className={`w-12 h-12 bg-gradient-to-br ${cardColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                                <Upload className="h-6 w-6 text-white" />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Task Details */}
+                          <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-indigo-100">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 bg-gradient-to-br ${cardColor} rounded-lg flex items-center justify-center shadow-md`}>
+                                  <TrendingUp className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Reward</p>
+                                  <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
+                                </div>
+                              </div>
+                              {task.reward_coins > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                                    <span className="text-xs text-white font-bold">₽</span>
+                                  </div>
+                                  <span className="text-sm font-medium text-slate-700">
+                                    +{task.reward_coins} PineCoins
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Started Date */}
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Clock className="h-4 w-4" />
+                            <span>Started: {new Date(task.created_at).toLocaleDateString()}</span>
+                          </div>
+                          
+                          {/* Submit Proof Button */}
+                          <Button 
+                            onClick={() => openProofDialog(task)} 
+                            className={`w-full rounded-xl bg-gradient-to-r ${cardColor} hover:shadow-lg text-white font-semibold py-3 shadow-md hover:shadow-xl transition-all duration-300 group-hover:scale-105`}
+                            size="lg"
+                          >
+                            <Upload className="h-5 w-5 mr-2" />
+                            Submit Proof
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                      <Upload className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to Submit Proof?</h3>
+                    <p className="text-slate-600 mb-6">
+                      Once you start a task, it will appear here for proof submission.
+                    </p>
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 max-w-md mx-auto border border-indigo-100">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-white text-xs font-bold">i</span>
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-slate-900 mb-1">How it works:</p>
+                          <ol className="text-xs text-slate-700 space-y-1">
+                            <li>1. Start a task from the available tasks above</li>
+                            <li>2. Complete the task requirements</li>
+                            <li>3. Return here to upload proof</li>
+                            <li>4. AI will verify your submission automatically</li>
+                          </ol>
+                        </div>
                       </div>
                     </div>
-                    
-                    {/* Started Date */}
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Clock className="h-4 w-4" />
-                      <span>Started: {new Date(task.created_at).toLocaleDateString()}</span>
-                    </div>
-                    
-                    {/* Submit Proof Button */}
-                    <Button 
-                      onClick={() => openProofDialog(task)} 
-                      className="w-full rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold py-3 shadow-sm hover:shadow-md transition-all duration-300"
-                      size="lg"
-                    >
-                      <Upload className="h-5 w-5 mr-2" />
-                      Submit Proof
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="bg-white border shadow-sm">
-            <CardContent className="p-6">
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Upload className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to Submit Proof?</h3>
-                <p className="text-slate-600 mb-6">
-                  Once you start a task, it will appear here for proof submission.
-                </p>
-                <div className="bg-slate-50 rounded-xl p-4 max-w-md mx-auto">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-slate-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-white text-xs font-bold">i</span>
+            )}
+      </div>
+
+          {/* Task Start Dialog */}
+          <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
+            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Start/Restart Task
+                </DialogTitle>
+                <DialogDescription className="text-slate-600">
+                  Are you sure you want to start or restart this task? Once started, you'll need to complete it and submit proof.
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedTask && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+                    <Label className="text-sm font-medium text-purple-700">Task</Label>
+                    <p className="text-sm text-slate-700 font-medium">{selectedTask.title}</p>
+                  </div>
+                  {'requirements' in selectedTask && (
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                      <Label className="text-sm font-medium text-indigo-700">Requirements</Label>
+                      <p className="text-sm text-slate-700">{selectedTask.requirements}</p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-slate-900 mb-1">How it works:</p>
-                      <ol className="text-xs text-slate-700 space-y-1">
-                        <li>1. Start a task from the available tasks above</li>
-                        <li>2. Complete the task requirements</li>
-                        <li>3. Return here to upload proof</li>
-                        <li>4. AI will verify your submission automatically</li>
-                      </ol>
+                  )}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-3 border border-emerald-100">
+                      <Label className="text-sm font-medium text-emerald-700">Reward</Label>
+                      <p className="text-sm text-slate-700 font-bold">{selectedTask.reward_points} points</p>
+                    </div>
+                    <div className="flex-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-100">
+                      <Label className="text-sm font-medium text-blue-700">Platform</Label>
+                      <p className="text-sm text-slate-700 font-medium">{selectedTask.platform}</p>
                     </div>
                   </div>
                 </div>
+              )}
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={closeTaskDialog} className="rounded-xl border-purple-200 text-purple-700 hover:bg-purple-50">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => selectedTask && startTask(selectedTask.id)}
+                  disabled={startingTask || !selectedTask}
+                  className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+                >
+                  {startingTask ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Start/Restart Task
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Proof Submission Dialog */}
+          <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
+            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Submit Task Proof
+                </DialogTitle>
+                <DialogDescription className="text-slate-600">
+                  Upload proof that you've completed the task. AI will automatically verify your submission.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                  <Label htmlFor="proof-image" className="text-indigo-700 font-medium">Proof Image (Optional)</Label>
+                  <Input
+                    id="proof-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="mt-2 rounded-xl border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
+                  />
+                  <p className="text-xs text-indigo-600 mt-2">
+                    Upload an image showing task completion. Max 5MB.
+                  </p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+                  <Label htmlFor="proof-description" className="text-purple-700 font-medium">Proof Description *</Label>
+                  <Textarea
+                    id="proof-description"
+                    placeholder="Describe how you completed the task..."
+                    value={proofDescription}
+                    onChange={(e) => setProofDescription(e.target.value)}
+                    className="mt-2 rounded-xl border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                    rows={3}
+                  />
+                </div>
+                
+                {error && (
+                  <div className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <p className="text-sm text-red-700 font-medium">{error}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={closeProofDialog} className="rounded-xl border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={submitProof}
+                  disabled={uploading || !proofDescription.trim()}
+                  className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Submit Proof
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-
-      {/* Task Start Dialog */}
-      <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-        <DialogContent className="max-w-md">
-                     <DialogHeader>
-             <DialogTitle>Start/Restart Task</DialogTitle>
-             <DialogDescription>
-               Are you sure you want to start or restart this task? Once started, you'll need to complete it and submit proof.
-             </DialogDescription>
-           </DialogHeader>
-          
-          {selectedTask && (
-            <div className="space-y-3">
-              <div>
-                <Label className="text-sm font-medium">Task</Label>
-                <p className="text-sm text-slate-600">{selectedTask.title}</p>
-              </div>
-              {'requirements' in selectedTask && (
-                <div>
-                  <Label className="text-sm font-medium">Requirements</Label>
-                  <p className="text-sm text-slate-600">{selectedTask.requirements}</p>
-                </div>
-              )}
-              <div className="flex items-center space-x-4">
-                <div>
-                  <Label className="text-sm font-medium">Reward</Label>
-                  <p className="text-sm text-slate-600">{selectedTask.reward_points} points</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Platform</Label>
-                  <p className="text-sm text-slate-600">{selectedTask.platform}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={closeTaskDialog} className="rounded-xl">
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => selectedTask && startTask(selectedTask.id)}
-              disabled={startingTask || !selectedTask}
-              className="rounded-xl"
-            >
-              {startingTask ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Starting...
-                </>
-              ) : (
-                <>
-                                     <Play className="h-4 w-4 mr-2" />
-                   Start/Restart Task
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Proof Submission Dialog */}
-      <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Submit Task Proof</DialogTitle>
-            <DialogDescription>
-              Upload proof that you've completed the task. AI will automatically verify your submission.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="proof-image">Proof Image (Optional)</Label>
-              <Input
-                id="proof-image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="mt-1 rounded-xl"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Upload an image showing task completion. Max 5MB.
-              </p>
-            </div>
-            
-            <div>
-              <Label htmlFor="proof-description">Proof Description *</Label>
-              <Textarea
-                id="proof-description"
-                placeholder="Describe how you completed the task..."
-                value={proofDescription}
-                onChange={(e) => setProofDescription(e.target.value)}
-                className="mt-1 rounded-xl"
-                rows={3}
-              />
-            </div>
-            
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={closeProofDialog} className="rounded-xl">
-              Cancel
-            </Button>
-            <Button 
-              onClick={submitProof}
-              disabled={uploading || !proofDescription.trim()}
-              className="rounded-xl"
-            >
-              {uploading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Submit Proof
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
+
