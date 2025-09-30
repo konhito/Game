@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
+import { robustRedirect, checkPageAfterDelay, forceRedirect, verifyAuthState } from "@/lib/redirection-utils";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -72,29 +73,24 @@ export default function SignInPage() {
       // Show success message briefly
       setSuccess("Login successful! Redirecting...");
       
-      // Force a small delay to ensure state is updated and user sees success message
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log("Redirecting to dashboard...");
-      
-      // Try router first
-      try {
-        await router.push("/dashboard");
-        console.log("Router.push completed");
-      } catch (routerError) {
-        console.error("Router error:", routerError);
-        // Fallback to window.location
-        console.log("Using window.location fallback");
-        window.location.href = "/dashboard";
+      // Verify authentication state
+      if (!verifyAuthState(authService)) {
+        console.error("Email login success but user not authenticated");
+        setError("Authentication failed. Please try again.");
+        return;
       }
       
-      // Additional fallback - if we're still on sign-in page after 1 second, force redirect
-      setTimeout(() => {
-        if (window.location.pathname === "/sign-in") {
-          console.log("Still on sign-in page, forcing redirect with window.location");
-          window.location.href = "/dashboard";
-        }
-      }, 1000);
+      console.log("Email authentication verified, starting robust redirect...");
+      
+      // Use robust redirection with multiple fallbacks
+      await robustRedirect(router, {
+        target: "/dashboard",
+        delay: 200,
+        maxAttempts: 3,
+        fallbackMethods: ['router', 'location', 'replace']
+      });
+      
+      console.log("Robust redirect completed successfully");
       
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -104,11 +100,42 @@ export default function SignInPage() {
     }
   };
 
-  const handleGoogleSuccess = () => {
+  const handleGoogleSuccess = async () => {
     setSuccess("Google sign-in successful! Redirecting...");
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 1000);
+    
+    try {
+      // Wait for auth state to be properly set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verify authentication state
+      if (!verifyAuthState(authService)) {
+        console.error("Google auth success but user not authenticated");
+        setError("Authentication failed. Please try again.");
+        return;
+      }
+      
+      console.log("Google authentication verified, starting robust redirect...");
+      
+      // Use robust redirection with multiple fallbacks
+      await robustRedirect(router, {
+        target: "/dashboard",
+        delay: 200,
+        maxAttempts: 3,
+        fallbackMethods: ['router', 'location', 'replace']
+      });
+      
+      console.log("Robust redirect completed successfully");
+      
+    } catch (error) {
+      console.error("Robust redirect failed:", error);
+      
+      // Final fallback - check if still on sign-in page and force redirect
+      const stillOnSignIn = await checkPageAfterDelay("/sign-in", 1000);
+      if (stillOnSignIn) {
+        console.log("Still on sign-in page, using force redirect...");
+        forceRedirect("/dashboard");
+      }
+    }
   };
 
   const handleGoogleError = (error: string) => {

@@ -67,10 +67,26 @@ class AuthService {
     this.token = token;
     this.user = user;
     if (typeof window !== 'undefined') {
+      // Set localStorage first
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', JSON.stringify(user));
       
-      // Also set cookies for middleware access
+      // Set cookies for middleware access with immediate effect
+      this.setAuthCookies(token, user);
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
+      
+      console.log('AuthService: Saved to localStorage and cookies');
+      console.log('  localStorage auth_token:', localStorage.getItem('auth_token') ? 'present' : 'missing');
+      console.log('  localStorage auth_user:', localStorage.getItem('auth_user') ? 'present' : 'missing');
+      console.log('  cookies set:', document.cookie);
+    }
+  }
+
+  // Set authentication cookies with proper encoding and error handling
+  private setAuthCookies(token: string, user: User) {
+    try {
       // Store only essential data in cookies to avoid truncation
       const encodedToken = encodeURIComponent(token);
       
@@ -84,16 +100,26 @@ class AuthService {
       };
       const encodedUserData = encodeURIComponent(JSON.stringify(minimalUser));
       
-      document.cookie = `custom_auth_token=${encodedToken}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `custom_user_data=${encodedUserData}; path=/; max-age=86400; SameSite=Lax`;
+      // Set cookies with immediate effect
+      document.cookie = `custom_auth_token=${encodedToken}; path=/; max-age=86400; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
+      document.cookie = `custom_user_data=${encodedUserData}; path=/; max-age=86400; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
       
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('authStateChanged'));
+      // Verify cookies were set
+      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
       
-      console.log('AuthService: Saved to localStorage and cookies');
-      console.log('  localStorage auth_token:', localStorage.getItem('auth_token') ? 'present' : 'missing');
-      console.log('  localStorage auth_user:', localStorage.getItem('auth_user') ? 'present' : 'missing');
-      console.log('  cookies set:', document.cookie);
+      console.log('Cookie verification:', {
+        tokenCookieSet: !!tokenCookie,
+        userCookieSet: !!userCookie,
+        tokenCookieLength: tokenCookie?.length || 0,
+        userCookieLength: userCookie?.length || 0
+      });
+      
+      if (!tokenCookie || !userCookie) {
+        console.warn('Failed to set authentication cookies properly');
+      }
+    } catch (error) {
+      console.error('Error setting auth cookies:', error);
     }
   }
 
@@ -264,35 +290,58 @@ class AuthService {
           if (result.success && result.token && result.user) {
             console.log('Backend authentication successful:', result);
             this.setAuth(result.token, result.user);
+            
+            // Wait a moment for cookies to be set
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Verify authentication state
+            const isAuth = this.isAuthenticated();
+            console.log('Post-backend auth verification:', isAuth);
+            
+            if (!isAuth) {
+              throw new Error('Authentication state not properly set after backend auth');
+            }
+            
             return;
           } else {
             console.error('Backend authentication failed - invalid response format:', result);
+            throw new Error('Invalid response format from backend');
           }
         } else {
           const errorText = await response.text();
           console.error('Backend authentication failed - HTTP error:', response.status, errorText);
+          throw new Error(`Backend authentication failed: ${response.status}`);
         }
-        
-        console.log('Backend authentication failed, falling back to local auth');
       } catch (backendError) {
-        console.error('Backend not available, using local authentication:', backendError);
-      }
-      
-      // Fallback: Create user object from Google data for local storage
-      const user: User = {
-        id: Date.now(), // Temporary ID for Google users
-        name: googleUser.name || googleUser.displayName || 'Google User',
-        email: googleUser.email,
-        role: 'user',
-        image: googleUser.picture || googleUser.photoURL,
-        created_at: new Date().toISOString(),
-      };
+        console.error('Backend authentication failed, using local fallback:', backendError);
+        
+        // Fallback: Create user object from Google data for local storage
+        const user: User = {
+          id: Date.now(), // Temporary ID for Google users
+          name: googleUser.name || googleUser.displayName || 'Google User',
+          email: googleUser.email,
+          role: 'user',
+          image: googleUser.picture || googleUser.photoURL,
+          created_at: new Date().toISOString(),
+        };
 
-      // Generate a temporary token for Google users (fallback)
-      const token = `google_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      console.log('Setting Google auth (local fallback):', { token, user });
-      this.setAuth(token, user);
+        // Generate a temporary token for Google users (fallback)
+        const token = `google_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        console.log('Setting Google auth (local fallback):', { token, user });
+        this.setAuth(token, user);
+        
+        // Wait a moment for cookies to be set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verify authentication state
+        const isAuth = this.isAuthenticated();
+        console.log('Post-fallback auth verification:', isAuth);
+        
+        if (!isAuth) {
+          throw new Error('Authentication state not properly set after fallback auth');
+        }
+      }
       
       // Log the successful Google authentication
       console.log('Google OAuth successful - user authenticated:', this.isAuthenticated());

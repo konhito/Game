@@ -91,7 +91,7 @@ export default function GoogleAuthButton({
 
     const handleGoogleResponse = async (response: any) => {
       try {
-        console.log("Google OAuth response:", response);
+        console.log("Google OAuth response received:", response);
         
         // Decode the JWT token to get user info
         const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -106,14 +106,32 @@ export default function GoogleAuthButton({
           email_verified: payload.email_verified,
         };
 
+        console.log("Processing Google authentication for user:", googleUser.email);
+        
         // Handle the Google authentication
         await authService.handleGoogleAuth(googleUser);
         
-        console.log("Google authentication successful");
+        // Verify authentication was successful
+        const isAuthenticated = authService.isAuthenticated();
+        const user = authService.getUser();
+        const token = authService.getToken();
+        
+        console.log("Post-auth verification:", {
+          isAuthenticated,
+          hasUser: !!user,
+          hasToken: !!token,
+          userEmail: user?.email
+        });
+        
+        if (!isAuthenticated) {
+          throw new Error("Authentication failed after Google OAuth");
+        }
+        
+        console.log("Google authentication successful - calling onSuccess");
         onSuccess?.();
       } catch (error) {
         console.error("Error handling Google response:", error);
-        onError?.("Google authentication failed");
+        onError?.(error.message || "Google authentication failed");
       }
     };
 
