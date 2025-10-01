@@ -35,6 +35,8 @@ export default function DashboardPage() {
   const [spinResult, setSpinResult] = useState<{ points: number; message: string } | null>(null);
   const [backendConnected, setBackendConnected] = useState(false);
   const [dailyRewardClaimed, setDailyRewardClaimed] = useState(false);
+  const [claimingDailyReward, setClaimingDailyReward] = useState(false);
+  const [dailyRewardMessage, setDailyRewardMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -116,6 +118,32 @@ export default function DashboardPage() {
     }
   };
 
+  const refreshDailyRewardStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const statsResponse = await dashboardService.getUserStats(user.id);
+      if (statsResponse.success && statsResponse.data.users && statsResponse.data.users.length > 0) {
+        const userStats = statsResponse.data.users[0];
+        
+        // Update user stats
+        setDashboardData(prev => ({ ...prev, userStats }));
+        
+        // Check daily reward status
+        if (userStats.last_daily_claim_date) {
+          const lastClaimDate = new Date(userStats.last_daily_claim_date);
+          const today = new Date();
+          const isSameDay = lastClaimDate.toDateString() === today.toDateString();
+          setDailyRewardClaimed(isSameDay);
+        } else {
+          setDailyRewardClaimed(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing daily reward status:', error);
+    }
+  };
+
   const fetchDashboardData = async (userId: number) => {
     try {
       setLoading(true);
@@ -132,6 +160,15 @@ export default function DashboardPage() {
           const today = new Date();
           const isSameDay = lastClaimDate.toDateString() === today.toDateString();
           setDailyRewardClaimed(isSameDay);
+          console.log('Daily reward claim status:', {
+            lastClaimDate: lastClaimDate.toDateString(),
+            today: today.toDateString(),
+            isSameDay,
+            claimed: isSameDay
+          });
+        } else {
+          setDailyRewardClaimed(false);
+          console.log('No previous daily claim date found, reward available');
         }
       }
 
@@ -251,19 +288,28 @@ export default function DashboardPage() {
   };
 
   const handleDailyReward = async () => {
-    if (dailyRewardClaimed) {
-      alert('Daily reward already claimed today! Come back tomorrow.');
+    if (dailyRewardClaimed || claimingDailyReward) {
+      setDailyRewardMessage('Daily reward already claimed today! Come back tomorrow.');
       return;
     }
 
     try {
-      // Mock daily reward
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setClaimingDailyReward(true);
+      setDailyRewardMessage(null);
       
       const baseReward = 20;
-      const streakBonus = dashboardData.userStats ? Math.min((dashboardData.userStats.current_streak || 0) * 5, 50) : 0;
+      const currentStreak = dashboardData.userStats?.current_streak || 0;
+      const streakBonus = Math.min(currentStreak * 5, 50);
       const totalReward = baseReward + streakBonus;
-      const coins = totalReward * 0.05;
+      const coins = Math.round(totalReward * 0.05);
+      
+      console.log('Claiming daily reward:', {
+        baseReward,
+        currentStreak,
+        streakBonus,
+        totalReward,
+        coins
+      });
       
       // Update user stats on backend
       const response = await dashboardService.updateUserStatsAfterDailyReward(totalReward, coins);
@@ -276,25 +322,37 @@ export default function DashboardPage() {
             ...prev.userStats,
             total_points: prev.userStats.total_points + totalReward,
             weekly_points: (prev.userStats.weekly_points || 0) + totalReward,
-            current_streak: (prev.userStats.current_streak || 0) + 1,
+            current_streak: currentStreak + 1,
             total_coins: prev.userStats.total_coins + coins,
             last_daily_claim_date: new Date().toISOString()
           } : null
         }));
 
         setDailyRewardClaimed(true);
-        alert(`🌅 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus)`);
+        setDailyRewardMessage(`🎉 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus) +${coins} PineCoins`);
+        
+        // Refresh the dashboard data to ensure consistency
+        setTimeout(() => {
+          refreshDailyRewardStatus();
+        }, 1000);
+        
+        // Clear message after 5 seconds
+        setTimeout(() => {
+          setDailyRewardMessage(null);
+        }, 5000);
       } else {
-        alert(response.error || 'Failed to claim daily reward. Please try again.');
+        setDailyRewardMessage(response.error || 'Failed to claim daily reward. Please try again.');
       }
     } catch (error) {
       console.error('Error claiming daily reward:', error);
       if (error instanceof Error && error.message.includes('already claimed')) {
         setDailyRewardClaimed(true);
-        alert('Daily reward already claimed today! Come back tomorrow.');
+        setDailyRewardMessage('Daily reward already claimed today! Come back tomorrow.');
       } else {
-        alert('Failed to claim daily reward. Please try again.');
+        setDailyRewardMessage('Failed to claim daily reward. Please try again.');
       }
+    } finally {
+      setClaimingDailyReward(false);
     }
   };
 
@@ -645,43 +703,86 @@ export default function DashboardPage() {
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/30 rounded-full -translate-y-16 translate-x-16"></div>
                 <CardHeader className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Calendar className="w-6 h-6 text-white" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <Calendar className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-slate-800 text-lg">Daily Login</CardTitle>
+                        <CardDescription className="text-slate-600">
+                          Claim your daily rewards
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-lg">Daily Login</CardTitle>
-                      <CardDescription className="text-slate-600">
-                        Claim your daily rewards
-                      </CardDescription>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={refreshDailyRewardStatus}
+                      className="text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4 relative z-10">
                   <div className="text-center">
                     <div className="text-4xl mb-3">🌅</div>
                     <p className="text-sm text-slate-600 mb-2">
-                                             {safeCurrentStreak} day streak
+                      {safeCurrentStreak} day streak
                     </p>
                     <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium px-3 py-1">
-                                             +{20 + Math.min(safeCurrentStreak * 5, 50)} points today
+                      +{20 + Math.min(safeCurrentStreak * 5, 50)} points today
                     </Badge>
                   </div>
+                  
+                  {/* Daily Reward Message */}
+                  {dailyRewardMessage && (
+                    <div className={`p-3 rounded-xl text-center text-sm font-medium ${
+                      dailyRewardMessage.includes('🎉') 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      {dailyRewardMessage}
+                    </div>
+                  )}
+                  
                   <Button 
                     className={`w-full font-bold py-3 rounded-xl shadow-lg transition-all duration-200 ${
                       dailyRewardClaimed 
                         ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+                        : claimingDailyReward
+                        ? 'bg-blue-400 cursor-not-allowed text-white'
                         : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl transform hover:scale-105'
                     }`}
                     onClick={handleDailyReward}
-                    disabled={dailyRewardClaimed}
+                    disabled={dailyRewardClaimed || claimingDailyReward}
                   >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    {dailyRewardClaimed ? 'Already Claimed Today' : 'Claim Daily Reward'}
+                    {claimingDailyReward ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Claiming...
+                      </>
+                    ) : (
+                      <>
+                        <Calendar className="w-5 h-5 mr-2" />
+                        {dailyRewardClaimed ? 'Already Claimed Today' : 'Claim Daily Reward'}
+                      </>
+                    )}
                   </Button>
+                  
                   <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-3 border border-blue-200/50">
-                    <div className="font-medium mb-1">⏰ Come back tomorrow!</div>
-                    <div className="text-slate-500">Streak bonus increases daily</div>
+                    <div className="font-medium mb-1">
+                      {dailyRewardClaimed ? '✅ Claimed today!' : '⏰ Come back tomorrow!'}
+                    </div>
+                    <div className="text-slate-500">
+                      {dailyRewardClaimed ? 'Great job maintaining your streak!' : 'Streak bonus increases daily'}
+                    </div>
+                    {dailyRewardClaimed && (
+                      <div className="mt-2 text-xs text-slate-400">
+                        Next reward available in {Math.ceil((24 - new Date().getHours()) * 60 - new Date().getMinutes())} minutes
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
