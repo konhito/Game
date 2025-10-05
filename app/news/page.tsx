@@ -45,7 +45,7 @@ export default function NewsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (selectedCategory !== 'All') params.append('tag', selectedCategory);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news?${params}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?${params}`);
       
       if (response.ok) {
         const result = await response.json();
@@ -65,7 +65,7 @@ export default function NewsPage() {
 
   const fetchFeaturedArticle = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news?featured=true&limit=1`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?featured=true&limit=1`);
       if (response.ok) {
         const result = await response.json();
         if (result.data.articles.length > 0) {
@@ -266,15 +266,39 @@ export default function NewsPage() {
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredNews.filter(item => item.featured).map((news) => (
-                <Card key={news.id} className="bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader>
+                <Card key={news.id} className="bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  {/* Featured Image */}
+                  {news.featured_image && (
+                    <div className="relative h-64 w-full">
+                      <img
+                        src={news.featured_image.startsWith('http') 
+                          ? news.featured_image 
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                        }
+                        alt={news.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      <div className="absolute top-4 left-4">
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
-                      <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category)} text-white`}>
-                        {news.category}
-                      </Badge>
+                      {!news.featured_image && (
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        </Badge>
+                      )}
                       <div className="flex items-center text-sm text-slate-500">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {news.date}
+                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : (news as any).date}
                       </div>
                     </div>
                     <CardTitle className="text-xl text-slate-800 line-clamp-2">
@@ -282,13 +306,19 @@ export default function NewsPage() {
                     </CardTitle>
                     <div className="flex items-center text-sm text-slate-500">
                       <User className="w-4 h-4 mr-1" />
-                      {news.author} • {news.readTime}
+                      {news.author_name || (news as any).author} • {(news as any).readTime || '2 min read'}
+                      {news.views && (
+                        <>
+                          <Eye className="w-4 h-4 ml-2 mr-1" />
+                          {news.views} views
+                        </>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 mb-4">{news.excerpt}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {news.tags.map((tag, index) => (
+                      {(news.tags || []).map((tag, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           #{tag}
                         </Badge>
@@ -372,12 +402,36 @@ export default function NewsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader>
+                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  {/* Featured Image */}
+                  {news.featured_image && (
+                    <div className="relative h-48 w-full">
+                      <img
+                        src={news.featured_image.startsWith('http') 
+                          ? news.featured_image 
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                        }
+                        alt={news.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      <div className="absolute top-2 left-2">
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
-                      <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
-                        {(news as any).category || (news.tags && news.tags[0]) || 'News'}
-                      </Badge>
+                      {!news.featured_image && (
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        </Badge>
+                      )}
                       <div className="flex items-center text-sm text-slate-500">
                         <Calendar className="w-4 h-4 mr-1" />
                         {news.published_at ? new Date(news.published_at).toLocaleDateString() : (news as any).date}

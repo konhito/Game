@@ -23,9 +23,14 @@ import { useState } from "react";
 
 interface SidebarProps {
   className?: string;
+  userStats?: {
+    spins_remaining?: number;
+    current_streak?: number;
+    total_points?: number;
+  } | null;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, userStats }: SidebarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -143,21 +148,21 @@ export function Sidebar({ className }: SidebarProps) {
                 <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                 Daily Streak
               </span>
-              <span className="font-semibold text-orange-600">🔥 3 days</span>
+              <span className="font-semibold text-orange-600">🔥 {userStats?.current_streak || 0} days</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
                 <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                 Spins Left
               </span>
-              <span className="font-semibold text-blue-600">🎯 3</span>
+              <span className="font-semibold text-blue-600">🎯 {userStats?.spins_remaining || 0}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Points Today
+                Total Points
               </span>
-              <span className="font-semibold text-green-600">+25</span>
+              <span className="font-semibold text-green-600">{userStats?.total_points || 0}</span>
             </div>
           </div>
         </div>

@@ -39,7 +39,8 @@ export default function CreateTaskPage() {
     reward_points: '',
     reward_coins: '',
     max_participants: '',
-    deadline: ''
+    deadline: '',
+    url: ''
   });
 
   useEffect(() => {
@@ -104,7 +105,8 @@ export default function CreateTaskPage() {
         reward_points: parseInt(formData.reward_points) || 0,
         reward_coins: parseFloat(formData.reward_coins) || 0,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : undefined,
-        deadline: formData.deadline || undefined
+        deadline: formData.deadline || undefined,
+        url: formData.url || undefined
       };
 
       let result;
@@ -128,7 +130,8 @@ export default function CreateTaskPage() {
             reward_points: '',
             reward_coins: '',
             max_participants: '',
-            deadline: ''
+            deadline: '',
+            url: ''
           });
         }
 
@@ -297,6 +300,20 @@ export default function CreateTaskPage() {
                   value={formData.deadline}
                   onChange={(e) => handleInputChange('deadline', e.target.value)}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="url">URL (Optional)</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://example.com"
+                  value={formData.url}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                />
+                <p className="text-sm text-gray-500">
+                  Paste the URL that users need to visit for this task
+                </p>
               </div>
             </div>
 

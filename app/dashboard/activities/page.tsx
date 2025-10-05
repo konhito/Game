@@ -297,6 +297,11 @@ export default function ActivitiesPage() {
       return;
     }
 
+    if (!proofImage) {
+      setError('Please upload an image as proof of task completion');
+      return;
+    }
+
     console.log('🚀 Starting proof submission for task:', selectedTask.id);
     console.log('📝 Proof description:', proofDescription);
     console.log('🖼️ Has proof image:', !!proofImage);
@@ -359,39 +364,6 @@ export default function ActivitiesPage() {
           console.error('❌ Backend returned error:', result.error);
           toast.error(result.error || 'Failed to submit proof');
         }
-      } else {
-        console.log('📤 Submitting proof without image to backend...');
-        // Submit without image
-        const result = await taskService.completeTask({
-          task_id: selectedTask.id,
-          proof_description: proofDescription
-        });
-        
-        console.log('📥 Backend response:', result);
-        
-        if (result.success) {
-          console.log('✅ Proof submitted successfully!');
-          
-          // Show different messages based on AI verification
-          if (result.ai_verification) {
-            if (result.ai_verification.verified) {
-              toast.success(`🎉 Task approved by AI! ${result.message}`);
-            } else {
-              toast.error(`❌ Task rejected by AI: ${result.ai_verification.reason}`);
-            }
-          } else {
-            toast.success('Proof submitted successfully! Your task is now under review.');
-          }
-          
-          // Refresh started tasks to remove completed task
-          await fetchStartedTasks(user.id);
-          
-          closeProofDialog();
-          setError(null);
-        } else {
-          console.error('❌ Backend returned error:', result.error);
-          toast.error(result.error || 'Failed to submit proof');
-        }
       }
     } catch (err) {
       console.error('❌ Exception during proof submission:', err);
@@ -418,23 +390,23 @@ export default function ActivitiesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+      <div className="min-h-screen bg-slate-50">
         <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Header Skeleton */}
             <div className="mb-8">
-              <div className="h-8 bg-gradient-to-r from-emerald-200 to-blue-200 rounded-lg w-48 mb-2 animate-pulse"></div>
-              <div className="h-5 bg-gradient-to-r from-slate-200 to-emerald-200 rounded-lg w-96 animate-pulse"></div>
+              <div className="h-8 bg-slate-200 rounded-lg w-48 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-slate-200 rounded-lg w-96 animate-pulse"></div>
             </div>
 
             {/* Available Tasks Skeleton */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="h-8 bg-gradient-to-r from-emerald-200 to-blue-200 rounded w-64 mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gradient-to-r from-slate-200 to-emerald-200 rounded w-96 animate-pulse"></div>
+                  <div className="h-8 bg-slate-200 rounded w-64 mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-slate-200 rounded w-96 animate-pulse"></div>
                 </div>
-                <div className="h-9 bg-gradient-to-r from-emerald-200 to-blue-200 rounded w-24 animate-pulse"></div>
+                <div className="h-9 bg-slate-200 rounded w-24 animate-pulse"></div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -444,35 +416,35 @@ export default function ActivitiesPage() {
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="h-6 bg-gradient-to-r from-emerald-200 to-blue-200 rounded w-full mb-2 animate-pulse"></div>
-                            <div className="h-4 bg-gradient-to-r from-slate-200 to-emerald-200 rounded w-full mb-2 animate-pulse"></div>
-                            <div className="h-4 bg-gradient-to-r from-blue-200 to-slate-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-6 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                            <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
+                            <div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div>
                           </div>
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-xl animate-pulse"></div>
+                          <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
                         </div>
                         <div className="flex gap-2">
-                          <div className="h-6 bg-gradient-to-r from-emerald-200 to-blue-200 rounded-full w-20 animate-pulse"></div>
-                          <div className="h-6 bg-gradient-to-r from-slate-200 to-emerald-200 rounded-full w-16 animate-pulse"></div>
+                          <div className="h-6 bg-slate-200 rounded-full w-20 animate-pulse"></div>
+                          <div className="h-6 bg-slate-200 rounded-full w-16 animate-pulse"></div>
                         </div>
-                        <div className="bg-gradient-to-r from-slate-50 to-emerald-50 rounded-xl p-4">
+                        <div className="bg-slate-50 rounded-xl p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-lg animate-pulse"></div>
+                              <div className="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
                               <div>
-                                <div className="h-3 bg-gradient-to-r from-emerald-200 to-blue-200 rounded w-12 mb-1 animate-pulse"></div>
-                                <div className="h-5 bg-gradient-to-r from-slate-200 to-emerald-200 rounded w-16 animate-pulse"></div>
+                                <div className="h-3 bg-slate-200 rounded w-12 mb-1 animate-pulse"></div>
+                                <div className="h-5 bg-slate-200 rounded w-16 animate-pulse"></div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gradient-to-br from-slate-200 to-emerald-200 rounded-lg animate-pulse"></div>
+                              <div className="w-8 h-8 bg-slate-200 rounded-lg animate-pulse"></div>
                               <div>
-                                <div className="h-3 bg-gradient-to-r from-blue-200 to-slate-200 rounded w-16 mb-1 animate-pulse"></div>
-                                <div className="h-4 bg-gradient-to-r from-emerald-200 to-blue-200 rounded w-12 animate-pulse"></div>
+                                <div className="h-3 bg-slate-200 rounded w-16 mb-1 animate-pulse"></div>
+                                <div className="h-4 bg-slate-200 rounded w-12 animate-pulse"></div>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="h-12 bg-gradient-to-r from-emerald-200 to-blue-200 rounded-xl w-full animate-pulse"></div>
+                        <div className="h-12 bg-slate-200 rounded-xl w-full animate-pulse"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -486,44 +458,48 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
+                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </Button>
               </Link>
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-blue-400/20 rounded-2xl blur-xl"></div>
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/50 shadow-xl">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                  Available Tasks
-                </h1>
-                <p className="text-slate-600 mt-3 text-lg">
-                  Discover and start new tasks to earn points and rewards
-                </p>
-                <div className="flex items-center gap-4 mt-4">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-full">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-emerald-700">Live Tasks</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-slate-100 rounded-full">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-blue-700">AI Verified</span>
-                  </div>
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                  <ClipboardList className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">
+                    Available Tasks
+                  </h1>
+                  <p className="text-slate-600 mt-1">
+                    Discover and start new tasks to earn points and rewards
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full border border-emerald-200">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-emerald-700">Live Tasks</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full border border-slate-200">
+                  <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-slate-700">AI Verified</span>
                 </div>
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl shadow-lg">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                   <AlertCircle className="h-4 w-4 text-red-600" />
@@ -536,20 +512,17 @@ export default function ActivitiesPage() {
           {/* Available Tasks Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-blue-400/10 rounded-xl blur-sm"></div>
-                <div className="relative bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-slate-200/50 shadow-lg">
-                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <ClipboardList className="h-6 w-6 text-white" />
-                    </div>
-                    Available Tasks
-                    <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-emerald-100 to-blue-100 text-emerald-700 hover:from-emerald-200 hover:to-blue-200 border-emerald-200">
-                      {availableTasks.length} available
-                    </Badge>
-                  </h2>
-                  <p className="text-slate-600 mt-2 text-lg">Discover new tasks and start earning rewards</p>
-                </div>
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <ClipboardList className="h-6 w-6 text-white" />
+                  </div>
+                  Available Tasks
+                  <Badge variant="secondary" className="ml-2 bg-emerald-100 text-emerald-700 border-emerald-200">
+                    {availableTasks.length} available
+                  </Badge>
+                </h2>
+                <p className="text-slate-600 mt-2">Discover new tasks and start earning rewards</p>
               </div>
               <Button 
                 size="sm" 
@@ -559,7 +532,7 @@ export default function ActivitiesPage() {
                   fetchAvailableTasks();
                 }}
                 disabled={refreshingTasks}
-                className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-lg"
+                className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
                 {refreshingTasks ? 'Refreshing...' : 'Refresh'}
@@ -575,19 +548,16 @@ export default function ActivitiesPage() {
               )}
               {!refreshingTasks && availableTasks.map((task, index) => {
                 const colors = [
-                  'from-emerald-500 to-blue-500',
-                  'from-blue-500 to-slate-500',
-                  'from-slate-500 to-emerald-500',
-                  'from-emerald-600 to-blue-600',
-                  'from-blue-600 to-slate-600',
-                  'from-slate-600 to-emerald-600'
+                  'bg-emerald-500',
+                  'bg-slate-600',
+                  'bg-emerald-500',
+                  'bg-slate-600'
                 ];
                 const cardColor = colors[index % colors.length];
                 
                 return (
-                  <Card key={task.id} className="group hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${cardColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                    <CardContent className="p-6 relative">
+                  <Card key={task.id} className="group hover:shadow-lg transition-all duration-300 border border-slate-200 shadow-sm bg-white overflow-hidden">
+                    <CardContent className="p-6">
                       <div className="space-y-4">
                         {/* Task Header */}
                         <div className="space-y-3">
@@ -601,7 +571,7 @@ export default function ActivitiesPage() {
                               </p>
                             </div>
                             <div className="ml-3 flex-shrink-0">
-                              <div className={`w-12 h-12 bg-gradient-to-br ${cardColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                              <div className={`w-12 h-12 ${cardColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                                 <TrendingUp className="h-6 w-6 text-white" />
                               </div>
                             </div>
@@ -611,19 +581,19 @@ export default function ActivitiesPage() {
                         {/* Task Details */}
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-700 border-emerald-200 hover:from-emerald-100 hover:to-blue-100">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
                               {task.platform}
                             </Badge>
-                            <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-slate-50 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-slate-100">
+                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
                               {task.task_type}
                             </Badge>
                           </div>
                           
                           {/* Rewards & Stats */}
-                          <div className="bg-gradient-to-r from-slate-50 to-emerald-50 rounded-xl p-4 space-y-3 border border-emerald-100">
+                          <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 bg-gradient-to-br ${cardColor} rounded-lg flex items-center justify-center shadow-md`}>
+                                <div className={`w-8 h-8 ${cardColor} rounded-lg flex items-center justify-center`}>
                                   <TrendingUp className="h-4 w-4 text-white" />
                                 </div>
                                 <div>
@@ -632,7 +602,7 @@ export default function ActivitiesPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                                   <User className="h-4 w-4 text-white" />
                                 </div>
                                 <div className="text-right">
@@ -646,7 +616,7 @@ export default function ActivitiesPage() {
                             
                             {task.reward_coins > 0 && (
                               <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
-                                <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                                <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center">
                                   <span className="text-xs text-white font-bold">₽</span>
                                 </div>
                                 <span className="text-sm font-medium text-slate-700">
@@ -660,7 +630,7 @@ export default function ActivitiesPage() {
                         {/* Action Button */}
                         <Button 
                           onClick={() => openTaskDialog(task)} 
-                          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg text-white font-semibold py-3 shadow-md hover:shadow-xl transition-all duration-300 group-hover:scale-105"
+                          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 transition-all duration-300"
                           size="lg"
                         >
                           <Play className="h-5 w-5 mr-2" />
@@ -673,9 +643,9 @@ export default function ActivitiesPage() {
                })}
            
               {!refreshingTasks && availableTasks.length === 0 && (
-                <Card className="col-span-full border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+                <Card className="col-span-full bg-white border border-slate-200 shadow-sm">
                   <CardContent className="p-16 text-center">
-                    <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                    <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                       <ClipboardList className="h-12 w-12 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-700 mb-2">No Available Tasks</h3>
@@ -683,7 +653,7 @@ export default function ActivitiesPage() {
                     <Button 
                       onClick={fetchAvailableTasks}
                       variant="outline" 
-                      className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-lg"
+                      className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check Again
@@ -697,17 +667,14 @@ export default function ActivitiesPage() {
           {/* Started Tasks Section - For Proof Submission */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-emerald-500/10 rounded-xl blur-sm"></div>
-                <div className="relative bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-emerald-200/50 shadow-lg">
-                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Upload className="h-6 w-6 text-white" />
-                    </div>
-                    Submit Proof
-                  </h2>
-                  <p className="text-slate-600 mt-2 text-lg">Upload proof for tasks you've started</p>
-                </div>
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-white" />
+                  </div>
+                  Submit Proof
+                </h2>
+                <p className="text-slate-600 mt-2">Upload proof for tasks you've started</p>
               </div>
             </div>
         
@@ -715,46 +682,45 @@ export default function ActivitiesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {startedTasks.map((task, index) => {
                   const colors = [
-                    'from-indigo-500 to-purple-500',
-                    'from-purple-500 to-pink-500',
-                    'from-pink-500 to-rose-500',
-                    'from-blue-500 to-indigo-500'
+                    'bg-slate-600',
+                    'bg-emerald-500',
+                    'bg-slate-600',
+                    'bg-emerald-500'
                   ];
                   const cardColor = colors[index % colors.length];
                   
                   return (
-                    <Card key={task.id} className="group bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-500">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${cardColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                      <CardContent className="p-6 relative">
+                    <Card key={task.id} className="group bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
                         <div className="space-y-4">
                           {/* Task Header */}
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <h3 className="font-bold text-slate-900 text-lg mb-2">{task.title}</h3>
                               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-700 border-emerald-200">
+                                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
                                   {task.platform}
                                 </Badge>
-                                <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-slate-50 text-blue-700 border-blue-200">
+                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
                                   {task.task_type}
                                 </Badge>
-                                <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-700 border-emerald-200">
+                                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
                                   Started
                                 </Badge>
                               </div>
                             </div>
                             <div className="ml-3 flex-shrink-0">
-                              <div className={`w-12 h-12 bg-gradient-to-br ${cardColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                              <div className={`w-12 h-12 ${cardColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                                 <Upload className="h-6 w-6 text-white" />
                               </div>
                             </div>
                           </div>
                           
                           {/* Task Details */}
-                          <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-indigo-100">
+                          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 bg-gradient-to-br ${cardColor} rounded-lg flex items-center justify-center shadow-md`}>
+                                <div className={`w-8 h-8 ${cardColor} rounded-lg flex items-center justify-center`}>
                                   <TrendingUp className="h-4 w-4 text-white" />
                                 </div>
                                 <div>
@@ -764,7 +730,7 @@ export default function ActivitiesPage() {
                               </div>
                               {task.reward_coins > 0 && (
                                 <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                                  <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center">
                                     <span className="text-xs text-white font-bold">₽</span>
                                   </div>
                                   <span className="text-sm font-medium text-slate-700">
@@ -784,7 +750,7 @@ export default function ActivitiesPage() {
                           {/* Submit Proof Button */}
                           <Button 
                             onClick={() => openProofDialog(task)} 
-                            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg text-white font-semibold py-3 shadow-md hover:shadow-xl transition-all duration-300 group-hover:scale-105"
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 transition-all duration-300"
                             size="lg"
                           >
                             <Upload className="h-5 w-5 mr-2" />
@@ -797,19 +763,19 @@ export default function ActivitiesPage() {
                 })}
               </div>
             ) : (
-              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
+              <Card className="bg-white border border-slate-200 shadow-sm">
                 <CardContent className="p-6">
                   <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                    <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Upload className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to Submit Proof?</h3>
                     <p className="text-slate-600 mb-6">
                       Once you start a task, it will appear here for proof submission.
                     </p>
-                    <div className="bg-gradient-to-r from-slate-50 to-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-slate-200">
+                    <div className="bg-slate-50 rounded-xl p-4 max-w-md mx-auto border border-slate-200">
                       <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-white text-xs font-bold">i</span>
                         </div>
                         <div className="text-left">
@@ -873,7 +839,7 @@ export default function ActivitiesPage() {
                 <Button 
                   onClick={() => selectedTask && startTask(selectedTask.id)}
                   disabled={startingTask || !selectedTask}
-                  className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg"
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg"
                 >
                   {startingTask ? (
                     <>
@@ -904,21 +870,22 @@ export default function ActivitiesPage() {
               </DialogHeader>
               
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-slate-50 to-emerald-50 rounded-xl p-4 border border-slate-200">
-                  <Label htmlFor="proof-image" className="text-slate-700 font-medium">Proof Image (Optional)</Label>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <Label htmlFor="proof-image" className="text-slate-700 font-medium">Proof Image *</Label>
                   <Input
                     id="proof-image"
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
+                    required
                     className="mt-2 rounded-xl border-slate-200 focus:border-emerald-400 focus:ring-emerald-400"
                   />
                   <p className="text-xs text-slate-600 mt-2">
-                    Upload an image showing task completion. Max 5MB.
+                    Upload an image showing task completion. Max 5MB. <span className="text-red-500 font-medium">Required</span>
                   </p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-100">
+                <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
                   <Label htmlFor="proof-description" className="text-emerald-700 font-medium">Proof Description *</Label>
                   <Textarea
                     id="proof-description"
@@ -946,8 +913,8 @@ export default function ActivitiesPage() {
                 </Button>
                 <Button 
                   onClick={submitProof}
-                  disabled={uploading || !proofDescription.trim()}
-                  className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg"
+                  disabled={uploading || !proofDescription.trim() || !proofImage}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg"
                 >
                   {uploading ? (
                     <>

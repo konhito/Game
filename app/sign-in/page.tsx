@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -24,6 +24,22 @@ export default function SignInPage() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isUserSwitching, setIsUserSwitching] = useState(false);
+
+  // Check for existing user on component mount
+  useEffect(() => {
+    const user = authService.getUser();
+    if (user) {
+      setCurrentUser(user);
+      setIsUserSwitching(true);
+      
+      // Ensure cookies are properly set for the current user
+      // This prevents the dashboard layout from redirecting to sign-in
+      console.log('Sign-in page: Ensuring cookies are set for current user');
+      authService.refreshCookies();
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,6 +49,15 @@ export default function SignInPage() {
     }));
     setError(""); // Clear error when user types
     setSuccess(""); // Clear success message when user types
+  };
+
+  const handleSwitchUser = () => {
+    console.log("User switching - clearing current session");
+    authService.logout();
+    setCurrentUser(null);
+    setIsUserSwitching(false);
+    setError("");
+    setSuccess("Previous session cleared. You can now sign in with a different account.");
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
@@ -46,6 +71,8 @@ export default function SignInPage() {
     try {
       setIsLoading(true);
       setError("");
+      setIsUserSwitching(false); // Clear user switching state
+      setCurrentUser(null);
       
       console.log("Attempting login with:", { email: formData.email });
       
@@ -102,6 +129,8 @@ export default function SignInPage() {
 
   const handleGoogleSuccess = async () => {
     setSuccess("Google sign-in successful! Redirecting...");
+    setIsUserSwitching(false); // Clear user switching state
+    setCurrentUser(null);
     
     try {
       // Wait for auth state to be properly set
@@ -209,6 +238,35 @@ export default function SignInPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* User Switching Alert */}
+                {isUserSwitching && currentUser && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                          <Users className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-amber-800">
+                            Currently signed in as {currentUser.name || currentUser.email}
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            To sign in with a different account, please sign out first
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleSwitchUser}
+                        variant="outline"
+                        size="sm"
+                        className="text-amber-700 border-amber-300 hover:bg-amber-100"
+                      >
+                        Switch User
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
                 <form onSubmit={handleEmailSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-slate-700 font-medium">

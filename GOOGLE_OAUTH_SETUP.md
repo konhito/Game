@@ -56,7 +56,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id-here
 GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 
 # Backend API
-NEXT_PUBLIC_API_BASE=https://casino-backend-obvo.onrender.com
+NEXT_PUBLIC_API_BASE=https://casinobackend-production-66bf.up.railway.app
 
 # App Configuration
 NEXT_PUBLIC_APP_NAME=PineCoin

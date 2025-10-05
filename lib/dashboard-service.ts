@@ -64,6 +64,7 @@ export interface Task {
   current_participants: number;
   status: string;
   deadline?: string;
+  url?: string;
   created_by: number;
   created_at: string;
   updated_at: string;

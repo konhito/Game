@@ -93,6 +93,15 @@ export default function GoogleAuthButton({
       try {
         console.log("Google OAuth response received:", response);
         
+        // Check if there's already a logged-in user
+        const currentUser = authService.getUser();
+        if (currentUser) {
+          console.log("User already logged in, clearing session first:", currentUser.email);
+          authService.logout();
+          // Wait for cleanup to complete
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
         // Decode the JWT token to get user info
         const payload = JSON.parse(atob(response.credential.split('.')[1]));
         console.log("Decoded Google payload:", payload);

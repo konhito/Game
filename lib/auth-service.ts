@@ -62,7 +62,7 @@ class AuthService {
   }
 
   // Set token and user, save to localStorage
-  private setAuth(token: string, user: User) {
+  setAuth(token: string, user: User) {
     console.log('AuthService: Setting auth - token:', token ? 'present' : 'missing', 'user:', user);
     this.token = token;
     this.user = user;
@@ -251,10 +251,69 @@ class AuthService {
     }
   }
 
+  // Clear all authentication data
+  clearAuth() {
+    console.log('AuthService: Clearing all authentication data');
+    this.token = null;
+    this.user = null;
+    
+    if (typeof window !== 'undefined') {
+      // Clear localStorage
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      
+      // Clear all auth-related cookies
+      this.clearAuthCookies();
+      
+      // Dispatch event to notify components
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
+      
+      console.log('AuthService: All authentication data cleared');
+    }
+  }
+
+  // Clear authentication cookies
+  private clearAuthCookies() {
+    try {
+      // Clear all possible auth cookie names
+      const cookieNames = [
+        'custom_auth_token',
+        'custom_user_data',
+        'auth_token',
+        'auth_user',
+        'session_token',
+        'user_session'
+      ];
+      
+      cookieNames.forEach(cookieName => {
+        // Clear for current domain
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        // Clear for parent domain
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+        // Clear for subdomain
+        const domain = window.location.hostname.split('.').slice(-2).join('.');
+        if (domain !== window.location.hostname) {
+          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
+        }
+      });
+      
+      console.log('AuthService: All authentication cookies cleared');
+    } catch (error) {
+      console.error('Error clearing auth cookies:', error);
+    }
+  }
+
   // Handle Google OAuth success
   async handleGoogleAuth(googleUser: any): Promise<void> {
     try {
       console.log('Google OAuth user data:', googleUser);
+      
+      // Clear any existing authentication data before proceeding
+      console.log('Clearing existing authentication data before Google login...');
+      this.clearAuth();
+      
+      // Wait a moment for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // First, try to authenticate with the backend to get a proper JWT token
       try {
@@ -354,6 +413,14 @@ class AuthService {
   // Logout user (works for both email and Google auth)
   logout(): void {
     this.clearAuth();
+  }
+
+  // Refresh cookies for current user (useful for ensuring server-side auth works)
+  refreshCookies() {
+    if (this.token && this.user) {
+      console.log('AuthService: Refreshing cookies for current user');
+      this.setAuthCookies(this.token, this.user);
+    }
   }
 
   // Forgot password (email only)

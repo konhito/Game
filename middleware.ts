@@ -26,9 +26,15 @@ export async function middleware(request: NextRequest) {
   });
 
   // If user is authenticated and trying to access sign-in/sign-up, redirect to dashboard
+  // BUT allow access if there's a "switch_user" query parameter (for user switching)
   if (isAuthenticated && ["/sign-in", "/sign-up"].includes(pathname)) {
-    console.log('Redirecting authenticated user from', pathname, 'to dashboard');
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const switchUser = request.nextUrl.searchParams.get('switch_user');
+    if (!switchUser) {
+      console.log('Redirecting authenticated user from', pathname, 'to dashboard');
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    } else {
+      console.log('Allowing user switch on', pathname, 'with switch_user parameter');
+    }
   }
 
   // If user is NOT authenticated and trying to access protected routes, redirect to sign-in

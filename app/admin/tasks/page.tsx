@@ -56,6 +56,7 @@ interface Task {
   priority: string;
   featured: boolean;
   deadline: string;
+  url?: string;
   created_at: string;
   created_by: number;
   created_by_name: string;
@@ -92,7 +93,8 @@ export default function AdminTasksPage() {
     max_participants: 100,
     priority: 'medium',
     featured: false,
-    deadline: ''
+    deadline: '',
+    url: ''
   });
 
   useEffect(() => {
@@ -146,7 +148,8 @@ export default function AdminTasksPage() {
       max_participants: 100,
       priority: 'medium',
       featured: false,
-      deadline: ''
+      deadline: '',
+      url: ''
     });
     setShowCreateDialog(true);
   };
@@ -164,7 +167,8 @@ export default function AdminTasksPage() {
       max_participants: 100,
       priority: 'medium',
       featured: false,
-      deadline: ''
+      deadline: '',
+      url: ''
     });
   };
 
@@ -181,7 +185,8 @@ export default function AdminTasksPage() {
       max_participants: task.max_participants,
       priority: task.priority,
       featured: task.featured,
-      deadline: task.deadline ? task.deadline.split('T')[0] : ''
+      deadline: task.deadline ? task.deadline.split('T')[0] : '',
+      url: task.url || ''
     });
     setShowEditDialog(true);
   };
@@ -189,6 +194,20 @@ export default function AdminTasksPage() {
   const closeEditDialog = () => {
     setShowEditDialog(false);
     setSelectedTask(null);
+    setTaskForm({
+      title: '',
+      description: '',
+      platform: '',
+      task_type: '',
+      requirements: '',
+      reward_points: 0,
+      reward_coins: 0,
+      max_participants: 100,
+      priority: 'medium',
+      featured: false,
+      deadline: '',
+      url: ''
+    });
   };
 
   const openDeleteDialog = (task: Task) => {
@@ -481,6 +500,19 @@ export default function AdminTasksPage() {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Deadline:</span>
                           <span className="font-medium">{new Date(task.deadline).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                      {task.url && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">URL:</span>
+                          <a 
+                            href={task.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="font-medium text-blue-600 hover:text-blue-800 underline truncate max-w-48"
+                          >
+                            {task.url}
+                          </a>
                         </div>
                       )}
                     </div>
@@ -886,6 +918,20 @@ export default function AdminTasksPage() {
                 <Label htmlFor="edit-featured">Featured Task</Label>
               </div>
             </div>
+            
+            <div>
+              <Label htmlFor="edit-url">URL (Optional)</Label>
+              <Input
+                id="edit-url"
+                type="url"
+                placeholder="https://example.com"
+                value={taskForm.url}
+                onChange={(e) => setTaskForm({...taskForm, url: e.target.value})}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Paste the URL that users need to visit for this task
+              </p>
+            </div>
           </div>
           
           <DialogFooter>
@@ -1026,6 +1072,20 @@ export default function AdminTasksPage() {
                   <div>
                     <Label className="text-sm font-medium">Deadline</Label>
                     <p className="mt-1 text-sm text-gray-700">{new Date(selectedTask.deadline).toLocaleString()}</p>
+                  </div>
+                )}
+                
+                {selectedTask.url && (
+                  <div>
+                    <Label className="text-sm font-medium">URL</Label>
+                    <a 
+                      href={selectedTask.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="mt-1 text-sm text-blue-600 hover:text-blue-800 underline block break-all"
+                    >
+                      {selectedTask.url}
+                    </a>
                   </div>
                 )}
               </div>

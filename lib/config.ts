@@ -7,7 +7,7 @@ console.log("Environment variables:", {
 
 export const config = {
   // API Configuration
-  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com',
+  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app',
   
   // App Configuration
   APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'PineCoin',

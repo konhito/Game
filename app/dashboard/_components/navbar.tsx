@@ -43,7 +43,7 @@ export function Navbar() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/users/stats`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

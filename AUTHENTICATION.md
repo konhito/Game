@@ -6,7 +6,7 @@ This project implements a hybrid authentication system that supports both **Goog
 
 ### 🔐 Dual Authentication Methods
 - **Google OAuth**: Uses Better Auth for seamless Google sign-in
-- **Email/Password**: Connects to hosted backend at `https://metal-backend-y2mo.onrender.com`
+- **Email/Password**: Connects to hosted backend at `https://casinobackend-production-66bf.up.railway.app`
 
 ### 🚀 Authentication Flow
 
@@ -95,7 +95,7 @@ authService.logout();
 
 ## Backend Integration
 
-The hosted backend (`https://metal-backend-y2mo.onrender.com`) provides:
+The hosted backend (`https://casinobackend-production-66bf.up.railway.app`) provides:
 
 - User registration and login
 - JWT token generation and validation
@@ -108,7 +108,7 @@ The hosted backend (`https://metal-backend-y2mo.onrender.com`) provides:
 ### Environment Variables
 ```bash
 # Backend API URL (optional, defaults to hosted backend)
-NEXT_PUBLIC_API_URL=https://metal-backend-y2mo.onrender.com
+NEXT_PUBLIC_API_URL=https://casinobackend-production-66bf.up.railway.app
 ```
 
 ### Testing

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, Gift, Users, Loader2, RefreshCw, ArrowRight, Star, TrendingUp, Activity, Calendar, Clock, Target, Zap } from "lucide-react";
 import { dashboardService, UserStats, UserActivity, LeaderboardEntry } from "@/lib/dashboard-service";
+import config from "@/lib/config";
 
 interface DashboardData {
   userStats: UserStats | null;
@@ -37,6 +38,12 @@ export default function DashboardPage() {
   const [dailyRewardClaimed, setDailyRewardClaimed] = useState(false);
   const [claimingDailyReward, setClaimingDailyReward] = useState(false);
   const [dailyRewardMessage, setDailyRewardMessage] = useState<string | null>(null);
+  const [nextReset, setNextReset] = useState<{
+    nextReset: string;
+    currentPeriod: number;
+    nextPeriod: number;
+    hoursUntilReset: number;
+  } | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -90,11 +97,22 @@ export default function DashboardPage() {
           console.log("Dashboard: User authenticated, setting user data:", user);
           setUser(user);
           
-          // Check backend connection
-          await checkBackendConnection();
-          
-          // Fetch dashboard data
-          await fetchDashboardData(user.id);
+      // Check backend connection
+      await checkBackendConnection();
+      
+      // Fetch next reset time
+      try {
+        const resetResponse = await fetch(`${config.API_BASE}/api/spin-reset/next-reset`);
+        if (resetResponse.ok) {
+          const resetData = await resetResponse.json();
+          setNextReset(resetData.data);
+        }
+      } catch (error) {
+        console.error('Error fetching reset time:', error);
+      }
+      
+      // Fetch dashboard data
+      await fetchDashboardData(user.id);
         } catch (error) {
           console.error('Dashboard: Failed to check authentication:', error);
           router.push("/sign-in");
@@ -257,31 +275,42 @@ export default function DashboardPage() {
       // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Update user stats on backend
+      // Update user stats on backend - this will handle the new 8-hour reset logic
       const coins = selectedReward.points * 0.1;
-      await dashboardService.updateUserStatsAfterSpin(selectedReward.points, coins);
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedReward.points, coins);
       
-      // Update local state
-      setDashboardData(prev => ({
-        ...prev,
-        userStats: prev.userStats ? {
-          ...prev.userStats,
-          total_points: prev.userStats.total_points + selectedReward.points,
-          weekly_points: (prev.userStats.weekly_points || 0) + selectedReward.points,
-          spins_remaining: (prev.userStats.spins_remaining || 0) - 1,
-          total_coins: prev.userStats.total_coins + coins
-        } : null
-      }));
+      if (updateResponse.success) {
+        // Update local state with the response data
+        setDashboardData(prev => ({
+          ...prev,
+          userStats: prev.userStats ? {
+            ...prev.userStats,
+            total_points: prev.userStats.total_points + selectedReward.points,
+            weekly_points: (prev.userStats.weekly_points || 0) + selectedReward.points,
+            spins_remaining: updateResponse.data?.spins_remaining || (prev.userStats.spins_remaining || 0) - 1,
+            total_coins: prev.userStats.total_coins + coins
+          } : null
+        }));
 
-      // Show result
-      setSpinResult({
-        points: selectedReward.points,
-        message: `🎉 Congratulations! You won ${selectedReward.points} points and ${coins.toFixed(1)} PineCoins!`
-      });
+        // Show result
+        setSpinResult({
+          points: selectedReward.points,
+          message: `🎉 Congratulations! You won ${selectedReward.points} points and ${coins.toFixed(1)} PineCoins!`
+        });
+      } else {
+        // Handle error from backend (e.g., no spins remaining in current period)
+        setSpinResult({
+          points: 0,
+          message: updateResponse.error || 'Failed to update stats. Please try again.'
+        });
+      }
 
     } catch (error) {
       console.error('Error spinning wheel:', error);
-      alert('Failed to spin wheel. Please try again.');
+      setSpinResult({
+        points: 0,
+        message: 'Failed to spin wheel. Please try again.'
+      });
     } finally {
       setSpinning(false);
     }
@@ -664,6 +693,12 @@ export default function DashboardPage() {
                     <p className="text-sm text-slate-600 mb-2">
                       {dashboardData?.userStats?.spins_remaining || 0} spins remaining
                     </p>
+                    {nextReset && (
+                      <p className="text-xs text-slate-500 mb-2">
+                        <Clock className="w-3 h-3 inline mr-1" />
+                        Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
+                      </p>
+                    )}
                     {dashboardData?.userStats?.current_streak >= 3 && (
                       <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-medium px-3 py-1">
                         🔥 {safeCurrentStreak} Day Streak!

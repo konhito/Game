@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "casino-backend-obvo.onrender.com",
+        hostname: "casinobackend-production-66bf.up.railway.app",
       },
     ],
   },

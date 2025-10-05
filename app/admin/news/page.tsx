@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,9 @@ import {
   Tag,
   Image as ImageIcon,
   Globe,
-  Lock
+  Lock,
+  Upload,
+  X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,6 +51,9 @@ export default function AdminNewsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -66,6 +71,28 @@ export default function AdminNewsPage() {
     fetchArticles();
   }, [searchTerm, statusFilter]);
 
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Clear selected file
+  const clearFile = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const fetchArticles = async () => {
     try {
       setLoading(true);
@@ -74,7 +101,7 @@ export default function AdminNewsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter !== 'all') params.append('status', statusFilter);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/all?${params}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -98,13 +125,32 @@ export default function AdminNewsPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/create`, {
+      
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('slug', formData.slug);
+      formDataToSend.append('excerpt', formData.excerpt);
+      formDataToSend.append('content', formData.content);
+      formDataToSend.append('status', formData.status);
+      formDataToSend.append('featured', formData.featured.toString());
+      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('meta_title', formData.meta_title);
+      formDataToSend.append('meta_description', formData.meta_description);
+      
+      // Add file if selected, otherwise add featured_image URL
+      if (selectedFile) {
+        formDataToSend.append('featured_image', selectedFile);
+      } else if (formData.featured_image) {
+        formDataToSend.append('featured_image', formData.featured_image);
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/admin/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -121,6 +167,7 @@ export default function AdminNewsPage() {
           meta_title: "",
           meta_description: ""
         });
+        clearFile();
         fetchArticles();
       } else {
         console.error('Failed to create article');
@@ -136,13 +183,32 @@ export default function AdminNewsPage() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/${editingArticle.id}`, {
+      
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('slug', formData.slug);
+      formDataToSend.append('excerpt', formData.excerpt);
+      formDataToSend.append('content', formData.content);
+      formDataToSend.append('status', formData.status);
+      formDataToSend.append('featured', formData.featured.toString());
+      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('meta_title', formData.meta_title);
+      formDataToSend.append('meta_description', formData.meta_description);
+      
+      // Add file if selected, otherwise add featured_image URL
+      if (selectedFile) {
+        formDataToSend.append('featured_image', selectedFile);
+      } else if (formData.featured_image) {
+        formDataToSend.append('featured_image', formData.featured_image);
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/admin/${editingArticle.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -159,6 +225,7 @@ export default function AdminNewsPage() {
           meta_title: "",
           meta_description: ""
         });
+        clearFile();
         fetchArticles();
       } else {
         console.error('Failed to update article');
@@ -173,7 +240,7 @@ export default function AdminNewsPage() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/admin/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -199,7 +266,7 @@ export default function AdminNewsPage() {
     
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casino-backend-obvo.onrender.com'}/api/news/admin/${article.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/admin/${article.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -457,13 +524,56 @@ export default function AdminNewsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="featured_image">Featured Image URL</Label>
-                    <Input
-                      id="featured_image"
-                      value={formData.featured_image}
-                      onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                    />
+                    <Label htmlFor="featured_image">Featured Image</Label>
+                    <div className="space-y-4">
+                      {/* File Upload */}
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          id="file-upload"
+                        />
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                          <p className="mt-2 text-sm text-gray-600">
+                            Click to upload an image
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG, GIF, WebP up to 10MB
+                          </p>
+                        </label>
+                      </div>
+                      
+                      {/* Image Preview */}
+                      {imagePreview && (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={clearFile}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Or URL Input */}
+                      <div className="text-center text-sm text-gray-500">OR</div>
+                      <Input
+                        id="featured_image"
+                        value={formData.featured_image}
+                        onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="status">Status</Label>

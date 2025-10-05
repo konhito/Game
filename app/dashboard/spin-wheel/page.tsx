@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Gift, Target } from "lucide-react";
+import { Trophy, Gift, Target, Clock, RefreshCw } from "lucide-react";
+import { dashboardService } from "@/lib/dashboard-service";
+import config from "@/lib/config";
 
 const wheelSegments = [
   { id: 1, label: "2", points: 2, color: "bg-blue-500", icon: "🎯" },
@@ -32,29 +34,88 @@ export default function SpinWheelPage() {
   const [result, setResult] = useState<typeof wheelSegments[0] | null>(null);
   const [spinsRemaining, setSpinsRemaining] = useState(3);
   const [showResult, setShowResult] = useState(false);
+  const [nextReset, setNextReset] = useState<{
+    nextReset: string;
+    currentPeriod: number;
+    nextPeriod: number;
+    hoursUntilReset: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const spinWheel = () => {
+  // Fetch reset information and user stats
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch next reset information
+        const resetResponse = await fetch(`${config.API_BASE}/api/spin-reset/next-reset`);
+        if (resetResponse.ok) {
+          const resetData = await resetResponse.json();
+          setNextReset(resetData.data);
+        }
+        
+        // Fetch user stats to get current spins
+        const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
+        if (user.id) {
+          const statsResponse = await dashboardService.getUserStats(user.id);
+          if (statsResponse.success) {
+            setSpinsRemaining(statsResponse.data.spins_remaining || 0);
+          }
+        }
+        
+      } catch (err) {
+        console.error('Error fetching spin wheel data:', err);
+        setError('Failed to load spin wheel data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const spinWheel = async () => {
     if (spinsRemaining <= 0 || isSpinning) return;
 
-    setIsSpinning(true);
-    setShowResult(false);
-    setResult(null);
+    try {
+      setIsSpinning(true);
+      setShowResult(false);
+      setResult(null);
+      setError(null);
 
-    // Random rotation between 5-10 full rotations plus random segment
-    const baseRotation = 1800 + Math.random() * 1800; // 5-10 full rotations
-    const segmentAngle = 360 / wheelSegments.length;
-    const randomSegment = Math.floor(Math.random() * wheelSegments.length);
-    const finalRotation = baseRotation + (randomSegment * segmentAngle);
+      // Random rotation between 5-10 full rotations plus random segment
+      const baseRotation = 1800 + Math.random() * 1800; // 5-10 full rotations
+      const segmentAngle = 360 / wheelSegments.length;
+      const randomSegment = Math.floor(Math.random() * wheelSegments.length);
+      const finalRotation = baseRotation + (randomSegment * segmentAngle);
 
-    setRotation(finalRotation);
+      setRotation(finalRotation);
 
-    setTimeout(() => {
-      setIsSpinning(false);
+      // Wait for animation to complete
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       const selectedSegment = wheelSegments[randomSegment];
-      setResult(selectedSegment);
-      setShowResult(true);
-      setSpinsRemaining(prev => prev - 1);
-    }, 3000);
+      
+      // Update user stats on backend
+      const coins = selectedSegment.points * 0.1;
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
+      
+      if (updateResponse.success) {
+        setResult(selectedSegment);
+        setShowResult(true);
+        setSpinsRemaining(prev => prev - 1);
+      } else {
+        setError(updateResponse.error || 'Failed to update stats');
+      }
+      
+    } catch (err) {
+      console.error('Error spinning wheel:', err);
+      setError('Failed to spin wheel. Please try again.');
+    } finally {
+      setIsSpinning(false);
+    }
   };
 
   const buySpins = (spins: number, price: number) => {
@@ -63,6 +124,17 @@ export default function SpinWheelPage() {
     setSpinsRemaining(prev => prev + spins);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white">Loading spin wheel...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6">
       <div className="max-w-6xl mx-auto">
@@ -70,6 +142,11 @@ export default function SpinWheelPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🎯 Spinning Wheel</h1>
           <p className="text-gray-300">Spin to win points and amazing rewards!</p>
+          {error && (
+            <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
+              {error}
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -82,6 +159,12 @@ export default function SpinWheelPage() {
                 <CardDescription className="text-gray-300">
                   {spinsRemaining} spins remaining
                 </CardDescription>
+                {nextReset && (
+                  <div className="mt-2 text-sm text-gray-400">
+                    <Clock className="w-4 h-4 inline mr-1" />
+                    Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="text-center">
                 {/* Wheel */}
