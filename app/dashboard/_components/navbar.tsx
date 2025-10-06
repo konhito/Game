@@ -290,15 +290,19 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center py-6">
           {/* Logo/Brand */}
-          <Link href="/dashboard">
+          <Link href="/">
             <div 
               className="flex items-center space-x-3 cursor-pointer"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl font-bold text-white">₽</span>
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img 
+                  src="/Icon.png" 
+                  alt="PineCrest Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              PineCrest
+                PineCrest
               </span>
             </div>
           </Link>
@@ -400,11 +404,36 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-72" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1 p-2">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
+                  <div className="flex flex-col space-y-2 p-2">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.avatar || ""} alt={user.name} />
+                        <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-sm">
+                          {user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium leading-none truncate">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-emerald-600">{user.points || 0}</div>
+                        <div className="text-xs text-slate-500">Points</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-blue-600">{user.pineCoins || 0}</div>
+                        <div className="text-xs text-slate-500">Coins</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-purple-600">{user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'User'}</div>
+                        <div className="text-xs text-slate-500">Level</div>
+                      </div>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -446,10 +475,32 @@ export function Navbar() {
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
+                {/* Profile Section */}
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
-                  <Link href="/dashboard/profile" className="flex items-center gap-3 w-full">
+                  <Link href="/user" className="flex items-center gap-3 w-full">
                     <User className="h-4 w-4 text-emerald-600" />
-                    <span>Profile</span>
+                    <div className="flex flex-col">
+                      <span>My Profile</span>
+                      <span className="text-xs text-slate-500">View stats & activities</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                  <Link href="/dashboard/activities" className="flex items-center gap-3 w-full">
+                    <Target className="h-4 w-4 text-purple-600" />
+                    <div className="flex flex-col">
+                      <span>My Activities</span>
+                      <span className="text-xs text-slate-500">Task history & progress</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                  <Link href="/dashboard/stats" className="flex items-center gap-3 w-full">
+                    <BarChart3 className="h-4 w-4 text-green-600" />
+                    <div className="flex flex-col">
+                      <span>Detailed Stats</span>
+                      <span className="text-xs text-slate-500">Analytics & insights</span>
+                    </div>
                   </Link>
                 </DropdownMenuItem>
                 

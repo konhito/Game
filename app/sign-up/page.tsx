@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
+import { robustRedirect } from "@/lib/redirection-utils";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -27,6 +28,53 @@ export default function SignUpPage() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check for existing user on component mount and redirect if authenticated
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      try {
+        const user = authService.getUser();
+        const token = authService.getToken();
+        const isAuth = authService.isAuthenticated();
+        
+        console.log('Sign-up page: Auth check:', {
+          hasUser: !!user,
+          hasToken: !!token,
+          isAuth,
+          userEmail: user?.email
+        });
+        
+        if (user && token && isAuth) {
+          console.log('Sign-up page: User is authenticated, redirecting to dashboard');
+          
+          // Ensure cookies are properly set for the current user
+          authService.refreshCookies();
+          
+          // Redirect to dashboard immediately
+          await robustRedirect(router, {
+            target: "/dashboard",
+            delay: 100,
+            maxAttempts: 2,
+            fallbackMethods: ['router', 'location', 'replace']
+          });
+          
+          return; // Exit early to prevent showing the sign-up form
+        }
+        
+        // If not authenticated, show the sign-up form
+        console.log('Sign-up page: User not authenticated, showing sign-up form');
+        
+      } catch (error) {
+        console.error('Sign-up page: Auth check failed:', error);
+        // Continue to show sign-up form on error
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuthAndRedirect();
+  }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -92,6 +140,18 @@ export default function SignUpPage() {
     setError(error);
   };
 
+  // Show loading screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 relative overflow-hidden">
       {/* Floating Background Elements */}
@@ -145,8 +205,12 @@ export default function SignUpPage() {
             className="flex flex-col justify-center space-y-8"
           >
             <div className="text-center lg:text-left">
-              <div className="mx-auto lg:mx-0 w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl">
-                <span className="text-3xl text-white">₽</span>
+              <div className="mx-auto lg:mx-0 w-16 h-16 flex items-center justify-center mb-6">
+                <img 
+                  src="/Icon.png" 
+                  alt="PineCrest Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h1 className="text-4xl font-bold text-slate-800 mb-4">
                 Share and Earn Money

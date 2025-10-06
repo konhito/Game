@@ -44,6 +44,7 @@ export default function DashboardPage() {
     nextPeriod: number;
     hoursUntilReset: number;
   } | null>(null);
+  const [buyingSpin, setBuyingSpin] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {

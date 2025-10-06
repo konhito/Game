@@ -17,9 +17,9 @@ export default function SharedFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center  mb-4">
-              <div className="w-20 h-20 flex items-center justify-center">
+              <div className="w-12 h-12 flex items-center justify-center">
                 <img 
-                  src="/Logo1.png" 
+                  src="/Icon.png" 
                   alt="PineCrest Logo" 
                   className="w-full h-full object-contain"
                 />

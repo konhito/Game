@@ -26,20 +26,53 @@ export default function SignInPage() {
   const [success, setSuccess] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isUserSwitching, setIsUserSwitching] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // Check for existing user on component mount
+  // Check for existing user on component mount and redirect if authenticated
   useEffect(() => {
-    const user = authService.getUser();
-    if (user) {
-      setCurrentUser(user);
-      setIsUserSwitching(true);
-      
-      // Ensure cookies are properly set for the current user
-      // This prevents the dashboard layout from redirecting to sign-in
-      console.log('Sign-in page: Ensuring cookies are set for current user');
-      authService.refreshCookies();
-    }
-  }, []);
+    const checkAuthAndRedirect = async () => {
+      try {
+        const user = authService.getUser();
+        const token = authService.getToken();
+        const isAuth = authService.isAuthenticated();
+        
+        console.log('Sign-in page: Auth check:', {
+          hasUser: !!user,
+          hasToken: !!token,
+          isAuth,
+          userEmail: user?.email
+        });
+        
+        if (user && token && isAuth) {
+          console.log('Sign-in page: User is authenticated, redirecting to dashboard');
+          
+          // Ensure cookies are properly set for the current user
+          authService.refreshCookies();
+          
+          // Redirect to dashboard immediately
+          await robustRedirect(router, {
+            target: "/dashboard",
+            delay: 100,
+            maxAttempts: 2,
+            fallbackMethods: ['router', 'location', 'replace']
+          });
+          
+          return; // Exit early to prevent showing the sign-in form
+        }
+        
+        // If not authenticated, show the sign-in form
+        console.log('Sign-in page: User not authenticated, showing sign-in form');
+        
+      } catch (error) {
+        console.error('Sign-in page: Auth check failed:', error);
+        // Continue to show sign-in form on error
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuthAndRedirect();
+  }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -171,6 +204,18 @@ export default function SignInPage() {
     setError(error);
   };
 
+  // Show loading screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 relative overflow-hidden">
       {/* Floating Background Elements */}
@@ -225,8 +270,12 @@ export default function SignInPage() {
           >
             <Card className="bg-white/80 border-slate-200/50 backdrop-blur-sm shadow-xl">
               <CardHeader className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-2xl text-white">₽</span>
+                <div className="mx-auto w-12 h-12 flex items-center justify-center">
+                  <img 
+                    src="/Icon.png" 
+                    alt="PineCrest Logo" 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold text-slate-800">

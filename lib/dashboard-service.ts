@@ -708,6 +708,27 @@ class DashboardService {
     }
   }
 
+  // Buy additional spins
+  async buySpin(): Promise<ApiResponse<{ spinsRemaining: number; coinsRemaining: number; spinCost: number }>> {
+    try {
+      const response = await fetch(`${API_BASE}/api/users/buy-spin`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to buy spin');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('DashboardService: Error buying spin:', error);
+      throw new Error('Failed to buy spin');
+    }
+  }
+
   // Update user stats after claiming daily reward
   async updateUserStatsAfterDailyReward(points: number, coins: number): Promise<ApiResponse> {
     try {

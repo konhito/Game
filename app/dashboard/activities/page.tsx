@@ -68,6 +68,7 @@ interface TaskActivity {
   admin_notes?: string;
   reviewed_by?: number;
   reviewed_at?: string;
+  url?: string;
   ai_verification?: {
     verified: boolean;
     confidence: number;
@@ -89,6 +90,7 @@ interface AvailableTask {
   current_participants: number;
   status: string;
   deadline?: string;
+  url?: string;
   created_at: string;
 }
 
@@ -817,6 +819,21 @@ export default function ActivitiesPage() {
                     <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-100">
                       <Label className="text-sm font-medium text-emerald-700">Requirements</Label>
                       <p className="text-sm text-slate-700">{selectedTask.requirements}</p>
+                    </div>
+                  )}
+                  {'url' in selectedTask && selectedTask.url && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+                      <Label className="text-sm font-medium text-blue-700">Task URL</Label>
+                      <div className="mt-2">
+                        <a 
+                          href={selectedTask.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {selectedTask.url}
+                        </a>
+                      </div>
                     </div>
                   )}
                   <div className="flex items-center space-x-4">

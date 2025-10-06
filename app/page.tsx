@@ -92,9 +92,10 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden relative">
+      {/* Enhanced Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
+        {/* Main floating orbs */}
         <motion.div 
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-60"
           animate={{ 
@@ -119,11 +120,90 @@ export default function HomePage() {
           }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         />
+        
+        {/* Additional floating elements */}
+        <motion.div 
+          className="absolute top-20 left-1/4 w-32 h-32 bg-gradient-to-br from-emerald-300 to-green-300 rounded-full blur-2xl opacity-50"
+          animate={{ 
+            y: [0, -20, 0],
+            x: [0, 10, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-1/4 w-40 h-40 bg-gradient-to-br from-blue-300 to-cyan-300 rounded-full blur-2xl opacity-50"
+          animate={{ 
+            y: [0, 20, 0],
+            x: [0, -10, 0],
+            scale: [1, 0.9, 1]
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        
+        {/* Geometric shapes */}
+        <motion.div 
+          className="absolute top-1/3 right-1/3 w-16 h-16 border-2 border-emerald-200/30 rotate-45"
+          animate={{ 
+            rotate: [45, 405, 45],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-1/3 left-1/3 w-12 h-12 border-2 border-blue-200/30 rounded-full"
+          animate={{ 
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.6, 0.3]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute top-1/4 left-1/2 w-8 h-8 bg-gradient-to-br from-emerald-300/20 to-blue-300/20 rounded-full"
+          animate={{ 
+            y: [0, -30, 0],
+            x: [0, 20, 0]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        
+        {/* Floating particles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-emerald-400/40 rounded-full"
+            style={{
+              left: `${20 + i * 15}%`,
+              top: `${30 + i * 10}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.4, 0.8, 0.4],
+              scale: [1, 1.5, 1]
+            }}
+            transition={{
+              duration: 3 + i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5
+            }}
+          />
+        ))}
+        
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-100/20"></div>
       </div>
 
       {/* Hero Section */}
       <section className="relative py-24 px-4 text-center">
         <div className="max-w-6xl mx-auto relative z-10">
+          {/* Background card for better text readability */}
+          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-3xl -m-8"></div>
           {/* Main Title with Animation */}
           <motion.div 
             className="mb-12"
@@ -218,6 +298,8 @@ export default function HomePage() {
       {/* Features Section */}
       <section id="features" className="py-20 px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
+          {/* Subtle background enhancement */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 via-transparent to-blue-50/30 rounded-3xl -m-4"></div>
           <motion.div 
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -311,8 +393,10 @@ export default function HomePage() {
       </section>
 
       {/* News Section */}
-      <section className="py-20 px-4 relative z-10 bg-white/50">
+      <section className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
+          {/* Enhanced background pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/60 to-emerald-50/80 rounded-3xl -m-4"></div>
           <motion.div 
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
