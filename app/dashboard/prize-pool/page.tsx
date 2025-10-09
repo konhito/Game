@@ -1,0 +1,368 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trophy, Gift, Users, Loader2, Calendar, Crown, Target, TrendingUp, Check } from "lucide-react";
+import { authService } from "@/lib/auth-service";
+import { prizePoolService, PrizePool, UserParticipation } from "@/lib/prize-pool-service";
+
+export default function PrizePoolPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [prizePools, setPrizePools] = useState<PrizePool[]>([]);
+  const [userParticipations, setUserParticipations] = useState<UserParticipation[]>([]);
+  const [joiningPool, setJoiningPool] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = authService.getUser();
+      const token = authService.getToken();
+      
+      if (!user || !token) {
+        router.push("/sign-in");
+        return;
+      }
+      
+      setCurrentUser(user);
+      await fetchPrizePools();
+      await fetchUserParticipations();
+    };
+
+    checkAuth();
+  }, [router]);
+
+  const fetchPrizePools = async () => {
+    try {
+      setLoading(true);
+      const response = await prizePoolService.getAllPrizePools();
+      
+      if (response.success && response.data) {
+        setPrizePools(response.data.pools);
+      }
+    } catch (error) {
+      console.error("Error fetching prize pools:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserParticipations = async () => {
+    try {
+      const response = await prizePoolService.getUserParticipations();
+      
+      if (response.success && response.data) {
+        setUserParticipations(response.data.participations);
+      }
+    } catch (error) {
+      console.error("Error fetching participations:", error);
+    }
+  };
+
+  const handleJoinPool = async (poolId: number, entryFee: number) => {
+    if (!currentUser) return;
+    
+    try {
+      setJoiningPool(poolId);
+      
+      const response = await prizePoolService.joinPrizePool(poolId);
+      
+      if (response.success) {
+        // Refresh prize pools and participations
+        await fetchPrizePools();
+        await fetchUserParticipations();
+        
+        alert(`Successfully joined the prize pool! Entry fee: ₽${entryFee}`);
+      }
+    } catch (error: any) {
+      console.error("Error joining prize pool:", error);
+      alert(error.message || "Failed to join prize pool. Please try again.");
+    } finally {
+      setJoiningPool(null);
+    }
+  };
+
+  const isUserJoined = (poolId: number) => {
+    return userParticipations.some(p => p.pool_id === poolId);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-500 text-white">Active</Badge>;
+      case 'upcoming':
+        return <Badge className="bg-blue-500 text-white">Upcoming</Badge>;
+      case 'completed':
+        return <Badge className="bg-gray-500 text-white">Completed</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
+          <p className="text-slate-600">Loading prize pools...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12 relative">
+          <div className="absolute inset-0 flex items-center justify-center opacity-5">
+            <Gift className="w-96 h-96" />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                <Gift className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+                Prize Pools
+              </h1>
+            </div>
+            <p className="text-slate-600 text-lg">Join prize pools and win amazing rewards! 🎁</p>
+            <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>Compete with players</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                <span>Win big prizes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Prize Pools */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <Target className="w-6 h-6 text-green-500" />
+            Active Prize Pools
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {prizePools.filter(pool => pool.status === 'active').map((pool) => (
+              <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
+                    {getStatusBadge(pool.status)}
+                  </div>
+                  <CardDescription className="text-slate-600">
+                    {pool.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {/* Prize Amount */}
+                  <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Prize Pool</span>
+                      <Trophy className="w-5 h-5 text-yellow-600" />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
+                  </div>
+
+                  {/* Entry Fee */}
+                  <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-white border border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Entry Fee</span>
+                      <span className="text-lg font-bold text-emerald-600">₽{pool.entry_fee}</span>
+                    </div>
+                  </div>
+
+                  {/* Participants */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
+                      <span>Participants</span>
+                      <span className="font-medium">{pool.current_participants}/{pool.max_participants}</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${(pool.current_participants / pool.max_participants) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Dates */}
+                  <div className="mb-4 text-sm text-slate-600 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Ends: {formatDate(pool.end_date)}</span>
+                    </div>
+                  </div>
+
+                  {/* Join Button */}
+                  {isUserJoined(pool.id) ? (
+                    <Button 
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold"
+                      disabled
+                    >
+                      <Check className="w-5 h-5 mr-2" />
+                      Already Joined
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold"
+                      onClick={() => handleJoinPool(pool.id, pool.entry_fee)}
+                      disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants}
+                    >
+                      {joiningPool === pool.id ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Joining...
+                        </>
+                      ) : pool.current_participants >= pool.max_participants ? (
+                        'Pool Full'
+                      ) : (
+                        <>
+                          <Gift className="w-5 h-5 mr-2" />
+                          Join Pool (₽{pool.entry_fee})
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Prize Pools */}
+        {prizePools.filter(pool => pool.status === 'upcoming').length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-blue-500" />
+              Upcoming Prize Pools
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {prizePools.filter(pool => pool.status === 'upcoming').map((pool) => (
+                <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
+                      {getStatusBadge(pool.status)}
+                    </div>
+                    <CardDescription className="text-slate-600">
+                      {pool.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Prize Pool</span>
+                        <Crown className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
+                    </div>
+
+                    <div className="text-sm text-slate-600 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>Starts: {formatDate(pool.start_date)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        <span>Entry Fee: ₽{pool.entry_fee}</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold"
+                      disabled
+                    >
+                      Coming Soon
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Info Section */}
+        <Card className="bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 text-white border-0 shadow-2xl">
+          <CardContent className="p-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <Trophy className="w-6 h-6" />
+                  How It Works
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="font-bold">1</span>
+                    </div>
+                    <p>Choose a prize pool and pay the entry fee using your PineCoins</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="font-bold">2</span>
+                    </div>
+                    <p>Compete with other players by earning points and completing tasks</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="font-bold">3</span>
+                    </div>
+                    <p>Winners are selected by admin (random or by performance)</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="font-bold">4</span>
+                    </div>
+                    <p>Win amazing prizes in PineCoins!</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6" />
+                  Tips to Win
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <p>Complete daily tasks to boost your chances</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🔥</span>
+                    <p>Maintain your daily streak for bonus points</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🎮</span>
+                    <p>Spin the wheel daily for extra points</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>💪</span>
+                    <p>Stay active and engaged throughout the competition</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+

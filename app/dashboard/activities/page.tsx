@@ -175,7 +175,7 @@ export default function ActivitiesPage() {
   const fetchStartedTasks = async (userId: number) => {
     try {
       console.log('🔄 Fetching started tasks...');
-      const result = await taskService.getUserTaskHistory({ limit: 50 });
+      const result = await taskService.getUserTaskHistory({ limit: 10 });
       if (result.success) {
         // Filter only started tasks
         const startedTasksOnly = (result.data.tasks || [])

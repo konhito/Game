@@ -203,7 +203,7 @@ export default function HomePage() {
       <section className="relative py-24 px-4 text-center">
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Background card for better text readability */}
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-3xl -m-8"></div>
+          <div className="absolute inset-0 bg-white/10 rounded-3xl -m-8"></div>
           {/* Main Title with Animation */}
           <motion.div 
             className="mb-12"
