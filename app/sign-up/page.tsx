@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
+import InstagramAuthButton from "@/components/instagram-auth-button";
 import { robustRedirect } from "@/lib/redirection-utils";
 
 export default function SignUpPage() {
@@ -19,6 +20,7 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isInstagramLoading, setIsInstagramLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -465,12 +467,20 @@ export default function SignUpPage() {
                   </div>
                 </div>
 
-                <GoogleAuthButton
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  isLoading={isGoogleLoading}
-                  className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-emerald-400 transition-all duration-200"
-                />
+                <div className="space-y-3">
+                  <GoogleAuthButton
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    isLoading={isGoogleLoading}
+                    className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-emerald-400 transition-all duration-200"
+                  />
+                  <InstagramAuthButton
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    isLoading={isInstagramLoading}
+                    className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-pink-400 transition-all duration-200"
+                  />
+                </div>
 
                 <div className="text-center">
                   <span className="text-slate-600">Already have an account? </span>

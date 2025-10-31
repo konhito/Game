@@ -410,7 +410,113 @@ class AuthService {
     }
   }
 
-  // Logout user (works for both email and Google auth)
+  // Handle Instagram OAuth success
+  async handleInstagramAuth(instagramUser: any): Promise<void> {
+    try {
+      console.log('Instagram OAuth user data:', instagramUser);
+      
+      // Clear any existing authentication data before proceeding
+      console.log('Clearing existing authentication data before Instagram login...');
+      this.clearAuth();
+      
+      // Wait a moment for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Authenticate with the backend to get a proper JWT token
+      try {
+        console.log('Attempting backend Instagram OAuth authentication...');
+        console.log('API Base URL:', config.API_BASE);
+        console.log('Instagram User Data:', {
+          instagramId: instagramUser.id,
+          name: instagramUser.name || instagramUser.username || 'Instagram User',
+          email: instagramUser.email,
+          image: instagramUser.picture?.data?.url || instagramUser.picture,
+        });
+
+        const response = await fetch(`${config.API_BASE}/api/users/auth/instagram`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instagramId: instagramUser.id,
+            name: instagramUser.name || instagramUser.username || 'Instagram User',
+            email: instagramUser.email,
+            image: instagramUser.picture?.data?.url || instagramUser.picture,
+          }),
+        });
+
+        console.log('Backend response status:', response.status);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Backend response data:', result);
+          
+          if (result.success && result.token && result.user) {
+            console.log('Backend authentication successful:', result);
+            this.setAuth(result.token, result.user);
+            
+            // Wait a moment for cookies to be set
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Verify authentication state
+            const isAuth = this.isAuthenticated();
+            console.log('Post-backend auth verification:', isAuth);
+            
+            if (!isAuth) {
+              throw new Error('Authentication state not properly set after backend auth');
+            }
+            
+            return;
+          } else {
+            console.error('Backend authentication failed - invalid response format:', result);
+            throw new Error('Invalid response format from backend');
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('Backend authentication failed - HTTP error:', response.status, errorText);
+          throw new Error(`Backend authentication failed: ${response.status}`);
+        }
+      } catch (backendError) {
+        console.error('Backend authentication failed, using local fallback:', backendError);
+        
+        // Fallback: Create user object from Instagram data for local storage
+        const user: User = {
+          id: Date.now(), // Temporary ID for Instagram users
+          name: instagramUser.name || instagramUser.username || 'Instagram User',
+          email: instagramUser.email || `instagram_${instagramUser.id}@example.com`,
+          role: 'user',
+          image: instagramUser.picture?.data?.url || instagramUser.picture,
+          created_at: new Date().toISOString(),
+        };
+
+        // Generate a temporary token for Instagram users (fallback)
+        const token = `instagram_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        console.log('Setting Instagram auth (local fallback):', { token, user });
+        this.setAuth(token, user);
+        
+        // Wait a moment for cookies to be set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verify authentication state
+        const isAuth = this.isAuthenticated();
+        console.log('Post-fallback auth verification:', isAuth);
+        
+        if (!isAuth) {
+          throw new Error('Authentication state not properly set after fallback auth');
+        }
+      }
+      
+      // Log the successful Instagram authentication
+      console.log('Instagram OAuth successful - user authenticated:', this.isAuthenticated());
+    } catch (error) {
+      console.error('Instagram auth handling error:', error);
+      throw error;
+    }
+  }
+
+  // Logout user (works for both email and OAuth auth)
   logout(): void {
     this.clearAuth();
   }
