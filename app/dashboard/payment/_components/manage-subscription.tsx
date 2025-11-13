@@ -15,6 +15,7 @@ export default function ManageSubscription() {
           console.error("Failed to open customer portal:", error);
         }
       }}
+      className="transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
     >
       <ExternalLink className="h-4 w-4 mr-2" />
       Manage Subscription

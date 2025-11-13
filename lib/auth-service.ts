@@ -214,7 +214,12 @@ class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Registration failed');
+        // Handle validation errors with details array
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const errorMessage = errorData.details.map((d: any) => d.msg || d.message || d).join(', ');
+          throw new Error(errorMessage || errorData.error || 'Registration failed');
+        }
+        throw new Error(errorData.error || errorData.message || 'Registration failed');
       }
 
       const result: AuthResponse = await response.json();
@@ -239,7 +244,16 @@ class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Login failed');
+        // Handle validation errors with details array
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const errorMessage = errorData.details.map((d: any) => d.msg || d.message || d).join(', ');
+          throw new Error(errorMessage || errorData.error || 'Login failed');
+        }
+        // Handle error with details field (from login controller)
+        if (errorData.details) {
+          throw new Error(errorData.details || errorData.error || 'Login failed');
+        }
+        throw new Error(errorData.error || errorData.message || 'Login failed');
       }
 
       const result: AuthResponse = await response.json();

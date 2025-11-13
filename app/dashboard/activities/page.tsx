@@ -124,20 +124,20 @@ export default function ActivitiesPage() {
       const userData = JSON.parse(userStr);
       setUser(userData);
       
-      // Stagger API calls to prevent rate limiting
+      // Load data in parallel for better performance
       const loadData = async () => {
-        console.log('🔄 Loading dashboard data with staggered requests...');
+        console.log('🔄 Loading activities data in parallel...');
         
         try {
-          // Load available tasks
-          await fetchAvailableTasks();
+          // Load both in parallel
+          await Promise.all([
+            fetchAvailableTasks(),
+            fetchStartedTasks(userData.id)
+          ]);
           
-          // Load started tasks
-          await fetchStartedTasks(userData.id);
-          
-          console.log('✅ All dashboard data loaded');
+          console.log('✅ All activities data loaded');
         } catch (error) {
-          console.error('❌ Error loading dashboard data:', error);
+          console.error('❌ Error loading activities data:', error);
         } finally {
           // Always set loading to false, regardless of success or failure
           setLoading(false);
@@ -460,71 +460,75 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-blue-50/30">
+      <div className="p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300">
+                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:scale-105">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </Button>
               </Link>
             </div>
-            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-                  <ClipboardList className="h-6 w-6 text-white" />
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-slate-200/50 shadow-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <ClipboardList className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      Activities & Tasks
+                    </h1>
+                    <p className="text-slate-600 mt-1 text-sm sm:text-base">
+                      Discover tasks and submit proof to earn rewards
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-900">
-                    Available Tasks
-                  </h1>
-                  <p className="text-slate-600 mt-1">
-                    Discover and start new tasks to earn points and rewards
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full border border-emerald-200">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-emerald-700">Live Tasks</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full border border-slate-200">
-                  <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-slate-700">AI Verified</span>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-200 shadow-sm">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs sm:text-sm font-medium text-emerald-700">Live</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full border border-blue-200 shadow-sm">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs sm:text-sm font-medium text-blue-700">AI Verified</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <div className="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 </div>
-                <p className="text-red-700 font-medium">{error}</p>
+                <p className="text-red-700 font-medium text-sm">{error}</p>
               </div>
             </div>
           )}
 
           {/* Available Tasks Section */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
-                    <ClipboardList className="h-6 w-6 text-white" />
-                  </div>
-                  Available Tasks
-                  <Badge variant="secondary" className="ml-2 bg-emerald-100 text-emerald-700 border-emerald-200">
-                    {availableTasks.length} available
-                  </Badge>
-                </h2>
-                <p className="text-slate-600 mt-2">Discover new tasks and start earning rewards</p>
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-200/50 shadow-sm">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                    Available Tasks
+                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs sm:text-sm">
+                      {availableTasks.length}
+                    </Badge>
+                  </h2>
+                  <p className="text-slate-600 text-xs sm:text-sm mt-1">Start new tasks to earn points and rewards</p>
+                </div>
               </div>
               <Button 
                 size="sm" 
@@ -534,47 +538,48 @@ export default function ActivitiesPage() {
                   fetchAvailableTasks();
                 }}
                 disabled={refreshingTasks}
-                className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
-                {refreshingTasks ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className={`h-3 h-3 sm:h-4 sm:w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{refreshingTasks ? 'Refreshing...' : 'Refresh'}</span>
+                <span className="sm:hidden">{refreshingTasks ? '...' : 'Refresh'}</span>
               </Button>
             </div>
         
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {refreshingTasks && (
-                <div className="col-span-full text-center py-12">
+                <div className="col-span-full text-center py-16">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-                  <p className="text-slate-500 text-lg">Updating available tasks...</p>
+                  <p className="text-slate-500 text-base sm:text-lg">Updating available tasks...</p>
                 </div>
               )}
               {!refreshingTasks && availableTasks.map((task, index) => {
-                const colors = [
-                  'bg-emerald-500',
-                  'bg-slate-600',
-                  'bg-emerald-500',
-                  'bg-slate-600'
+                const gradientColors = [
+                  'from-emerald-500 to-emerald-600',
+                  'from-blue-500 to-blue-600',
+                  'from-purple-500 to-purple-600',
+                  'from-orange-500 to-orange-600'
                 ];
-                const cardColor = colors[index % colors.length];
+                const gradient = gradientColors[index % gradientColors.length];
                 
                 return (
-                  <Card key={task.id} className="group hover:shadow-lg transition-all duration-300 border border-slate-200 shadow-sm bg-white overflow-hidden">
-                    <CardContent className="p-6">
+                  <Card key={task.id} className="group hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-slate-200/50 shadow-md bg-white/90 backdrop-blur-sm overflow-hidden">
+                    <CardContent className="p-5 sm:p-6">
                       <div className="space-y-4">
                         {/* Task Header */}
                         <div className="space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-slate-900 text-lg line-clamp-2 group-hover:text-slate-700 transition-colors">
+                          <div className="flex items-start justify-between gap-2 sm:gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-slate-900 text-sm sm:text-base md:text-lg line-clamp-2 group-hover:text-emerald-600 transition-colors duration-300">
                                 {task.title}
                               </h3>
-                              <p className="text-sm text-slate-600 line-clamp-3 mt-2 leading-relaxed">
+                              <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 mt-1 sm:mt-2 leading-relaxed">
                                 {task.description}
                               </p>
                             </div>
-                            <div className="ml-3 flex-shrink-0">
-                              <div className={`w-12 h-12 ${cardColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                <TrendingUp className="h-6 w-6 text-white" />
+                            <div className="flex-shrink-0">
+                              <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
                               </div>
                             </div>
                           </div>
@@ -583,33 +588,33 @@ export default function ActivitiesPage() {
                         {/* Task Details */}
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 text-xs">
                               {task.platform}
                             </Badge>
-                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
                               {task.task_type}
                             </Badge>
                           </div>
                           
                           {/* Rewards & Stats */}
-                          <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
+                          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 space-y-3 border border-slate-200/50 group-hover:from-slate-100 group-hover:to-slate-50 transition-colors duration-300">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 ${cardColor} rounded-lg flex items-center justify-center`}>
+                                <div className={`w-8 h-8 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-sm`}>
                                   <TrendingUp className="h-4 w-4 text-white" />
                                 </div>
                                 <div>
                                   <p className="text-xs text-slate-500 font-medium">Reward</p>
-                                  <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
+                                  <p className="text-base sm:text-lg font-bold text-slate-900">{task.reward_points} pts</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
                                   <User className="h-4 w-4 text-white" />
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-xs text-slate-500 font-medium">Participants</p>
-                                  <p className="text-sm font-bold text-slate-900">
+                                  <p className="text-xs text-slate-500 font-medium">Joined</p>
+                                  <p className="text-xs sm:text-sm font-bold text-slate-900">
                                     {task.current_participants}/{task.max_participants || '∞'}
                                   </p>
                                 </div>
@@ -617,11 +622,11 @@ export default function ActivitiesPage() {
                             </div>
                             
                             {task.reward_coins > 0 && (
-                              <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
-                                <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center">
+                              <div className="flex items-center gap-2 pt-2 border-t border-slate-200/50">
+                                <div className="w-6 h-6 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center shadow-sm">
                                   <span className="text-xs text-white font-bold">₽</span>
                                 </div>
-                                <span className="text-sm font-medium text-slate-700">
+                                <span className="text-xs sm:text-sm font-semibold text-slate-700">
                                   +{task.reward_coins} PineCoins
                                 </span>
                               </div>
@@ -632,10 +637,10 @@ export default function ActivitiesPage() {
                         {/* Action Button */}
                         <Button 
                           onClick={() => openTaskDialog(task)} 
-                          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 transition-all duration-300"
+                          className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-2.5 sm:py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
                           size="lg"
                         >
-                          <Play className="h-5 w-5 mr-2" />
+                          <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                           Start Task
                         </Button>
                        </div>
@@ -645,17 +650,17 @@ export default function ActivitiesPage() {
                })}
            
               {!refreshingTasks && availableTasks.length === 0 && (
-                <Card className="col-span-full bg-white border border-slate-200 shadow-sm">
-                  <CardContent className="p-16 text-center">
-                    <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <ClipboardList className="h-12 w-12 text-white" />
+                <Card className="col-span-full bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg">
+                  <CardContent className="p-12 sm:p-16 text-center">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <ClipboardList className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-700 mb-2">No Available Tasks</h3>
-                    <p className="text-slate-500 text-lg mb-6">Check back later for new opportunities!</p>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-700 mb-2">No Available Tasks</h3>
+                    <p className="text-slate-500 text-sm sm:text-base mb-6">Check back later for new opportunities!</p>
                     <Button 
                       onClick={fetchAvailableTasks}
                       variant="outline" 
-                      className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                      className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:scale-105"
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check Again
@@ -667,76 +672,83 @@ export default function ActivitiesPage() {
           </div>
 
           {/* Started Tasks Section - For Proof Submission */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-white" />
-                  </div>
-                  Submit Proof
-                </h2>
-                <p className="text-slate-600 mt-2">Upload proof for tasks you've started</p>
+          <div className="space-y-4">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-200/50 shadow-sm">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                  <Upload className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                    Submit Proof
+                    {startedTasks.length > 0 && (
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs sm:text-sm">
+                        {startedTasks.length}
+                      </Badge>
+                    )}
+                  </h2>
+                  <p className="text-slate-600 text-xs sm:text-sm mt-1">Upload proof for tasks you've started</p>
+                </div>
               </div>
             </div>
         
             {startedTasks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {startedTasks.map((task, index) => {
-                  const colors = [
-                    'bg-slate-600',
-                    'bg-emerald-500',
-                    'bg-slate-600',
-                    'bg-emerald-500'
+                  const gradientColors = [
+                    'from-blue-500 to-blue-600',
+                    'from-purple-500 to-purple-600',
+                    'from-pink-500 to-pink-600',
+                    'from-indigo-500 to-indigo-600'
                   ];
-                  const cardColor = colors[index % colors.length];
+                  const gradient = gradientColors[index % gradientColors.length];
                   
                   return (
-                    <Card key={task.id} className="group bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300">
-                      <CardContent className="p-6">
+                    <Card key={task.id} className="group bg-white/90 backdrop-blur-sm border border-slate-200/50 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                      <CardContent className="p-5 sm:p-6">
                         <div className="space-y-4">
                           {/* Task Header */}
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-slate-900 text-lg mb-2">{task.title}</h3>
+                          <div className="flex items-start justify-between gap-2 sm:gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-slate-900 text-sm sm:text-base md:text-lg mb-2 group-hover:text-blue-600 transition-colors duration-300">{task.title}</h3>
                               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
+                                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 text-xs">
                                   {task.platform}
                                 </Badge>
-                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
                                   {task.task_type}
                                 </Badge>
-                                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
                                   Started
                                 </Badge>
                               </div>
                             </div>
-                            <div className="ml-3 flex-shrink-0">
-                              <div className={`w-12 h-12 ${cardColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                <Upload className="h-6 w-6 text-white" />
+                            <div className="flex-shrink-0">
+                              <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                                <Upload className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
                               </div>
                             </div>
                           </div>
                           
                           {/* Task Details */}
-                          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200/50 group-hover:from-slate-100 group-hover:to-slate-50 transition-colors duration-300">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 ${cardColor} rounded-lg flex items-center justify-center`}>
+                                <div className={`w-8 h-8 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-sm`}>
                                   <TrendingUp className="h-4 w-4 text-white" />
                                 </div>
                                 <div>
                                   <p className="text-xs text-slate-500 font-medium">Reward</p>
-                                  <p className="text-lg font-bold text-slate-900">{task.reward_points} pts</p>
+                                  <p className="text-base sm:text-lg font-bold text-slate-900">{task.reward_points} pts</p>
                                 </div>
                               </div>
                               {task.reward_coins > 0 && (
                                 <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center">
+                                  <div className="w-6 h-6 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center shadow-sm">
                                     <span className="text-xs text-white font-bold">₽</span>
                                   </div>
-                                  <span className="text-sm font-medium text-slate-700">
-                                    +{task.reward_coins} PineCoins
+                                  <span className="text-xs sm:text-sm font-semibold text-slate-700">
+                                    +{task.reward_coins}
                                   </span>
                                 </div>
                               )}
@@ -744,18 +756,18 @@ export default function ActivitiesPage() {
                           </div>
                           
                           {/* Started Date */}
-                          <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Clock className="h-4 w-4" />
+                          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
+                            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             <span>Started: {new Date(task.created_at).toLocaleDateString()}</span>
                           </div>
                           
                           {/* Submit Proof Button */}
                           <Button 
                             onClick={() => openProofDialog(task)} 
-                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 transition-all duration-300"
+                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 sm:py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
                             size="lg"
                           >
-                            <Upload className="h-5 w-5 mr-2" />
+                            <Upload className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                             Submit Proof
                           </Button>
                         </div>
@@ -765,28 +777,40 @@ export default function ActivitiesPage() {
                 })}
               </div>
             ) : (
-              <Card className="bg-white border border-slate-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Upload className="h-8 w-8 text-white" />
+              <Card className="bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg">
+                <CardContent className="p-8 sm:p-12">
+                  <div className="text-center py-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Ready to Submit Proof?</h3>
-                    <p className="text-slate-600 mb-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">Ready to Submit Proof?</h3>
+                    <p className="text-slate-600 text-sm sm:text-base mb-6 max-w-md mx-auto">
                       Once you start a task, it will appear here for proof submission.
                     </p>
-                    <div className="bg-slate-50 rounded-xl p-4 max-w-md mx-auto border border-slate-200">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 sm:p-6 max-w-lg mx-auto border border-blue-200/50 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
                           <span className="text-white text-xs font-bold">i</span>
                         </div>
                         <div className="text-left">
-                          <p className="text-sm font-medium text-slate-900 mb-1">How it works:</p>
-                          <ol className="text-xs text-slate-700 space-y-1">
-                            <li>1. Start a task from the available tasks above</li>
-                            <li>2. Complete the task requirements</li>
-                            <li>3. Return here to upload proof</li>
-                            <li>4. AI will verify your submission automatically</li>
+                          <p className="text-sm font-semibold text-slate-900 mb-2">How it works:</p>
+                          <ol className="text-xs sm:text-sm text-slate-700 space-y-2">
+                            <li className="flex items-start gap-2">
+                              <span className="font-bold text-blue-600">1.</span>
+                              <span>Start a task from the available tasks above</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="font-bold text-blue-600">2.</span>
+                              <span>Complete the task requirements</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="font-bold text-blue-600">3.</span>
+                              <span>Return here to upload proof</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="font-bold text-blue-600">4.</span>
+                              <span>AI will verify your submission automatically</span>
+                            </li>
                           </ol>
                         </div>
                       </div>
@@ -795,16 +819,16 @@ export default function ActivitiesPage() {
                 </CardContent>
               </Card>
             )}
-      </div>
+          </div>
 
           {/* Task Start Dialog */}
           <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border border-slate-200/50 shadow-2xl rounded-2xl mx-4 sm:mx-auto">
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-slate-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                <DialogTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
                   Start/Restart Task
                 </DialogTitle>
-                <DialogDescription className="text-slate-600">
+                <DialogDescription className="text-slate-600 text-sm sm:text-base">
                   Are you sure you want to start or restart this task? Once started, you'll need to complete it and submit proof.
                 </DialogDescription>
               </DialogHeader>
@@ -876,12 +900,12 @@ export default function ActivitiesPage() {
 
           {/* Proof Submission Dialog */}
           <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
-            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm border border-slate-200/50 shadow-2xl rounded-2xl mx-4 sm:mx-auto">
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-slate-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                <DialogTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
                   Submit Task Proof
                 </DialogTitle>
-                <DialogDescription className="text-slate-600">
+                <DialogDescription className="text-slate-600 text-sm sm:text-base">
                   Upload proof that you've completed the task. AI will automatically verify your submission.
                 </DialogDescription>
               </DialogHeader>

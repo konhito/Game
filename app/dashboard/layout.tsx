@@ -27,13 +27,13 @@ export default async function DashboardLayout({
       // This handles cases where cookies aren't accessible server-side but are available client-side
       return (
         <AuthWrapper>
-          <div className="min-h-screen bg-background">
+          <div className="min-h-screen bg-background overflow-x-hidden w-full">
             {/* Top Navigation Bar */}
             <Navbar />
             
             {/* Main Content Area */}
-            <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50">
-              <div className="p-6">
+            <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
+              <div className="p-6 w-full max-w-full">
                 {children}
               </div>
             </main>
@@ -43,13 +43,13 @@ export default async function DashboardLayout({
     }
 
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background overflow-x-hidden w-full">
         {/* Top Navigation Bar */}
         <Navbar />
         
         {/* Main Content Area */}
-        <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50">
-          <div className="p-6">
+        <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
+          <div className="p-6 w-full max-w-full">
             {children}
           </div>
         </main>
@@ -60,13 +60,13 @@ export default async function DashboardLayout({
     // Use client-side auth wrapper as fallback
     return (
       <AuthWrapper>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background overflow-x-hidden w-full">
           {/* Top Navigation Bar */}
           <Navbar />
           
           {/* Main Content Area */}
-          <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50">
-            <div className="p-6">
+          <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
+            <div className="p-6 w-full max-w-full">
               {children}
             </div>
           </main>

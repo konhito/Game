@@ -217,9 +217,19 @@ function SettingsContent() {
         onValueChange={handleTabChange}
         className="w-full max-w-4xl"
       >
-        <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+        <TabsList className="transition-all duration-300">
+          <TabsTrigger 
+            value="profile"
+            className="transition-all duration-300 hover:scale-105 data-[state=active]:scale-105"
+          >
+            Profile
+          </TabsTrigger>
+          <TabsTrigger 
+            value="billing"
+            className="transition-all duration-300 hover:scale-105 data-[state=active]:scale-105"
+          >
+            Billing
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -254,6 +264,7 @@ function SettingsContent() {
                         document.getElementById("profile-image-input")?.click()
                       }
                       disabled={uploadingImage}
+                      className="transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
                     >
                       {uploadingImage ? "Uploading..." : "Change Photo"}
                     </Button>
@@ -262,6 +273,7 @@ function SettingsContent() {
                         size="sm"
                         onClick={handleUploadProfilePicture}
                         disabled={uploadingImage}
+                        className="transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
                       >
                         Save
                       </Button>
@@ -274,6 +286,7 @@ function SettingsContent() {
                           setImagePreview(null);
                           setProfileImage(null);
                         }}
+                        className="transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
                       >
                         Cancel
                       </Button>
@@ -315,7 +328,12 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <Button onClick={handleUpdateProfile}>Save Changes</Button>
+              <Button 
+                onClick={handleUpdateProfile}
+                className="transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+              >
+                Save Changes
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

@@ -36,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`font-[-apple-system,BlinkMacSystemFont]antialiased`}>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden w-full">
+      <body className={`font-[-apple-system,BlinkMacSystemFont]antialiased overflow-x-hidden w-full`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

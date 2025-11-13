@@ -30,7 +30,9 @@ export default async function PaymentPage() {
                     features.
                   </p>
                   <Link href="/pricing">
-                    <Button>Subscribe Now</Button>
+                    <Button className="transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95">
+                      Subscribe Now
+                    </Button>
                   </Link>
                 </div>
               </div>

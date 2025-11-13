@@ -158,10 +158,10 @@ export default function UploadPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div
-              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
                 dragActive
-                  ? "border-primary bg-primary/5"
-                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                  ? "border-primary bg-primary/5 scale-105"
+                  : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/5 hover:scale-[1.02]"
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -264,7 +264,7 @@ export default function UploadPage() {
               {uploadedFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="group relative border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  className="group relative border rounded-lg overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer"
                 >
                   <div className="aspect-video relative bg-muted">
                     <Image
@@ -291,7 +291,7 @@ export default function UploadPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => navigator.clipboard.writeText(file.url)}
-                        className="flex-1 text-xs"
+                        className="flex-1 text-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
                       >
                         Copy URL
                       </Button>
@@ -299,7 +299,7 @@ export default function UploadPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => window.open(file.url, "_blank")}
-                        className="flex-1 text-xs"
+                        className="flex-1 text-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
                       >
                         Open
                       </Button>
@@ -309,7 +309,7 @@ export default function UploadPage() {
                     size="sm"
                     variant="ghost"
                     onClick={() => removeFile(file.id)}
-                    className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background"
+                    className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-background/80 hover:bg-background hover:scale-110 active:scale-95"
                   >
                     <X className="h-4 w-4" />
                   </Button>

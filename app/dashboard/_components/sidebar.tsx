@@ -188,11 +188,12 @@ export function Sidebar({ className, userStats }: SidebarProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-background/95 lg:backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:border-r lg:shadow-sm">
+      {/* Desktop Sidebar - Fixed, not resizable */}
+      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-background/95 lg:backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:border-r lg:shadow-sm lg:left-0">
         <SidebarContent />
       </div>
-      <div className="hidden lg:block lg:w-64" />
+      {/* Spacer for fixed sidebar */}
+      <div className="hidden lg:block lg:w-64 flex-shrink-0" />
     </>
   );
 }

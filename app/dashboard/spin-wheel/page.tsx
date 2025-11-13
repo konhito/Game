@@ -352,9 +352,9 @@ export default function SpinWheelPage() {
                 <Button 
                   onClick={spinWheel}
                   disabled={spinsRemaining <= 0 || isSpinning}
-                  className={`w-40 h-16 text-xl font-black rounded-full shadow-2xl transition-all duration-300 ${
+                  className={`w-40 h-16 text-xl font-black rounded-full shadow-2xl transition-all duration-300 relative overflow-hidden group ${
                     spinsRemaining > 0 && !isSpinning
-                      ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-300 hover:via-orange-400 hover:to-red-400 text-white hover:scale-105 hover:shadow-yellow-500/50'
+                      ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-300 hover:via-orange-400 hover:to-red-400 text-white hover:scale-110 hover:shadow-yellow-500/50 active:scale-95'
                       : 'bg-gray-500 cursor-not-allowed'
                   }`}
                 >
@@ -453,7 +453,7 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="space-y-4">
                   {spinPrices.map((offer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:scale-105 transition-transform duration-200">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:scale-105 hover:shadow-lg hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
                       <div>
                         <p className="font-black text-lg text-white">{offer.spins} Spins</p>
                         <p className="text-sm text-purple-300 font-semibold">
@@ -465,7 +465,7 @@ export default function SpinWheelPage() {
                         <Button 
                           onClick={() => buySpins(offer.spins, offer.price)}
                           size="sm"
-                          className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold rounded-full px-6 py-2 shadow-lg hover:shadow-green-500/50"
+                          className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold rounded-full px-6 py-2 shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-110 active:scale-95"
                         >
                           💎 Buy
                         </Button>
@@ -490,7 +490,7 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-3">
                   {wheelSegments.map((segment) => (
-                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg hover:scale-105 transition-transform duration-200`}>
+                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 cursor-pointer`}>
                       <div className="text-3xl mb-2 drop-shadow-lg">{segment.icon}</div>
                       <p className="text-lg font-black text-white">{segment.label}</p>
                       <p className="text-xs text-white/80 font-semibold">{segment.points} PTS</p>

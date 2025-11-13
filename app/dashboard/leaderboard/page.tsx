@@ -135,7 +135,7 @@ export default function LeaderboardPage() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition-all duration-300 hover:scale-110 hover:rotate-180 active:scale-95"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               </Button>
@@ -235,7 +235,7 @@ export default function LeaderboardPage() {
                     leaderboardData.slice(0, 10).map((player, index) => (
                       <div 
                         key={player.id} 
-                        className={`flex items-center justify-between p-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                        className={`flex items-center justify-between p-5 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer ${
                           player.rank === 1 
                             ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 shadow-md' 
                             : player.rank === 2 
@@ -325,7 +325,7 @@ export default function LeaderboardPage() {
               <CardContent className="p-6">
                 <div className="space-y-3">
                   {weeklyRewards.map((reward, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-md transition-all duration-200">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-lg hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <Badge className={`${reward.color} text-white shadow-sm`}>
                           {reward.rank === "Random" ? "🎲" : `#${reward.rank}`}
@@ -429,7 +429,7 @@ export default function LeaderboardPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
-                    className="bg-white text-emerald-600 hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+                    className="bg-white text-emerald-600 hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
                     onClick={() => router.push('/dashboard')}
                   >
                     <Trophy className="w-5 h-5 mr-2" />
@@ -437,7 +437,7 @@ export default function LeaderboardPage() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm font-bold text-lg px-8 py-6 rounded-xl hover:scale-105 transition-all duration-200"
+                    className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm font-bold text-lg px-8 py-6 rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
                     onClick={() => router.push('/dashboard/activities')}
                   >
                     <TrendingUp className="w-5 h-5 mr-2" />

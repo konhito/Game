@@ -177,7 +177,7 @@ export default function SharedHeader() {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link href="/sign-in">
-                  <Button variant="outline" className="border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 font-semibold px-4 py-2 rounded-xl transition-all duration-200">
+                  <Button variant="outline" className="border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 font-semibold px-4 py-2 rounded-xl transition-all duration-200">
                     Sign In
                   </Button>
                 </Link>
@@ -240,7 +240,7 @@ export default function SharedHeader() {
               ) : (
                 <div className="space-y-3">
                   <Link href="/sign-in" className="block">
-                    <Button variant="outline" className="w-full border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 font-semibold py-3 rounded-xl">
+                    <Button variant="outline" className="w-full border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 font-semibold py-3 rounded-xl transition-all duration-200">
                       Sign In
                     </Button>
                   </Link>

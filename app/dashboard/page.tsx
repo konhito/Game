@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Trophy, Gift, Users, Loader2, RefreshCw, ArrowRight, Star, TrendingUp, Activity, Calendar, Clock, Target, Zap } from "lucide-react";
 import { dashboardService, UserStats, UserActivity, LeaderboardEntry } from "@/lib/dashboard-service";
 import config from "@/lib/config";
+import { OnboardingTour } from "@/components/dashboard/onboarding-tour";
 
 interface DashboardData {
   userStats: UserStats | null;
@@ -167,8 +168,22 @@ export default function DashboardPage() {
     try {
       setLoading(true);
 
-      // Fetch user stats
-      const statsResponse = await dashboardService.getUserStats(userId);
+      // Fetch all data in parallel for better performance
+      const [
+        statsResponse,
+        activitiesResponse,
+        leaderboardResponse,
+        tasksResponse,
+        historyResponse
+      ] = await Promise.all([
+        dashboardService.getUserStats(userId),
+        dashboardService.getUserActivities(userId, 5),
+        dashboardService.getLeaderboard(10),
+        dashboardService.getAvailableTasks(),
+        dashboardService.getUserTaskHistory(userId)
+      ]);
+
+      // Process user stats
       if (statsResponse.success && statsResponse.data.users && statsResponse.data.users.length > 0) {
         const userStats = statsResponse.data.users[0];
         setDashboardData(prev => ({ ...prev, userStats }));
@@ -179,29 +194,19 @@ export default function DashboardPage() {
           const today = new Date();
           const isSameDay = lastClaimDate.toDateString() === today.toDateString();
           setDailyRewardClaimed(isSameDay);
-          console.log('Daily reward claim status:', {
-            lastClaimDate: lastClaimDate.toDateString(),
-            today: today.toDateString(),
-            isSameDay,
-            claimed: isSameDay
-          });
         } else {
           setDailyRewardClaimed(false);
-          console.log('No previous daily claim date found, reward available');
         }
       }
 
-      // Fetch recent activities
-      const activitiesResponse = await dashboardService.getUserActivities(userId, 5);
+      // Process activities
       if (activitiesResponse.success) {
         setDashboardData(prev => ({ ...prev, recentActivities: activitiesResponse.data.activities || [] }));
       }
 
-      // Fetch leaderboard
-      const leaderboardResponse = await dashboardService.getLeaderboard(10);
+      // Process leaderboard
       if (leaderboardResponse.success) {
         const leaderboard = leaderboardResponse.data.users || [];
-        // Add rank to leaderboard entries
         const rankedLeaderboard = leaderboard.map((entry: any, index: number) => ({
           ...entry,
           rank: index + 1
@@ -209,24 +214,19 @@ export default function DashboardPage() {
         setDashboardData(prev => ({ ...prev, leaderboard: rankedLeaderboard }));
       }
 
-      // Fetch available tasks
-      const tasksResponse = await dashboardService.getAvailableTasks();
+      // Process tasks
       if (tasksResponse.success) {
         setDashboardData(prev => ({ ...prev, availableTasks: tasksResponse.data.tasks || [] }));
       }
 
-      // Fetch user task history
-      const historyResponse = await dashboardService.getUserTaskHistory(userId);
+      // Process task history
       if (historyResponse.success) {
         setDashboardData(prev => ({ ...prev, userTaskHistory: historyResponse.data.tasks || [] }));
       }
 
-      // Log dashboard view activity
-      try {
-        await dashboardService.logActivity('dashboard_view', 'Viewed dashboard overview');
-      } catch (error) {
-        console.error('Failed to log dashboard view activity:', error);
-      }
+      // Log dashboard view activity (async, don't block)
+      dashboardService.logActivity('dashboard_view', 'Viewed dashboard overview')
+        .catch(error => console.error('Failed to log dashboard view activity:', error));
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -388,9 +388,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
-        <div className="p-6">
-          <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-x-hidden">
+        <div className="p-6 w-full">
+          <div className="max-w-7xl mx-auto w-full">
             {/* Welcome Header Skeleton */}
             <div className="text-center mb-8">
               <div className="h-10 bg-slate-200 rounded-lg w-96 mx-auto mb-2 animate-pulse"></div>
@@ -513,29 +513,27 @@ export default function DashboardPage() {
   const nextRewardAt = Math.max(0, 2500 - safeTotalPoints);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
-
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-x-hidden">
       {/* Main Content */}
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="p-3 sm:p-4 md:p-6 w-full">
+        <div className="max-w-7xl mx-auto w-full">
           {/* Welcome Header with Live Stats */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+            className="text-center mb-4 sm:mb-6 md:mb-8"
           >
-            <h2 className="text-4xl font-bold text-slate-800 mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 mb-2 px-2">
               Welcome Back, {user?.name || 'Player'}! 👋
             </h2>
-            <p className="text-slate-600 text-lg">Ready to climb the leaderboard and earn PineCoins?</p>
+            <p className="text-slate-600 text-sm sm:text-base md:text-lg px-2">Ready to climb the leaderboard and earn PineCoins?</p>
             
             {/* Live Stats Display in Welcome Header */}
             
 
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
-              <Calendar className="w-4 h-4" />
+            <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 px-2">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Last login: {safeLastLoginDate ? new Date(safeLastLoginDate).toLocaleDateString() : 'Today'}</span>
             </div>
           </motion.div>
@@ -545,7 +543,8 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8"
+            data-tour="stats-cards"
           >
             {/* Total Points Card */}
             <motion.div
@@ -554,14 +553,14 @@ export default function DashboardPage() {
             >
               <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                <CardHeader className="pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium text-blue-100 flex items-center gap-2">
-                    <Star className="w-4 h-4" />
+                <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-blue-100 flex items-center gap-2">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4" />
                     Total Points
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                                     <div className="text-3xl font-bold mb-2">{safeTotalPoints.toLocaleString()}</div>
+                <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{safeTotalPoints.toLocaleString()}</div>
                   <Progress 
                                          value={Math.min(100, (safeTotalPoints / 2500) * 100)} 
                     className="h-2 bg-blue-400/30" 
@@ -580,14 +579,14 @@ export default function DashboardPage() {
             >
               <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                <CardHeader className="pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium text-emerald-100 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
+                <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-emerald-100 flex items-center gap-2">
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                     Weekly Points
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                                     <div className="text-3xl font-bold mb-2">{safeWeeklyPoints.toLocaleString()}</div>
+                <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{safeWeeklyPoints.toLocaleString()}</div>
                   <div className="flex items-center gap-2 text-emerald-100">
                     <div className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></div>
                     <span className="text-xs">This week's progress</span>
@@ -603,14 +602,14 @@ export default function DashboardPage() {
             >
               <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                <CardHeader className="pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium text-amber-100 flex items-center gap-2">
-                    <Trophy className="h-4 w-4" />
+                <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-amber-100 flex items-center gap-2">
+                    <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
                     Current Rank
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="text-3xl font-bold mb-2">
+                <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">
                     #{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}
                   </div>
                   <div className="flex items-center gap-2 text-amber-100">
@@ -628,14 +627,14 @@ export default function DashboardPage() {
             >
               <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                <CardHeader className="pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium text-violet-100 flex items-center gap-2">
-                    <span className="text-lg">₽</span>
+                <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-violet-100 flex items-center gap-2">
+                    <span className="text-base sm:text-lg">₽</span>
                     PineCoins
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                                     <div className="text-3xl font-bold mb-2">₽{Number(safeTotalCoins).toFixed(2)}</div>
+                <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">₽{Number(safeTotalCoins).toFixed(2)}</div>
                   <div className="flex items-center gap-2 text-violet-100">
                     <div className="w-2 h-2 bg-violet-200 rounded-full animate-pulse"></div>
                     <span className="text-xs">Available balance</span>
@@ -666,66 +665,68 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid lg:grid-cols-3 gap-6 mb-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-6 md:mb-8"
           >
             {/* Spinning Wheel Card */}
             <motion.div
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden" data-tour="spin-wheel-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Target className="w-6 h-6 text-white" />
+                <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-lg">Quick Spin</CardTitle>
-                      <CardDescription className="text-slate-600">
+                    <div className="min-w-0">
+                      <CardTitle className="text-slate-800 text-base sm:text-lg">Quick Spin</CardTitle>
+                      <CardDescription className="text-slate-600 text-xs sm:text-sm">
                         Spin for instant rewards!
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4 relative z-10">
+                <CardContent className="space-y-3 sm:space-y-4 relative z-10 px-4 sm:px-6 pb-4 sm:pb-6">
                   <div className="text-center">
-                    <div className="text-4xl mb-3">🎯</div>
-                    <p className="text-sm text-slate-600 mb-2">
+                    <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🎯</div>
+                    <p className="text-xs sm:text-sm text-slate-600 mb-2">
                       {dashboardData?.userStats?.spins_remaining || 0} spins remaining
                     </p>
                     {nextReset && (
-                      <p className="text-xs text-slate-500 mb-2">
+                      <p className="text-xs text-slate-500 mb-2 px-2">
                         <Clock className="w-3 h-3 inline mr-1" />
                         Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
                       </p>
                     )}
                     {dashboardData?.userStats?.current_streak >= 3 && (
-                      <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-medium px-3 py-1">
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm">
                         🔥 {safeCurrentStreak} Day Streak!
                       </Badge>
                     )}
                   </div>
                   <Button 
-                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-2.5 sm:py-3 text-sm sm:text-base rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
                     onClick={handleWheelSpin}
                     disabled={spinning || !dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0}
                   >
                     {spinning ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                        Spinning...
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin mr-2" />
+                        <span className="hidden sm:inline">Spinning...</span>
+                        <span className="sm:hidden">Spin...</span>
                       </>
                     ) : (
                       <>
-                        <Target className="w-5 h-5 mr-2" />
-                        Quick Spin
+                        <Target className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                        <span className="hidden sm:inline">Quick Spin</span>
+                        <span className="sm:hidden">Spin</span>
                       </>
                     )}
                   </Button>
-                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-3 border border-emerald-200/50">
+                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-emerald-200/50">
                     <div className="font-medium mb-1">🎁 Win 20-150 points + PineCoins!</div>
-                    <div className="text-slate-500">Daily bonus available</div>
+                    <div className="text-slate-500 text-xs">Daily bonus available</div>
                   </div>
                 </CardContent>
               </Card>
@@ -736,17 +737,17 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.1 }}
             >
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden" data-tour="daily-reward-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <Calendar className="w-6 h-6 text-white" />
+                <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <div>
-                        <CardTitle className="text-slate-800 text-lg">Daily Login</CardTitle>
-                        <CardDescription className="text-slate-600">
+                      <div className="min-w-0">
+                        <CardTitle className="text-slate-800 text-base sm:text-lg">Daily Login</CardTitle>
+                        <CardDescription className="text-slate-600 text-xs sm:text-sm">
                           Claim your daily rewards
                         </CardDescription>
                       </div>
@@ -755,19 +756,19 @@ export default function DashboardPage() {
                       variant="ghost"
                       size="sm"
                       onClick={refreshDailyRewardStatus}
-                      className="text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                      className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 hover:scale-110 hover:rotate-180 active:scale-95 flex-shrink-0"
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4 relative z-10">
+                <CardContent className="space-y-3 sm:space-y-4 relative z-10 px-4 sm:px-6 pb-4 sm:pb-6">
                   <div className="text-center">
-                    <div className="text-4xl mb-3">🌅</div>
-                    <p className="text-sm text-slate-600 mb-2">
+                    <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🌅</div>
+                    <p className="text-xs sm:text-sm text-slate-600 mb-2">
                       {safeCurrentStreak} day streak
                     </p>
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium px-3 py-1">
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm">
                       +{20 + Math.min(safeCurrentStreak * 5, 50)} points today
                     </Badge>
                   </div>
@@ -784,34 +785,36 @@ export default function DashboardPage() {
                   )}
                   
                   <Button 
-                    className={`w-full font-bold py-3 rounded-xl shadow-lg transition-all duration-200 ${
+                    className={`w-full font-bold py-2.5 sm:py-3 text-sm sm:text-base rounded-xl shadow-lg transition-all duration-300 relative overflow-hidden group ${
                       dailyRewardClaimed 
                         ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
                         : claimingDailyReward
                         ? 'bg-blue-400 cursor-not-allowed text-white'
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl transform hover:scale-105'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl transform hover:scale-105 active:scale-95'
                     }`}
                     onClick={handleDailyReward}
                     disabled={dailyRewardClaimed || claimingDailyReward}
                   >
                     {claimingDailyReward ? (
                       <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Claiming...
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                        <span className="hidden sm:inline">Claiming...</span>
+                        <span className="sm:hidden">Claim...</span>
                       </>
                     ) : (
                       <>
-                        <Calendar className="w-5 h-5 mr-2" />
-                        {dailyRewardClaimed ? 'Already Claimed Today' : 'Claim Daily Reward'}
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                        <span className="hidden sm:inline">{dailyRewardClaimed ? 'Already Claimed Today' : 'Claim Daily Reward'}</span>
+                        <span className="sm:hidden">{dailyRewardClaimed ? 'Claimed' : 'Claim'}</span>
                       </>
                     )}
                   </Button>
                   
-                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-3 border border-blue-200/50">
+                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-blue-200/50">
                     <div className="font-medium mb-1">
                       {dailyRewardClaimed ? '✅ Claimed today!' : '⏰ Come back tomorrow!'}
                     </div>
-                    <div className="text-slate-500">
+                    <div className="text-slate-500 text-xs">
                       {dailyRewardClaimed ? 'Great job maintaining your streak!' : 'Streak bonus increases daily'}
                     </div>
                     {dailyRewardClaimed && (
@@ -829,31 +832,31 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-indigo-50 to-purple-100 border-indigo-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <Card className="bg-gradient-to-br from-indigo-50 to-purple-100 border-indigo-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden" data-tour="progress-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <TrendingUp className="w-6 h-6 text-white" />
+                <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-lg">Progress & Goals</CardTitle>
-                      <CardDescription className="text-slate-600">
+                    <div className="min-w-0">
+                      <CardTitle className="text-slate-800 text-base sm:text-lg">Progress & Goals</CardTitle>
+                      <CardDescription className="text-slate-600 text-xs sm:text-sm">
                         Track your achievements
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4 relative z-10">
+                <CardContent className="space-y-3 sm:space-y-4 relative z-10 px-4 sm:px-6 pb-4 sm:pb-6">
                   {/* Level Progress */}
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-slate-700">Current Level</span>
-                      <span className="text-sm font-bold text-indigo-600">Level {Math.floor((safeTotalPoints || 0) / 100)}</span>
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-xs sm:text-sm font-medium text-slate-700">Current Level</span>
+                      <span className="text-xs sm:text-sm font-bold text-indigo-600 whitespace-nowrap">Level {Math.floor((safeTotalPoints || 0) / 100)}</span>
                     </div>
                     <Progress 
                       value={((safeTotalPoints || 0) % 100)} 
-                      className="h-2 bg-indigo-200" 
+                      className="h-1.5 sm:h-2 bg-indigo-200" 
                     />
                     <p className="text-xs text-slate-500">
                       {100 - ((safeTotalPoints || 0) % 100)} points to next level
@@ -862,13 +865,13 @@ export default function DashboardPage() {
 
                   {/* Weekly Goal */}
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-slate-700">Weekly Goal</span>
-                      <span className="text-sm font-bold text-purple-600">{safeWeeklyPoints}/500 pts</span>
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-xs sm:text-sm font-medium text-slate-700">Weekly Goal</span>
+                      <span className="text-xs sm:text-sm font-bold text-purple-600 whitespace-nowrap">{safeWeeklyPoints}/500 pts</span>
                     </div>
                     <Progress 
                       value={(safeWeeklyPoints || 0) / 5} 
-                      className="h-2 bg-purple-200" 
+                      className="h-1.5 sm:h-2 bg-purple-200" 
                     />
                     <p className="text-xs text-slate-500">
                       {500 - (safeWeeklyPoints || 0)} points remaining this week
@@ -914,62 +917,64 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid lg:grid-cols-2 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6"
           >
             {/* Enhanced Leaderboard */}
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden" data-tour="leaderboard-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <Trophy className="w-6 h-6 text-white" />
+                <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-lg">Weekly Leaderboard</CardTitle>
-                      <CardDescription className="text-slate-600">
+                    <div className="min-w-0">
+                      <CardTitle className="text-slate-800 text-base sm:text-lg">Weekly Leaderboard</CardTitle>
+                      <CardDescription className="text-slate-600 text-xs sm:text-sm">
                         Top performers this week
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="space-y-3">
+                <CardContent className="relative z-10 px-4 sm:px-6 pb-4 sm:pb-6">
+                  <div className="space-y-2 sm:space-y-3">
                     {(dashboardData.leaderboard || []).slice(0, 5).map((player, index) => (
                       <motion.div 
                         key={player.id} 
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="flex items-center justify-between p-4 rounded-xl bg-white/60 hover:bg-white/80 transition-all duration-200 border border-amber-200/50 hover:border-amber-300/50 hover:scale-105"
+                        className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-amber-200/50 hover:border-amber-400/70 hover:scale-[1.02] hover:shadow-md cursor-pointer gap-2"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                          <span className="text-2xl sm:text-3xl flex-shrink-0">
                             {index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}️⃣`}
                           </span>
-                          <div>
-                            <p className="font-semibold text-slate-800">{player.name}</p>
-                            <p className="text-sm text-slate-500">#{player.rank || index + 1}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{player.name}</p>
+                            <p className="text-xs sm:text-sm text-slate-500">#{player.rank || index + 1}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-slate-800 text-lg">{(player.total_points || 0).toLocaleString()}</p>
-                          <p className="text-sm text-slate-500">+{(player.weekly_points || 0)} this week</p>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-bold text-slate-800 text-base sm:text-lg">{(player.total_points || 0).toLocaleString()}</p>
+                          <p className="text-xs sm:text-sm text-slate-500">+{(player.weekly_points || 0)} this week</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
-                  <div className="mt-6 text-center">
+                  <div className="mt-4 sm:mt-6 text-center">
                     <Button 
                       variant="outline" 
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200"
+                      size="sm"
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm"
                       onClick={() => router.push('/dashboard/leaderboard')}
                     >
-                      <Trophy className="w-4 h-4 mr-2" />
-                      View Full Leaderboard
+                      <Trophy className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                      <span className="hidden sm:inline">View Full Leaderboard</span>
+                      <span className="sm:hidden">Leaderboard</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -981,23 +986,23 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden" data-tour="activities-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <TrendingUp className="w-6 h-6" />
+                <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-lg">Recent Activities</CardTitle>
-                      <CardDescription className="text-slate-600">
+                    <div className="min-w-0">
+                      <CardTitle className="text-slate-800 text-base sm:text-lg">Recent Activities</CardTitle>
+                      <CardDescription className="text-slate-600 text-xs sm:text-sm">
                         Your latest point earnings
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="space-y-3">
+                <CardContent className="relative z-10 px-4 sm:px-6 pb-4 sm:pb-6">
+                  <div className="space-y-2 sm:space-y-3">
                     {(dashboardData.recentActivities || []).length > 0 ? (
                       (dashboardData.recentActivities || []).map((activity, index) => (
                         <motion.div 
@@ -1005,32 +1010,33 @@ export default function DashboardPage() {
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className="flex items-center justify-between p-4 rounded-xl bg-white/60 hover:bg-white/80 transition-all duration-200 border border-emerald-200/50 hover:border-emerald-300/50 hover:scale-105"
+                          className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-emerald-200/50 hover:border-emerald-400/70 hover:scale-[1.02] hover:shadow-md cursor-pointer gap-2"
                         >
-                          <div>
-                            <p className="font-semibold text-slate-800">{activity.description || activity.activity_type}</p>
-                            <p className="text-sm text-slate-500 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {new Date(activity.created_at).toLocaleDateString()}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{activity.description || activity.activity_type}</p>
+                            <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{new Date(activity.created_at).toLocaleDateString()}</span>
                             </p>
                           </div>
-                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium px-3 py-1">
-                            +{(activity.points || 10)} points
+                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0">
+                            +{(activity.points || 10)} pts
                           </Badge>
                         </motion.div>
                       ))
                     ) : (
-                      <div className="text-center py-8">
-                        <div className="text-4xl mb-3">📊</div>
-                        <p className="text-slate-500 font-medium">No activities yet</p>
-                        <p className="text-slate-400 text-sm">Start earning points to see your history</p>
+                      <div className="text-center py-6 sm:py-8">
+                        <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">📊</div>
+                        <p className="text-slate-500 font-medium text-sm sm:text-base">No activities yet</p>
+                        <p className="text-slate-400 text-xs sm:text-sm">Start earning points to see your history</p>
                       </div>
                     )}
                   </div>
-                  <div className="mt-6 text-center">
-                    <Button variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200">
-                      <TrendingUp className="w-4 w-4 mr-2" />
-                      View All Activities
+                  <div className="mt-4 sm:mt-6 text-center">
+                    <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm">
+                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                      <span className="hidden sm:inline">View All Activities</span>
+                      <span className="sm:hidden">Activities</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -1043,35 +1049,35 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-8 space-y-6"
+            className="mt-6 sm:mt-8 space-y-4 sm:space-y-6"
           >
             {/* Achievements Section */}
             <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="pt-6 relative z-10">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Trophy className="w-8 h-8 text-white" />
+              <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6 pb-4 sm:pb-6 relative z-10">
+                <div className="text-center mb-4 sm:mb-6">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                    <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Your Achievements</h3>
-                  <p className="text-slate-600">Track your progress and unlock rewards</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Your Achievements</h3>
+                  <p className="text-slate-600 text-sm sm:text-base">Track your progress and unlock rewards</p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-white/60 rounded-lg p-4 text-center border border-yellow-200/50">
-                    <div className="text-2xl mb-2">🔥</div>
-                    <p className="font-semibold text-slate-800">{safeCurrentStreak} Day Streak</p>
-                    <p className="text-sm text-slate-600">Keep it going!</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                    <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">🔥</div>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{safeCurrentStreak} Day Streak</p>
+                    <p className="text-xs sm:text-sm text-slate-600">Keep it going!</p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-4 text-center border border-yellow-200/50">
-                    <div className="text-2xl mb-2">⭐</div>
-                    <p className="font-semibold text-slate-800">{Math.floor((safeTotalPoints || 0) / 100)} Level</p>
-                    <p className="text-sm text-slate-600">Every 100 points</p>
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                    <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">⭐</div>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{Math.floor((safeTotalPoints || 0) / 100)} Level</p>
+                    <p className="text-xs sm:text-sm text-slate-600">Every 100 points</p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-4 text-center border border-yellow-200/50">
-                    <div className="text-2xl mb-2">🎯</div>
-                    <p className="font-semibold text-slate-800">{safeSpinsRemaining} Spins</p>
-                    <p className="text-sm text-slate-600">Available today</p>
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                    <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">🎯</div>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{safeSpinsRemaining} Spins</p>
+                    <p className="text-xs sm:text-sm text-slate-600">Available today</p>
                   </div>
                 </div>
               </CardContent>
@@ -1080,27 +1086,29 @@ export default function DashboardPage() {
             {/* Main CTA */}
             <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="pt-6 relative z-10">
-                <div className="text-center mb-6">
-                  <h3 className="text-3xl font-bold text-slate-800 mb-4">Ready to Win Big? 🚀</h3>
-                  <p className="text-slate-600 text-lg mb-6">
+              <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6 pb-4 sm:pb-6 relative z-10">
+                <div className="text-center mb-4 sm:mb-6">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3 sm:mb-4">Ready to Win Big? 🚀</h3>
+                  <p className="text-slate-600 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 px-2">
                     Join prize pools, compete in challenges, and turn your points into real rewards!
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                     <Button 
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                       onClick={() => router.push('/dashboard/prize-pool')}
                     >
-                      <Gift className="w-5 h-5 mr-2" />
-                      Join Prize Pool
+                      <Gift className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <span className="hidden sm:inline">Join Prize Pool</span>
+                      <span className="sm:hidden">Prize Pool</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200 py-3 px-6 rounded-xl"
+                      className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200 py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-xl"
                       onClick={() => router.push('/dashboard/activities')}
                     >
-                      <Target className="w-5 h-5 mr-2" />
-                      View Challenges
+                      <Target className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <span className="hidden sm:inline">View Challenges</span>
+                      <span className="sm:hidden">Challenges</span>
                     </Button>
                   </div>
                 </div>
@@ -1108,23 +1116,23 @@ export default function DashboardPage() {
             </Card>
 
             {/* Quick Stats Footer */}
-            <div className="grid md:grid-cols-4 gap-4">
-              <div className="bg-white/60 rounded-lg p-4 text-center border border-slate-200/50">
-                                 <div className="text-2xl font-bold text-slate-800">{safeTotalPoints.toLocaleString()}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800">{safeTotalPoints.toLocaleString()}</div>
                 <p className="text-sm text-slate-600">Total Points</p>
               </div>
-                              <div className="bg-white/60 rounded-lg p-4 text-center border border-slate-200/50">
-                 <div className="text-2xl font-bold text-slate-800">₽{Number(safeTotalCoins).toFixed(2)}</div>
-                  <p className="text-sm text-slate-600">PineCoins</p>
-                </div>
-                <div className="bg-white/60 rounded-lg p-4 text-center border border-slate-200/50">
-                 <div className="text-2xl font-bold text-slate-800">{safeCurrentStreak}</div>
-                  <p className="text-sm text-slate-600">Day Streak</p>
-                </div>
-                <div className="bg-white/60 rounded-lg p-4 text-center border border-slate-200/50">
-                 <div className="text-2xl font-bold text-slate-800">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
-                  <p className="text-sm text-slate-600">Current Rank</p>
-                </div>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800">₽{Number(safeTotalCoins).toFixed(2)}</div>
+                <p className="text-xs sm:text-sm text-slate-600">PineCoins</p>
+              </div>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800">{safeCurrentStreak}</div>
+                <p className="text-xs sm:text-sm text-slate-600">Day Streak</p>
+              </div>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
+                <p className="text-xs sm:text-sm text-slate-600">Current Rank</p>
+              </div>
             </div>
           </motion.div>
       </div>
@@ -1286,6 +1294,9 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Onboarding Tour */}
+      <OnboardingTour />
     </div>
   );
 }

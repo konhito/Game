@@ -29,6 +29,7 @@ export default function NewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [featuredArticle, setFeaturedArticle] = useState<NewsArticle | null>(null);
 
   // Fetch news articles from CMS
@@ -39,6 +40,7 @@ export default function NewsPage() {
   const fetchNewsArticles = async () => {
     try {
       setLoading(true);
+      setError(false);
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
       params.append('limit', '10');
@@ -49,10 +51,21 @@ export default function NewsPage() {
       
       if (response.ok) {
         const result = await response.json();
-        setNewsItems(result.data.articles);
+        if (result.data && result.data.articles && result.data.articles.length > 0) {
+          setNewsItems(result.data.articles);
+        } else {
+          // Empty response - no articles found
+          setNewsItems([]);
+        }
+      } else {
+        // API error - will use fallback
+        setError(true);
+        setNewsItems([]);
       }
     } catch (error) {
       console.error('Error fetching news articles:', error);
+      setError(true);
+      setNewsItems([]);
     } finally {
       setLoading(false);
     }
@@ -155,10 +168,11 @@ export default function NewsPage() {
 
   const categories = ["All", "Challenge", "Leaderboard", "Content", "Platform", "Referrals", "Community"];
 
-  // Use dynamic data or fallback
-  const displayNews = newsItems.length > 0 ? newsItems : fallbackNewsItems;
+  // Use dynamic data or fallback (only if not loading and API failed)
+  // Don't show fallback while loading - show skeleton instead
+  const displayNews = loading ? [] : (newsItems.length > 0 ? newsItems : (error ? fallbackNewsItems : []));
   
-  // Filter news based on search and category (for fallback data)
+  // Filter news based on search and category
   const filteredNews = displayNews.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -253,7 +267,7 @@ export default function NewsPage() {
         </motion.div>
 
         {/* Featured News */}
-        {filteredNews.filter(item => item.featured).length > 0 && (
+        {!loading && filteredNews.filter(item => item.featured).length > 0 && (
           <motion.div 
             className="mb-12"
             initial={{ opacity: 0, y: 20 }}
@@ -393,14 +407,14 @@ export default function NewsPage() {
                 ))}
               </div>
             </div>
-          ) : (
+          ) : paginatedNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedNews.map((news) => (
+              {paginatedNews.map((news, index) => (
               <motion.div
                 key={news.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                   {/* Featured Image */}
@@ -469,6 +483,12 @@ export default function NewsPage() {
                 </Card>
               </motion.div>
             ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📰</div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">No news articles found</h3>
+              <p className="text-slate-600">Try adjusting your search or filter criteria.</p>
             </div>
           )}
         </motion.div>

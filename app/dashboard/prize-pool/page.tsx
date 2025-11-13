@@ -160,7 +160,7 @@ export default function PrizePoolPage() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {prizePools.filter(pool => pool.status === 'active').map((pool) => (
-              <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+              <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-purple-300/50 cursor-pointer group">
                 <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200/50">
                   <div className="flex items-center justify-between mb-2">
                     <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
@@ -213,7 +213,7 @@ export default function PrizePoolPage() {
                   {/* Join Button */}
                   {isUserJoined(pool.id) ? (
                     <Button 
-                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold"
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold transition-all duration-300 cursor-not-allowed"
                       disabled
                     >
                       <Check className="w-5 h-5 mr-2" />
@@ -221,7 +221,7 @@ export default function PrizePoolPage() {
                     </Button>
                   ) : (
                     <Button 
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold"
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 relative overflow-hidden group"
                       onClick={() => handleJoinPool(pool.id, pool.entry_fee)}
                       disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants}
                     >
@@ -255,7 +255,7 @@ export default function PrizePoolPage() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {prizePools.filter(pool => pool.status === 'upcoming').map((pool) => (
-                <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-blue-300/50 cursor-pointer group">
                   <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50">
                     <div className="flex items-center justify-between mb-2">
                       <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
@@ -286,7 +286,7 @@ export default function PrizePoolPage() {
                     </div>
 
                     <Button 
-                      className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold"
+                      className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold transition-all duration-300 cursor-not-allowed"
                       disabled
                     >
                       Coming Soon

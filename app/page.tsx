@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Share2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight, MessageCircle, ThumbsUp, Eye, UserPlus, Newspaper, Star } from "lucide-react";
+import { Trophy, Share2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight, MessageCircle, ThumbsUp, Eye, UserPlus, Newspaper, Star, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 // Animated Counter Component
 function AnimatedCounter({ value, suffix = "", className = "" }: { value: number; suffix?: string; className?: string }) {
@@ -22,7 +23,24 @@ function AnimatedCounter({ value, suffix = "", className = "" }: { value: number
   );
 }
 
+interface NewsArticle {
+  id: number;
+  title: string;
+  excerpt: string;
+  slug: string;
+  published_at: string;
+  tags: string[];
+  featured_image?: string;
+}
+
 export default function HomePage() {
+  const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreNews, setHasMoreNews] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const itemsPerPage = 5;
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -38,30 +56,87 @@ export default function HomePage() {
     visible: { opacity: 1, y: 0 }
   };
 
-  // Sample news data
-  const newsItems = [
-    {
-      id: 1,
-      title: "New Social Media Challenge: Share Your Success Story",
-      excerpt: "Share your PineCrest journey and earn up to 50 points!",
-      date: "2 hours ago",
-      category: "Challenge"
-    },
-    {
-      id: 2,
-      title: "Weekly Leaderboard Winners Announced",
-      excerpt: "Congratulations to this week's top performers!",
-      date: "1 day ago",
-      category: "Leaderboard"
-    },
-    {
-      id: 3,
-      title: "New Video Content Available for Rewards",
-      excerpt: "Watch our latest videos and earn points instantly.",
-      date: "3 days ago",
-      category: "Content"
+  // Fetch news articles after page loads
+  useEffect(() => {
+    // Wait a bit to ensure all other data is loaded first
+    const timer = setTimeout(() => {
+      fetchNews(1);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const fetchNews = async (page: number, append: boolean = false) => {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoadingNews(true);
+      }
+
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', itemsPerPage.toString());
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?${params}`
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data.articles) {
+          const articles = result.data.articles;
+          const pagination = result.data.pagination;
+          
+          if (append) {
+            setNewsItems(prev => {
+              const newItems = [...prev, ...articles];
+              // Check if there are more news items
+              if (pagination && pagination.total) {
+                setHasMoreNews(newItems.length < pagination.total);
+              } else {
+                // If no pagination info, assume no more if we got fewer items than requested
+                setHasMoreNews(articles.length === itemsPerPage);
+              }
+              return newItems;
+            });
+          } else {
+            setNewsItems(articles);
+            // Check if there are more news items
+            if (pagination && pagination.total) {
+              setHasMoreNews(articles.length < pagination.total);
+            } else {
+              // If no pagination info, assume no more if we got fewer items than requested
+              setHasMoreNews(articles.length === itemsPerPage);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching news articles:', error);
+    } finally {
+      setLoadingNews(false);
+      setLoadingMore(false);
     }
-  ];
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchNews(nextPage, true);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+  };
 
   // Sample testimonials
   const testimonials = [
@@ -295,6 +370,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Leaderboard Section */}
+      <section id="leaderboard" className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Trophy className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              Weekly Leaderboard
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+              Compete with other users and climb the ranks to win amazing rewards
+            </p>
+            <Link href="/dashboard/leaderboard">
+              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                View Full Leaderboard <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="py-20 px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
@@ -412,53 +513,226 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {newsItems.map((news, index) => (
-              <motion.div
-                key={news.id}
-                variants={itemVariants}
-                whileHover={{ y: -5, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          {loadingNews ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {[...Array(5)].map((_, index) => (
+                <Card key={index} className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg animate-pulse">
                   <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
-                        {news.category}
-                      </Badge>
-                      <span className="text-sm text-slate-500">{news.date}</span>
-                    </div>
-                    <CardTitle className="text-lg text-slate-800 line-clamp-2">
-                      {news.title}
-                    </CardTitle>
+                    <div className="h-4 bg-slate-200 rounded w-1/4 mb-2"></div>
+                    <div className="h-6 bg-slate-200 rounded w-3/4"></div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-600 mb-4">{news.excerpt}</p>
-                    <Button variant="ghost" className="text-emerald-600 hover:text-emerald-700 p-0 h-auto font-medium">
-                      Read More <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                    <div className="h-4 bg-slate-200 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-slate-200 rounded w-2/3"></div>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          ) : newsItems.length > 0 ? (
+            <>
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {newsItems.map((news, index) => (
+                  <motion.div
+                    key={news.id}
+                    variants={itemVariants}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-2">
+                          {news.tags && news.tags.length > 0 && (
+                            <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
+                              {news.tags[0]}
+                            </Badge>
+                          )}
+                          <span className="text-sm text-slate-500">
+                            {formatDate(news.published_at)}
+                          </span>
+                        </div>
+                        <CardTitle className="text-lg text-slate-800 line-clamp-2">
+                          {news.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-slate-600 mb-4 line-clamp-3">{news.excerpt}</p>
+                        <Link href={`/news/${news.slug}`}>
+                          <Button variant="ghost" className="text-emerald-600 hover:text-emerald-700 p-0 h-auto font-medium">
+                            Read More <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
 
+              <motion.div 
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                {hasMoreNews ? (
+                  <Button 
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingMore ? 'Loading...' : 'Load More'}
+                  </Button>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-slate-600 text-lg">You've seen all the latest news!</p>
+                    <Link href="/news">
+                      <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                        View All News & Updates
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </motion.div>
+            </>
+          ) : (
+            <motion.div 
+              className="text-center py-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <p className="text-slate-600 text-lg mb-4">No news available at the moment.</p>
+              <Link href="/news">
+                <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                  View All News & Updates
+                </Button>
+              </Link>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Link href="/news">
-              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
-                View All News & Updates
+            <Users className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              About PineCrest
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+              Transforming social media engagement into real rewards
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">Our Mission</h3>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                PineCrest empowers users to earn real value from their social media activities. 
+                We connect users with engaging tasks from brands and creators, making it easy to 
+                convert your online engagement into PineCoins and real rewards.
+              </p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">Why Choose Us</h3>
+              <ul className="space-y-3 text-slate-600">
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <span>AI-verified tasks ensure authenticity and prevent fraud</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <span>Fair weekly leaderboards with automatic resets</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <span>Secure platform with industry-standard protection</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <span>Real rewards you can redeem for cash and prizes</span>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+                      <Target className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Verified Tasks</h4>
+                      <p className="text-sm text-slate-600">All tasks are AI-verified</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <Gift className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Real Rewards</h4>
+                      <p className="text-sm text-slate-600">Redeem PineCoins for prizes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                      <Trophy className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Fair Competition</h4>
+                      <p className="text-sm text-slate-600">Weekly leaderboard resets</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            className="text-center mt-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Link href="/about">
+              <Button variant="outline" className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 text-lg">
+                Learn More About Us
               </Button>
             </Link>
           </motion.div>

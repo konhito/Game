@@ -62,7 +62,7 @@ export default function SharedFooter() {
         </div>
         
         <div className="border-t border-slate-700 mt-12 pt-8 text-center text-slate-400">
-          <p>&copy; 2024 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
+          <p>&copy; 2025 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
         </div>
       </div>
     </footer>

@@ -62,7 +62,10 @@ export default function Chat() {
             onChange={handleInputChange}
           />
           <div className="flex justify-end gap-3 items-center w-full">
-            <Button size="sm" className="text-xs">
+            <Button 
+              size="sm" 
+              className="text-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95"
+            >
               Send
             </Button>
           </div>
