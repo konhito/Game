@@ -219,7 +219,8 @@ class DashboardService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user stats');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to fetch user stats: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
@@ -232,9 +233,13 @@ class DashboardService {
       } else {
         throw new Error('Invalid response format from backend');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('DashboardService: Error in getUserStats:', error);
-      throw new Error('Failed to fetch user stats');
+      // Check for network errors
+      if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+      throw error;
     }
   }
 
@@ -313,7 +318,8 @@ class DashboardService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to fetch leaderboard: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
@@ -326,9 +332,13 @@ class DashboardService {
       } else {
         throw new Error('Invalid response format from backend');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('DashboardService: Error in getLeaderboard:', error);
-      throw new Error('Failed to fetch leaderboard');
+      // Check for network errors
+      if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+      throw error;
     }
   }
 
@@ -345,7 +355,7 @@ class DashboardService {
       console.log('DashboardService: Response headers:', response.headers);
 
       if (!response.ok) {
-        const errorText = await response.text();
+        const errorText = await response.text().catch(() => 'Unknown error');
         console.error('DashboardService: Response not OK:', errorText);
         throw new Error(`Failed to fetch available tasks: ${response.status} ${errorText}`);
       }
@@ -363,9 +373,13 @@ class DashboardService {
         console.error('DashboardService: Invalid response format:', result);
         throw new Error('Invalid response format from backend');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('DashboardService: Error in getAvailableTasks:', error);
-      throw new Error('Failed to fetch available tasks');
+      // Check for network errors
+      if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+      throw error;
     }
   }
 
@@ -377,7 +391,8 @@ class DashboardService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user task history');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to fetch user task history: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
@@ -391,8 +406,13 @@ class DashboardService {
       } else {
         throw new Error('Invalid response format from backend');
       }
-    } catch (error) {
-      throw new Error('Failed to fetch user task history');
+    } catch (error: any) {
+      console.error('DashboardService: Error in getUserTaskHistory:', error);
+      // Check for network errors
+      if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+      throw error;
     }
   }
 

@@ -46,6 +46,7 @@ export default function DashboardPage() {
     hoursUntilReset: number;
   } | null>(null);
   const [buyingSpin, setBuyingSpin] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -104,13 +105,21 @@ export default function DashboardPage() {
       
       // Fetch next reset time
       try {
-        const resetResponse = await fetch(`${config.API_BASE}/api/spin-reset/next-reset`);
+        const resetResponse = await fetch(`${config.API_BASE}/api/spin-reset/next-reset`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('auth_token') && { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` })
+          }
+        });
         if (resetResponse.ok) {
           const resetData = await resetResponse.json();
           setNextReset(resetData.data);
+        } else {
+          console.warn('Failed to fetch reset time:', resetResponse.status);
         }
       } catch (error) {
         console.error('Error fetching reset time:', error);
+        // Don't set error state for this as it's not critical
       }
       
       // Fetch dashboard data
@@ -167,25 +176,56 @@ export default function DashboardPage() {
   const fetchDashboardData = async (userId: number) => {
     try {
       setLoading(true);
+      setError(null);
 
-      // Fetch all data in parallel for better performance
-      const [
-        statsResponse,
-        activitiesResponse,
-        leaderboardResponse,
-        tasksResponse,
-        historyResponse
-      ] = await Promise.all([
-        dashboardService.getUserStats(userId),
-        dashboardService.getUserActivities(userId, 5),
-        dashboardService.getLeaderboard(10),
-        dashboardService.getAvailableTasks(),
-        dashboardService.getUserTaskHistory(userId)
+      // Fetch all data in parallel using Promise.allSettled to handle individual failures gracefully
+      const results = await Promise.allSettled([
+        dashboardService.getUserStats(userId).catch(err => {
+          console.error('Failed to fetch user stats:', err);
+          return { success: false, error: err.message };
+        }),
+        dashboardService.getUserActivities(userId, 5).catch(err => {
+          console.error('Failed to fetch user activities:', err);
+          return { success: false, error: err.message };
+        }),
+        dashboardService.getLeaderboard(10).catch(err => {
+          console.error('Failed to fetch leaderboard:', err);
+          return { success: false, error: err.message };
+        }),
+        dashboardService.getAvailableTasks().catch(err => {
+          console.error('Failed to fetch available tasks:', err);
+          return { success: false, error: err.message };
+        }),
+        dashboardService.getUserTaskHistory(userId).catch(err => {
+          console.error('Failed to fetch task history:', err);
+          return { success: false, error: err.message };
+        })
       ]);
 
+      // Process results - handle both fulfilled and rejected promises
+      const statsResult = results[0].status === 'fulfilled' 
+        ? results[0].value 
+        : { success: false as const, error: results[0].reason?.message || 'Unknown error' };
+      
+      const activitiesResult = results[1].status === 'fulfilled' 
+        ? results[1].value 
+        : { success: false as const, error: results[1].reason?.message || 'Unknown error' };
+      
+      const leaderboardResult = results[2].status === 'fulfilled' 
+        ? results[2].value 
+        : { success: false as const, error: results[2].reason?.message || 'Unknown error' };
+      
+      const tasksResult = results[3].status === 'fulfilled' 
+        ? results[3].value 
+        : { success: false as const, error: results[3].reason?.message || 'Unknown error' };
+      
+      const historyResult = results[4].status === 'fulfilled' 
+        ? results[4].value 
+        : { success: false as const, error: results[4].reason?.message || 'Unknown error' };
+
       // Process user stats
-      if (statsResponse.success && statsResponse.data.users && statsResponse.data.users.length > 0) {
-        const userStats = statsResponse.data.users[0];
+      if (statsResult.success && 'data' in statsResult && statsResult.data?.users && statsResult.data.users.length > 0) {
+        const userStats = statsResult.data.users[0];
         setDashboardData(prev => ({ ...prev, userStats }));
         
         // Check if daily reward was already claimed today
@@ -197,16 +237,22 @@ export default function DashboardPage() {
         } else {
           setDailyRewardClaimed(false);
         }
+      } else if ('error' in statsResult && statsResult.error) {
+        console.error('User stats error:', statsResult.error);
+        // Only set error if this is critical (user stats is required)
+        if (!dashboardData.userStats) {
+          setError(`Failed to load user stats: ${statsResult.error}`);
+        }
       }
 
       // Process activities
-      if (activitiesResponse.success) {
-        setDashboardData(prev => ({ ...prev, recentActivities: activitiesResponse.data.activities || [] }));
+      if (activitiesResult.success && 'data' in activitiesResult && activitiesResult.data) {
+        setDashboardData(prev => ({ ...prev, recentActivities: activitiesResult.data.activities || [] }));
       }
 
       // Process leaderboard
-      if (leaderboardResponse.success) {
-        const leaderboard = leaderboardResponse.data.users || [];
+      if (leaderboardResult.success && 'data' in leaderboardResult && leaderboardResult.data) {
+        const leaderboard = leaderboardResult.data.users || [];
         const rankedLeaderboard = leaderboard.map((entry: any, index: number) => ({
           ...entry,
           rank: index + 1
@@ -215,21 +261,29 @@ export default function DashboardPage() {
       }
 
       // Process tasks
-      if (tasksResponse.success) {
-        setDashboardData(prev => ({ ...prev, availableTasks: tasksResponse.data.tasks || [] }));
+      if (tasksResult.success && 'data' in tasksResult && tasksResult.data) {
+        setDashboardData(prev => ({ ...prev, availableTasks: tasksResult.data.tasks || [] }));
       }
 
       // Process task history
-      if (historyResponse.success) {
-        setDashboardData(prev => ({ ...prev, userTaskHistory: historyResponse.data.tasks || [] }));
+      if (historyResult.success && 'data' in historyResult && historyResult.data) {
+        setDashboardData(prev => ({ ...prev, userTaskHistory: historyResult.data.tasks || [] }));
       }
 
       // Log dashboard view activity (async, don't block)
       dashboardService.logActivity('dashboard_view', 'Viewed dashboard overview')
         .catch(error => console.error('Failed to log dashboard view activity:', error));
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
+      const errorMessage = error?.message || error?.toString() || 'Failed to fetch dashboard data';
+      
+      // Check for network errors
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -490,24 +544,51 @@ export default function DashboardPage() {
     );
   }
 
-  if (!dashboardData.userStats) {
+  if (!dashboardData.userStats && !loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-slate-600">Failed to load user stats</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-red-600">Failed to Load Dashboard</CardTitle>
+            <CardDescription>
+              {error || 'Unable to load user statistics. Please try refreshing the page.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={() => {
+                if (user?.id) {
+                  fetchDashboardData(user.id);
+                } else {
+                  window.location.reload();
+                }
+              }}
+              className="w-full"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => router.push('/sign-in')}
+              className="w-full"
+            >
+              Sign In Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   // Add safe access helper
-  const safeUserStats = dashboardData.userStats || {};
-  const safeTotalPoints = safeUserStats.total_points || 0;
-  const safeTotalCoins = safeUserStats.total_coins || 0;
-  const safeCurrentStreak = safeUserStats.current_streak || 0;
-  const safeWeeklyPoints = safeUserStats.weekly_points || 0;
-  const safeSpinsRemaining = safeUserStats.spins_remaining || 0;
-  const safeLastLoginDate = safeUserStats.last_login_date;
+  const safeUserStats = dashboardData.userStats;
+  const safeTotalPoints = safeUserStats?.total_points || 0;
+  const safeTotalCoins = safeUserStats?.total_coins || 0;
+  const safeCurrentStreak = safeUserStats?.current_streak || 0;
+  const safeWeeklyPoints = safeUserStats?.weekly_points || 0;
+  const safeSpinsRemaining = safeUserStats?.spins_remaining || 0;
+  const safeLastLoginDate = safeUserStats?.last_login_date;
 
   // Calculate next reward
   const nextRewardAt = Math.max(0, 2500 - safeTotalPoints);
@@ -517,6 +598,38 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="p-3 sm:p-4 md:p-6 w-full">
         <div className="max-w-7xl mx-auto w-full">
+          {/* Error Banner */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4"
+            >
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-600">⚠️</span>
+                      <p className="text-red-800 text-sm">{error}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setError(null);
+                        if (user?.id) {
+                          fetchDashboardData(user.id);
+                        }
+                      }}
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           {/* Welcome Header with Live Stats */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -699,7 +812,7 @@ export default function DashboardPage() {
                         Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
                       </p>
                     )}
-                    {dashboardData?.userStats?.current_streak >= 3 && (
+                    {(safeCurrentStreak >= 3) && (
                       <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm">
                         🔥 {safeCurrentStreak} Day Streak!
                       </Badge>
