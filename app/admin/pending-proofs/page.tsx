@@ -393,7 +393,7 @@ export default function PendingProofsPage() {
                         <img
                           src={submission.proof_image.startsWith('data:') 
                             ? submission.proof_image 
-                            : `https://casinobackend-production-66bf.up.railway.app/${submission.proof_image}`
+                            : `https://pinecrest.up.railway.app/${submission.proof_image}`
                           }
                           alt="Task proof"
                           className="w-full h-48 object-cover rounded-lg border border-gray-200"
@@ -404,7 +404,7 @@ export default function PendingProofsPage() {
                           className="absolute top-2 right-2 bg-white/90 hover:bg-white"
                           onClick={() => window.open(submission.proof_image.startsWith('data:') 
                             ? submission.proof_image 
-                            : `https://casinobackend-production-66bf.up.railway.app/${submission.proof_image}`, '_blank')}
+                            : `https://pinecrest.up.railway.app/${submission.proof_image}`, '_blank')}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Full

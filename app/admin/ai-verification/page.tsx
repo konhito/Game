@@ -332,7 +332,7 @@ export default function AIVerificationPage() {
                       <img
                         src={verification.proof_image.startsWith('data:') 
                           ? verification.proof_image 
-                          : `https://casinobackend-production-66bf.up.railway.app/${verification.proof_image}`
+                          : `https://pinecrest.up.railway.app/${verification.proof_image}`
                         }
                         alt="Proof"
                         className="w-full h-full object-cover cursor-pointer"
@@ -476,7 +476,7 @@ export default function AIVerificationPage() {
                   <img
                     src={selectedVerification.proof_image.startsWith('data:') 
                       ? selectedVerification.proof_image 
-                      : `https://casinobackend-production-66bf.up.railway.app/${selectedVerification.proof_image}`
+                      : `https://pinecrest.up.railway.app/${selectedVerification.proof_image}`
                     }
                     alt="Proof"
                     className="w-full max-h-96 object-contain rounded-lg border border-gray-200"

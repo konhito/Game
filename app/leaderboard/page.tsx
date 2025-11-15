@@ -37,7 +37,7 @@ export default function LeaderboardPage() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app';
       const response = await fetch(`${API_BASE}/api/users/leaderboard/public?limit=50`);
       
       if (!response.ok) {

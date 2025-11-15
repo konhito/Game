@@ -69,7 +69,7 @@ Create or update your `.env.local` file in the frontend directory:
 NEXT_PUBLIC_FACEBOOK_APP_ID=your-facebook-app-id-here
 
 # Backend API
-NEXT_PUBLIC_API_BASE=https://casinobackend-production-66bf.up.railway.app
+NEXT_PUBLIC_API_BASE=https://pinecrest.up.railway.app
 
 # App Configuration
 NEXT_PUBLIC_APP_NAME=PineCoin

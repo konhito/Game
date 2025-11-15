@@ -47,7 +47,7 @@ export default function NewsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (selectedCategory !== 'All') params.append('tag', selectedCategory);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?${params}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news?${params}`);
       
       if (response.ok) {
         const result = await response.json();
@@ -78,7 +78,7 @@ export default function NewsPage() {
 
   const fetchFeaturedArticle = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?featured=true&limit=1`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news?featured=true&limit=1`);
       if (response.ok) {
         const result = await response.json();
         if (result.data.articles.length > 0) {
@@ -287,7 +287,7 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"
@@ -423,7 +423,7 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"

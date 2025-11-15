@@ -45,7 +45,7 @@ export default function ArticlePage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/${slug}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/${slug}`);
       
       if (response.ok) {
         const result = await response.json();
@@ -75,7 +75,7 @@ export default function ArticlePage() {
       if (tags.length === 0) return;
       
       const tagParam = tags[0]; // Use first tag for related articles
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news?tag=${tagParam}&limit=3`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news?tag=${tagParam}&limit=3`);
       
       if (response.ok) {
         const result = await response.json();
@@ -190,7 +190,7 @@ export default function ArticlePage() {
                     <img
                       src={article.featured_image.startsWith('http') 
                         ? article.featured_image 
-                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${article.featured_image.split('/').pop()}`
+                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${article.featured_image.split('/').pop()}`
                       }
                       alt={article.title}
                       className="w-full h-full object-cover"
@@ -447,7 +447,7 @@ export default function ArticlePage() {
                         <img
                           src={relatedArticle.featured_image.startsWith('http') 
                             ? relatedArticle.featured_image 
-                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://casinobackend-production-66bf.up.railway.app'}/api/news/images/${relatedArticle.featured_image.split('/').pop()}`
+                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${relatedArticle.featured_image.split('/').pop()}`
                           }
                           alt={relatedArticle.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

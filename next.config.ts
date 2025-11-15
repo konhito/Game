@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "casinobackend-production-66bf.up.railway.app",
+        hostname: "pinecrest.up.railway.app",
       },
     ],
   },
