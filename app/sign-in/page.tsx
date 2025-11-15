@@ -160,14 +160,20 @@ export default function SignInPage() {
       console.log("Email authentication verified, starting robust redirect...");
       
       // Use robust redirection with multiple fallbacks
+      // Use replace first for most reliable redirect
       await robustRedirect(router, {
         target: "/dashboard",
-        delay: 100,
-        maxAttempts: 3,
-        fallbackMethods: ['router', 'location', 'replace']
+        delay: 200,
+        maxAttempts: 2,
+        fallbackMethods: ['replace', 'location', 'router']
       });
       
-      console.log("Robust redirect completed successfully");
+      // If we're still here after redirect, force it
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (typeof window !== 'undefined' && window.location.pathname === '/sign-in') {
+        console.warn('Still on sign-in page after redirect, forcing navigation...');
+        window.location.replace('/dashboard');
+      }
       
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -211,24 +217,27 @@ export default function SignInPage() {
       console.log("Google authentication verified, starting robust redirect...");
       
       // Use robust redirection with multiple fallbacks
+      // Use replace first for most reliable redirect
       await robustRedirect(router, {
         target: "/dashboard",
-        delay: 100,
-        maxAttempts: 3,
-        fallbackMethods: ['router', 'location', 'replace']
+        delay: 200,
+        maxAttempts: 2,
+        fallbackMethods: ['replace', 'location', 'router']
       });
       
-      console.log("Robust redirect completed successfully");
+      // If we're still here after redirect, force it
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (typeof window !== 'undefined' && window.location.pathname === '/sign-in') {
+        console.warn('Still on sign-in page after redirect, forcing navigation...');
+        window.location.replace('/dashboard');
+      }
       
     } catch (error) {
       console.error("Robust redirect failed:", error);
       
-      // Final fallback - check if still on sign-in page and force redirect
-      const stillOnSignIn = await checkPageAfterDelay("/sign-in", 1000);
-      if (stillOnSignIn) {
-        console.log("Still on sign-in page, using force redirect...");
-        forceRedirect("/dashboard");
-      }
+      // Final fallback - force redirect immediately
+      console.log("Using force redirect as fallback...");
+      window.location.replace('/dashboard');
     }
   };
 

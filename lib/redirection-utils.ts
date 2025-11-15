@@ -20,14 +20,20 @@ export async function robustRedirect(
     target,
     delay = 500,
     maxAttempts = 3,
-    fallbackMethods = ['router', 'location', 'replace']
+    fallbackMethods = ['replace', 'location', 'router']
   } = options;
 
   console.log(`Starting robust redirect to ${target} with ${maxAttempts} attempts`);
 
-  // Wait for any pending state updates
+  // Wait for any pending state updates and ensure cookies are set
   if (delay > 0) {
     await new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  // Verify we're not already on the target page
+  if (typeof window !== 'undefined' && window.location.pathname === target) {
+    console.log(`Already on target page ${target}`);
+    return;
   }
 
   let attempt = 0;
@@ -38,30 +44,43 @@ export async function robustRedirect(
     console.log(`Redirection attempt ${attempt}/${maxAttempts}`);
 
     try {
-      // Try each fallback method in order
+      // Try each fallback method in order - use replace first for most reliable redirect
       for (const method of fallbackMethods) {
         try {
           switch (method) {
-            case 'router':
-              if (router && typeof router.push === 'function') {
-                console.log(`Attempting router.push to ${target}`);
-                await router.push(target);
-                console.log('Router.push successful');
-                return;
-              }
-              break;
+            case 'replace':
+              // Use replace first as it's most reliable and doesn't add to history
+              console.log(`Attempting window.location.replace to ${target}`);
+              window.location.replace(target);
+              // Give it a moment to start navigation
+              await new Promise(resolve => setTimeout(resolve, 100));
+              console.log('window.location.replace initiated');
+              return;
 
             case 'location':
               console.log(`Attempting window.location.href to ${target}`);
               window.location.href = target;
+              // Give it a moment to start navigation
+              await new Promise(resolve => setTimeout(resolve, 100));
               console.log('window.location.href set successfully');
               return;
 
-            case 'replace':
-              console.log(`Attempting window.location.replace to ${target}`);
-              window.location.replace(target);
-              console.log('window.location.replace successful');
-              return;
+            case 'router':
+              if (router && typeof router.push === 'function') {
+                console.log(`Attempting router.push to ${target}`);
+                // Use router.push as last resort since it's less reliable
+                router.push(target);
+                // Wait a bit and check if navigation happened
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (typeof window !== 'undefined' && window.location.pathname === target) {
+                  console.log('Router.push successful - navigation confirmed');
+                  return;
+                } else {
+                  console.warn('Router.push did not navigate, trying next method');
+                  throw new Error('Router.push did not navigate');
+                }
+              }
+              break;
           }
         } catch (methodError) {
           console.error(`Method ${method} failed:`, methodError);
@@ -80,8 +99,9 @@ export async function robustRedirect(
     }
   }
 
-  // If all attempts failed, throw the last error
-  throw new Error(`Failed to redirect to ${target} after ${maxAttempts} attempts. Last error: ${lastError?.message}`);
+  // If all attempts failed, use force redirect as last resort
+  console.warn('All redirect methods failed, using force redirect');
+  forceRedirect(target);
 }
 
 /**
