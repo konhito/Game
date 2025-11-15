@@ -132,9 +132,6 @@ export default function SignInPage() {
       console.log("  auth_token:", localStorage.getItem('auth_token'));
       console.log("  auth_user:", localStorage.getItem('auth_user'));
       
-      // Show success message briefly
-      setSuccess("Login successful! Redirecting...");
-      
       // Verify authentication state
       if (!verifyAuthState(authService)) {
         console.error("Email login success but user not authenticated");
@@ -142,12 +139,30 @@ export default function SignInPage() {
         return;
       }
       
+      // Ensure cookies are properly set before redirecting
+      console.log("Refreshing cookies before redirect...");
+      authService.refreshCookies();
+      
+      // Wait for cookies to be set and processed by the browser
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Verify cookies are set
+      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+      console.log("Cookie verification before redirect:", {
+        tokenCookieSet: !!tokenCookie,
+        userCookieSet: !!userCookie
+      });
+      
+      // Show success message briefly
+      setSuccess("Login successful! Redirecting...");
+      
       console.log("Email authentication verified, starting robust redirect...");
       
       // Use robust redirection with multiple fallbacks
       await robustRedirect(router, {
         target: "/dashboard",
-        delay: 200,
+        delay: 100,
         maxAttempts: 3,
         fallbackMethods: ['router', 'location', 'replace']
       });
@@ -169,7 +184,7 @@ export default function SignInPage() {
     
     try {
       // Wait for auth state to be properly set
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Verify authentication state
       if (!verifyAuthState(authService)) {
@@ -178,12 +193,27 @@ export default function SignInPage() {
         return;
       }
       
+      // Ensure cookies are properly set before redirecting
+      console.log("Refreshing cookies before redirect...");
+      authService.refreshCookies();
+      
+      // Wait for cookies to be set and processed by the browser
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Verify cookies are set
+      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+      console.log("Cookie verification before redirect:", {
+        tokenCookieSet: !!tokenCookie,
+        userCookieSet: !!userCookie
+      });
+      
       console.log("Google authentication verified, starting robust redirect...");
       
       // Use robust redirection with multiple fallbacks
       await robustRedirect(router, {
         target: "/dashboard",
-        delay: 200,
+        delay: 100,
         maxAttempts: 3,
         fallbackMethods: ['router', 'location', 'replace']
       });

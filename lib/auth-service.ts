@@ -100,24 +100,40 @@ class AuthService {
       };
       const encodedUserData = encodeURIComponent(JSON.stringify(minimalUser));
       
-      // Set cookies with immediate effect
-      document.cookie = `custom_auth_token=${encodedToken}; path=/; max-age=86400; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-      document.cookie = `custom_user_data=${encodedUserData}; path=/; max-age=86400; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
+      // Determine if we're on HTTPS
+      const isSecure = window.location.protocol === 'https:';
+      const secureFlag = isSecure ? '; Secure' : '';
       
-      // Verify cookies were set
-      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
-      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+      // Set cookies with immediate effect - use explicit expiration date
+      const expirationDate = new Date();
+      expirationDate.setTime(expirationDate.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
+      const expires = `; expires=${expirationDate.toUTCString()}`;
       
-      console.log('Cookie verification:', {
-        tokenCookieSet: !!tokenCookie,
-        userCookieSet: !!userCookie,
-        tokenCookieLength: tokenCookie?.length || 0,
-        userCookieLength: userCookie?.length || 0
-      });
+      // Set cookies with all necessary flags
+      document.cookie = `custom_auth_token=${encodedToken}; path=/${expires}; SameSite=Lax${secureFlag}`;
+      document.cookie = `custom_user_data=${encodedUserData}; path=/${expires}; SameSite=Lax${secureFlag}`;
       
-      if (!tokenCookie || !userCookie) {
-        console.warn('Failed to set authentication cookies properly');
-      }
+      // Small delay to ensure cookies are processed
+      setTimeout(() => {
+        // Verify cookies were set
+        const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+        const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+        
+        console.log('Cookie verification:', {
+          tokenCookieSet: !!tokenCookie,
+          userCookieSet: !!userCookie,
+          tokenCookieLength: tokenCookie?.length || 0,
+          userCookieLength: userCookie?.length || 0,
+          allCookies: document.cookie
+        });
+        
+        if (!tokenCookie || !userCookie) {
+          console.warn('Failed to set authentication cookies properly, retrying...');
+          // Retry once
+          document.cookie = `custom_auth_token=${encodedToken}; path=/${expires}; SameSite=Lax${secureFlag}`;
+          document.cookie = `custom_user_data=${encodedUserData}; path=/${expires}; SameSite=Lax${secureFlag}`;
+        }
+      }, 50);
     } catch (error) {
       console.error('Error setting auth cookies:', error);
     }

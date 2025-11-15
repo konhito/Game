@@ -12,7 +12,7 @@ import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star,
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
 import InstagramAuthButton from "@/components/instagram-auth-button";
-import { robustRedirect } from "@/lib/redirection-utils";
+import { robustRedirect, verifyAuthState } from "@/lib/redirection-utils";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -117,12 +117,40 @@ export default function SignUpPage() {
       });
 
       console.log("Registration successful:", result);
+      
+      // Verify authentication state
+      if (!verifyAuthState(authService)) {
+        console.error("Registration success but user not authenticated");
+        setError("Authentication failed. Please try again.");
+        return;
+      }
+      
+      // Ensure cookies are properly set before redirecting
+      console.log("Refreshing cookies before redirect...");
+      authService.refreshCookies();
+      
+      // Wait for cookies to be set and processed by the browser
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Verify cookies are set
+      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+      console.log("Cookie verification before redirect:", {
+        tokenCookieSet: !!tokenCookie,
+        userCookieSet: !!userCookie
+      });
+      
       setSuccess("Account created successfully! Redirecting to dashboard...");
       
-      // Redirect after a short delay to show success message
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
+      // Use robust redirection with multiple fallbacks
+      await robustRedirect(router, {
+        target: "/dashboard",
+        delay: 100,
+        maxAttempts: 3,
+        fallbackMethods: ['router', 'location', 'replace']
+      });
+      
+      console.log("Robust redirect completed successfully");
     } catch (error: any) {
       console.error("Registration failed:", error);
       setError(error.message || "Registration failed. Please try again.");
@@ -131,11 +159,49 @@ export default function SignUpPage() {
     }
   };
 
-  const handleGoogleSuccess = () => {
+  const handleGoogleSuccess = async () => {
     setSuccess("Google sign-up successful! Redirecting to dashboard...");
-    setTimeout(() => {
+    
+    try {
+      // Wait for auth state to be properly set
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Verify authentication state
+      if (!verifyAuthState(authService)) {
+        console.error("Google sign-up success but user not authenticated");
+        setError("Authentication failed. Please try again.");
+        return;
+      }
+      
+      // Ensure cookies are properly set before redirecting
+      console.log("Refreshing cookies before redirect...");
+      authService.refreshCookies();
+      
+      // Wait for cookies to be set and processed by the browser
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Verify cookies are set
+      const tokenCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_auth_token='));
+      const userCookie = document.cookie.split(';').find(c => c.trim().startsWith('custom_user_data='));
+      console.log("Cookie verification before redirect:", {
+        tokenCookieSet: !!tokenCookie,
+        userCookieSet: !!userCookie
+      });
+      
+      // Use robust redirection with multiple fallbacks
+      await robustRedirect(router, {
+        target: "/dashboard",
+        delay: 100,
+        maxAttempts: 3,
+        fallbackMethods: ['router', 'location', 'replace']
+      });
+      
+      console.log("Robust redirect completed successfully");
+    } catch (error) {
+      console.error("Robust redirect failed:", error);
+      // Fallback to simple redirect
       router.push("/dashboard");
-    }, 1000);
+    }
   };
 
   const handleGoogleError = (error: string) => {
