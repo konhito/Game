@@ -135,7 +135,7 @@ export default function LeaderboardPage() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition-all duration-300 hover:scale-110 hover:rotate-180 active:scale-95"
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-400 hover:shadow-md transition-all duration-300 hover:scale-110 hover:rotate-180 active:scale-95"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               </Button>
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
 
         {/* Enhanced Stats Overview */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+          <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-amber-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <CardHeader className="pb-2 relative z-10">
               <CardTitle className="text-sm font-medium text-amber-100 flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function LeaderboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <CardHeader className="pb-2 relative z-10">
               <CardTitle className="text-sm font-medium text-blue-100 flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function LeaderboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <CardHeader className="pb-2 relative z-10">
               <CardTitle className="text-sm font-medium text-emerald-100 flex items-center gap-2">
@@ -235,7 +235,7 @@ export default function LeaderboardPage() {
                     leaderboardData.slice(0, 10).map((player, index) => (
                       <div 
                         key={player.id} 
-                        className={`flex items-center justify-between p-5 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer ${
+                        className={`flex items-center justify-between p-5 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-200/50 cursor-pointer ${
                           player.rank === 1 
                             ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 shadow-md' 
                             : player.rank === 2 
@@ -325,7 +325,7 @@ export default function LeaderboardPage() {
               <CardContent className="p-6">
                 <div className="space-y-3">
                   {weeklyRewards.map((reward, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-lg hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 cursor-pointer">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-lg hover:shadow-slate-200/50 hover:scale-[1.02] hover:border-slate-300 hover:bg-gradient-to-r hover:from-slate-100 hover:to-white transition-all duration-300 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <Badge className={`${reward.color} text-white shadow-sm`}>
                           {reward.rank === "Random" ? "🎲" : `#${reward.rank}`}

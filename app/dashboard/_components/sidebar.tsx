@@ -104,7 +104,7 @@ export function Sidebar({ className, userStats }: SidebarProps) {
           <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
             🎯
           </div>
-          <span className="text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <span className="text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent hover:from-slate-900 hover:to-slate-700 transition-all duration-200">
             PineCoin Media
           </span>
         </Link>
@@ -119,15 +119,15 @@ export function Sidebar({ className, userStats }: SidebarProps) {
             >
               <span
                 className={cn(
-                  "group flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
+                  "group flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:shadow-md hover:scale-105 active:scale-95",
                   item.isActive 
-                    ? "bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 text-emerald-700 border border-emerald-200/50 shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 text-emerald-700 border border-emerald-200/50 shadow-sm hover:from-emerald-500/20 hover:to-emerald-600/20 hover:border-emerald-300/70" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-slate-100"
                 )}
               >
                 <item.icon className={cn(
-                  "mr-3 h-4 w-4 transition-colors",
-                  item.isActive ? "text-emerald-600" : "text-muted-foreground group-hover:text-foreground"
+                  "mr-3 h-4 w-4 transition-all duration-200",
+                  item.isActive ? "text-emerald-600 hover:text-emerald-700 hover:scale-110" : "text-muted-foreground group-hover:text-foreground group-hover:scale-110"
                 )} />
                 <span className="font-medium">{item.title}</span>
               </span>
@@ -143,26 +143,26 @@ export function Sidebar({ className, userStats }: SidebarProps) {
             Quick Stats
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <div className="flex items-center justify-between text-sm hover:bg-slate-50 rounded-lg p-2 transition-all duration-200 cursor-pointer group">
+              <span className="text-muted-foreground flex items-center gap-2 group-hover:text-slate-700 transition-colors duration-200">
+                <span className="w-2 h-2 bg-orange-500 rounded-full group-hover:bg-orange-600 group-hover:scale-125 transition-all duration-200"></span>
                 Daily Streak
               </span>
-              <span className="font-semibold text-orange-600">🔥 {userStats?.current_streak || 0} days</span>
+              <span className="font-semibold text-orange-600 group-hover:text-orange-700 group-hover:scale-110 transition-all duration-200">🔥 {userStats?.current_streak || 0} days</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <div className="flex items-center justify-between text-sm hover:bg-slate-50 rounded-lg p-2 transition-all duration-200 cursor-pointer group">
+              <span className="text-muted-foreground flex items-center gap-2 group-hover:text-slate-700 transition-colors duration-200">
+                <span className="w-2 h-2 bg-blue-500 rounded-full group-hover:bg-blue-600 group-hover:scale-125 transition-all duration-200"></span>
                 Spins Left
               </span>
-              <span className="font-semibold text-blue-600">🎯 {userStats?.spins_remaining || 0}</span>
+              <span className="font-semibold text-blue-600 group-hover:text-blue-700 group-hover:scale-110 transition-all duration-200">🎯 {userStats?.spins_remaining || 0}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            <div className="flex items-center justify-between text-sm hover:bg-slate-50 rounded-lg p-2 transition-all duration-200 cursor-pointer group">
+              <span className="text-muted-foreground flex items-center gap-2 group-hover:text-slate-700 transition-colors duration-200">
+                <span className="w-2 h-2 bg-green-500 rounded-full group-hover:bg-green-600 group-hover:scale-125 transition-all duration-200"></span>
                 Total Points
               </span>
-              <span className="font-semibold text-green-600">{userStats?.total_points || 0}</span>
+              <span className="font-semibold text-green-600 group-hover:text-green-700 group-hover:scale-110 transition-all duration-200">{userStats?.total_points || 0}</span>
             </div>
           </div>
         </div>

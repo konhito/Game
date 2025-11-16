@@ -686,15 +686,15 @@ class DashboardService {
         }
       }
 
-      // Calculate coins based on points (1 point = 0.1 coins)
-      const coins = Math.round(selectedReward.points * 0.1 * 100) / 100;
+      // Calculate coins based on points (1000 points = 1 PineCoin)
+      const coins = Math.round(selectedReward.points * 0.001 * 100) / 100;
 
       return {
         success: true,
         data: {
           points: selectedReward.points,
           coins: coins,
-          message: `Congratulations! You won ${selectedReward.points} points and ${coins} coins!`
+          message: `Congratulations! You won ${selectedReward.points} points and ${coins} PineCoins!`
         }
       };
     } catch (error) {

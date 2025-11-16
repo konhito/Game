@@ -22,10 +22,13 @@ import {
   Edit,
   Trash2,
   Bot,
-  Brain
+  Brain,
+  ArrowRight,
+  RefreshCw
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 interface DashboardStats {
   total_users: number;
@@ -63,9 +66,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated before fetching stats
     const token = localStorage.getItem('auth_token');
     if (!token) {
       setError('Please sign in to access the admin dashboard');
@@ -94,99 +97,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
-        <div className="p-8">
-          <div className="max-w-7xl mx-auto">
-            {/* Header Skeleton */}
-            <div className="mb-8">
-              <div className="h-8 bg-slate-200 rounded-lg w-64 mb-2 animate-pulse"></div>
-              <div className="h-5 bg-slate-200 rounded-lg w-96 animate-pulse"></div>
-            </div>
-
-            {/* Stats Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(8)].map((_, index) => (
-                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-slate-200 rounded animate-pulse"></div>
-                      <div className="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-8 bg-slate-200 rounded w-16 mb-2 animate-pulse"></div>
-                    <div className="h-3 bg-slate-200 rounded w-20 animate-pulse"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* AI Verification Section Skeleton */}
-            <Card className="bg-white/80 border-slate-200/50 shadow-lg mb-8">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-slate-200 rounded animate-pulse"></div>
-                  <div className="h-6 bg-slate-200 rounded w-48 animate-pulse"></div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {[...Array(3)].map((_, index) => (
-                    <div key={index} className="text-center p-4 rounded-lg bg-slate-100">
-                      <div className="h-8 bg-slate-200 rounded w-16 mx-auto mb-2 animate-pulse"></div>
-                      <div className="h-4 bg-slate-200 rounded w-24 mx-auto animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions Skeleton */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {[...Array(6)].map((_, index) => (
-                <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-slate-200 rounded-xl animate-pulse"></div>
-                      <div>
-                        <div className="h-5 bg-slate-200 rounded w-32 mb-2 animate-pulse"></div>
-                        <div className="h-4 bg-slate-200 rounded w-40 animate-pulse"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-10 bg-slate-200 rounded w-full animate-pulse"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Top Performers Skeleton */}
-            <Card className="bg-white/80 border-slate-200/50 shadow-lg">
-              <CardHeader>
-                <div className="h-6 bg-slate-200 rounded w-40 animate-pulse"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
-                        <div>
-                          <div className="h-4 bg-slate-200 rounded w-24 mb-1 animate-pulse"></div>
-                          <div className="h-3 bg-slate-200 rounded w-16 animate-pulse"></div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="h-4 bg-slate-200 rounded w-16 mb-1 animate-pulse"></div>
-                        <div className="h-3 bg-slate-200 rounded w-12 animate-pulse"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-4" />
+          <p className="text-slate-600">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -194,26 +108,35 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
-        </div>
-        <Button onClick={fetchDashboardStats} className="mt-4">
-          Retry
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center p-8">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={fetchDashboardStats} className="bg-emerald-600 hover:bg-emerald-700">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-gray-500">No dashboard data available</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center p-8">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6 text-center">
+            <p className="text-gray-500">No dashboard data available</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  // Ensure all required properties exist with default values
   const safeStats = {
     total_users: stats.total_users || 0,
     total_tasks: stats.total_tasks || 0,
@@ -234,423 +157,379 @@ export default function AdminDashboard() {
     recent_activities: stats.recent_activities || []
   };
 
+  const approvalRate = safeStats.total_submissions > 0 
+    ? Math.round((safeStats.approved_submissions / safeStats.total_submissions) * 100)
+    : 0;
+
+  const quickActions = [
+    {
+      title: "Review Proofs",
+      description: `${safeStats.pending_submissions} pending`,
+      href: "/admin/pending-proofs",
+      icon: Eye,
+      color: "blue",
+      urgent: safeStats.pending_submissions > 0
+    },
+    {
+      title: "Create Task",
+      description: "Add new tasks",
+      href: "/admin/create-task",
+      icon: Plus,
+      color: "emerald"
+    },
+    {
+      title: "Manage Users",
+      description: `${safeStats.total_users} users`,
+      href: "/admin/users",
+      icon: Users,
+      color: "purple"
+    },
+    {
+      title: "Manage Tasks",
+      description: `${safeStats.total_tasks} tasks`,
+      href: "/admin/tasks",
+      icon: ClipboardList,
+      color: "indigo"
+    },
+    {
+      title: "Withdrawals",
+      description: "Process requests",
+      href: "/admin/withdrawals",
+      icon: DollarSign,
+      color: "emerald"
+    },
+    {
+      title: "Activity Monitor",
+      description: "Track activities",
+      href: "/admin/activities",
+      icon: Activity,
+      color: "green"
+    }
+  ];
+
+  const adminTools = [
+    { title: "AI Verification", href: "/admin/ai-verification", icon: Bot, color: "purple" },
+    { title: "Duplicate Images", href: "/admin/duplicate-images", icon: AlertTriangle, color: "orange" },
+    { title: "Audit Log", href: "/admin/audit-log", icon: Shield, color: "red" },
+    { title: "Prize Pools", href: "/admin/prize-pools", icon: BarChart3, color: "indigo" }
+  ];
+
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">
-          Welcome to the admin dashboard. Monitor and manage your platform from here.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+          >
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
+              <p className="text-slate-600">Monitor and manage your platform</p>
+            </div>
+            <Button
+              onClick={fetchDashboardStats}
+              variant="outline"
+              size="sm"
+              className="border-slate-300 hover:bg-slate-100 hover:border-slate-400 transition-all duration-200"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </motion.div>
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/admin/create-task">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-4 text-center">
-                <Plus className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-                <h3 className="font-medium">Create Task</h3>
-                <p className="text-sm text-gray-600">Add new tasks</p>
+          {/* Key Metrics - Compact Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100 text-xs font-medium mb-1">Total Users</p>
+                    <p className="text-2xl font-bold">{safeStats.total_users.toLocaleString()}</p>
+                    <p className="text-blue-100 text-xs mt-1">+{safeStats.active_users_today} today</p>
+                  </div>
+                  <Users className="w-8 h-8 text-blue-200" />
+                </div>
               </CardContent>
             </Card>
-          </Link>
 
-          <Link href="/admin/pending-proofs">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-4 text-center">
-                <Eye className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <h3 className="font-medium">Review Proofs</h3>
-                <p className="text-sm text-gray-600">{safeStats.pending_submissions} pending</p>
+            <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-emerald-100 text-xs font-medium mb-1">Pending Reviews</p>
+                    <p className="text-2xl font-bold">{safeStats.pending_submissions}</p>
+                    <p className="text-emerald-100 text-xs mt-1">+{safeStats.submissions_today} today</p>
+                  </div>
+                  <Clock className="w-8 h-8 text-emerald-200" />
+                </div>
               </CardContent>
             </Card>
-          </Link>
 
-          <Link href="/admin/users">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-4 text-center">
-                <Users className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <h3 className="font-medium">Manage Users</h3>
-                <p className="text-sm text-gray-600">{safeStats.total_users} users</p>
+            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-100 text-xs font-medium mb-1">Total Tasks</p>
+                    <p className="text-2xl font-bold">{safeStats.total_tasks.toLocaleString()}</p>
+                    <p className="text-purple-100 text-xs mt-1">+{safeStats.tasks_created_today} today</p>
+                  </div>
+                  <ClipboardList className="w-8 h-8 text-purple-200" />
+                </div>
               </CardContent>
             </Card>
-          </Link>
 
-          <Link href="/admin/tasks">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-4 text-center">
-                <ClipboardList className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-                <h3 className="font-medium">Manage Tasks</h3>
-                <p className="text-sm text-gray-600">{safeStats.total_tasks} tasks</p>
+            <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-amber-100 text-xs font-medium mb-1">Revenue</p>
+                    <p className="text-2xl font-bold">₽{safeStats.total_revenue.toLocaleString()}</p>
+                    <p className="text-amber-100 text-xs mt-1">From tasks</p>
+                  </div>
+                  <DollarSign className="w-8 h-8 text-amber-200" />
+                </div>
               </CardContent>
             </Card>
-          </Link>
-        </div>
-      </div>
+          </motion.div>
 
-      {/* Key Statistics */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Key Statistics</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{safeStats.total_users}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+{safeStats.active_users_today}</span> active today
-              </p>
-            </CardContent>
-          </Card>
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon;
+                const colorClasses = {
+                  blue: "bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700",
+                  emerald: "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700",
+                  purple: "bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700",
+                  indigo: "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700",
+                  green: "bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+                };
+                return (
+                  <Link key={index} href={action.href}>
+                    <Card className={`${colorClasses[action.color as keyof typeof colorClasses]} border-2 hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer ${action.urgent ? 'ring-2 ring-orange-400' : ''}`}>
+                      <CardContent className="p-4 text-center">
+                        <Icon className={`w-6 h-6 mx-auto mb-2 ${action.urgent ? 'animate-pulse' : ''}`} />
+                        <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
+                        <p className="text-xs opacity-75">{action.description}</p>
+                        {action.urgent && (
+                          <Badge className="mt-2 bg-orange-500 text-white text-xs">Urgent</Badge>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{safeStats.total_tasks}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+{safeStats.tasks_created_today}</span> created today
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{safeStats.pending_submissions}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-orange-600">+{safeStats.submissions_today}</span> submitted today
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₽{safeStats.total_revenue}</div>
-              <p className="text-xs text-muted-foreground">
-                From approved tasks
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Submission Statistics */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Submission Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{safeStats.total_submissions}</div>
-              <div className="flex items-center space-x-2 mt-2">
-                <Badge variant="outline" className="text-xs">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  {safeStats.approved_submissions} approved
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  <XCircle className="h-3 w-3 mr-1" />
-                  {safeStats.rejected_submissions} rejected
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {safeStats.total_submissions > 0 
-                  ? Math.round((safeStats.approved_submissions / safeStats.total_submissions) * 100)
-                  : 0}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {safeStats.approved_submissions} out of {safeStats.total_submissions} submissions
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{safeStats.pending_submissions}</div>
-              <p className="text-xs text-muted-foreground">
-                Require admin attention
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* AI Verification Statistics */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">AI Verification Statistics</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">AI Approved</CardTitle>
-              <Bot className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{safeStats.ai_approved_submissions}</div>
-              <p className="text-xs text-muted-foreground">
-                Automatically approved by AI
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">AI Rejected</CardTitle>
-              <Bot className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{safeStats.ai_rejected_submissions}</div>
-              <p className="text-xs text-muted-foreground">
-                Automatically rejected by AI
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manual Approved</CardTitle>
-              <Shield className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{safeStats.manual_approved_submissions}</div>
-              <p className="text-xs text-muted-foreground">
-                Manually approved by admin
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">AI Verification Rate</CardTitle>
-              <Brain className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{safeStats.ai_verification_rate}%</div>
-              <p className="text-xs text-muted-foreground">
-                Percentage handled by AI
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Top Performing Users */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Top Performing Users</h2>
-          <Card>
-            <CardContent className="p-6">
-              {!safeStats.top_performing_users || safeStats.top_performing_users.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No user data available</p>
-              ) : (
-                <div className="space-y-4">
-                  {safeStats.top_performing_users.slice(0, 5).map((user, index) => (
-                    <div key={user.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-sm font-medium text-emerald-600">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-600">{user.tasks_approved} tasks approved</p>
-                        </div>
+          {/* Stats Overview - Collapsible Sections */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Submission Stats */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-emerald-600" />
+                      Submission Overview
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpandedSection(expandedSection === 'submissions' ? null : 'submissions')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ArrowRight className={`w-4 h-4 transition-transform ${expandedSection === 'submissions' ? 'rotate-90' : ''}`} />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-3 bg-slate-50 rounded-lg">
+                      <p className="text-2xl font-bold text-slate-900">{safeStats.total_submissions}</p>
+                      <p className="text-xs text-slate-600 mt-1">Total</p>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <p className="text-2xl font-bold text-green-600">{safeStats.approved_submissions}</p>
+                      <p className="text-xs text-slate-600 mt-1">Approved</p>
+                    </div>
+                    <div className="text-center p-3 bg-red-50 rounded-lg">
+                      <p className="text-2xl font-bold text-red-600">{safeStats.rejected_submissions}</p>
+                      <p className="text-xs text-slate-600 mt-1">Rejected</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                    <span className="text-sm font-medium text-slate-700">Approval Rate</span>
+                    <span className="text-lg font-bold text-emerald-600">{approvalRate}%</span>
+                  </div>
+                  {expandedSection === 'submissions' && (
+                    <div className="mt-4 pt-4 border-t space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">AI Approved:</span>
+                        <span className="font-semibold text-green-600">{safeStats.ai_approved_submissions}</span>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{user.total_points} pts</p>
-                        <p className="text-sm text-gray-600">₽{user.total_coins}</p>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">AI Rejected:</span>
+                        <span className="font-semibold text-red-600">{safeStats.ai_rejected_submissions}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">Manual Approved:</span>
+                        <span className="font-semibold text-blue-600">{safeStats.manual_approved_submissions}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">AI Verification Rate:</span>
+                        <span className="font-semibold text-purple-600">{safeStats.ai_verification_rate}%</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4 pt-4 border-t">
-                <Link href="/admin/users">
-                  <Button variant="outline" className="w-full">
-                    View All Users
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        {/* Recent Activities */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
-          <Card>
-            <CardContent className="p-6">
-              {!safeStats.recent_activities || safeStats.recent_activities.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No recent activities</p>
-              ) : (
-                <div className="space-y-4">
-                  {safeStats.recent_activities.slice(0, 5).map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.user_name}</p>
-                        <p className="text-sm text-gray-600">{activity.description}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(activity.created_at).toLocaleString()}
-                        </p>
-                      </div>
+            {/* Top Performers */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-emerald-600" />
+                    Top Performers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {safeStats.top_performing_users.length === 0 ? (
+                    <p className="text-slate-500 text-center py-4 text-sm">No user data available</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {safeStats.top_performing_users.slice(0, 5).map((user, index) => (
+                        <div key={user.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                              index === 0 ? 'bg-amber-500 text-white' :
+                              index === 1 ? 'bg-slate-400 text-white' :
+                              index === 2 ? 'bg-amber-700 text-white' :
+                              'bg-slate-200 text-slate-700'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-900 text-sm">{user.name}</p>
+                              <p className="text-xs text-slate-600">{user.tasks_approved} tasks</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-slate-900 text-sm">{user.total_points.toLocaleString()} pts</p>
+                            <p className="text-xs text-emerald-600">₽{user.total_coins.toLocaleString()}</p>
+                          </div>
+                        </div>
+                      ))}
+                      <Link href="/admin/users">
+                        <Button variant="outline" className="w-full mt-3 text-sm">
+                          View All Users
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </Link>
                     </div>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4 pt-4 border-t">
-                <Link href="/admin/activities">
-                  <Button variant="outline" className="w-full">
-                    View All Activities
-                  </Button>
-                </Link>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Recent Activities */}
+          {safeStats.recent_activities.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-emerald-600" />
+                      Recent Activities
+                    </CardTitle>
+                    <Link href="/admin/activities">
+                      <Button variant="ghost" size="sm" className="text-sm">
+                        View All
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {safeStats.recent_activities.slice(0, 5).map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900">{activity.user_name}</p>
+                          <p className="text-sm text-slate-600">{activity.description}</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {new Date(activity.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Admin Tools */}
+          {adminTools.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Admin Tools</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {adminTools.map((tool, index) => {
+                  const Icon = tool.icon;
+                  const colorClasses = {
+                    purple: "bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700",
+                    orange: "bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700",
+                    red: "bg-red-50 hover:bg-red-100 border-red-200 text-red-700",
+                    blue: "bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700",
+                    indigo: "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700",
+                    slate: "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+                  };
+                  return (
+                    <Link key={index} href={tool.href}>
+                      <Card className={`${colorClasses[tool.color as keyof typeof colorClasses]} border-2 hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer`}>
+                        <CardContent className="p-4 text-center">
+                          <Icon className="w-5 h-5 mx-auto mb-2" />
+                          <h3 className="font-medium text-xs">{tool.title}</h3>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Navigation Cards */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Admin Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link href="/admin/tasks">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <ClipboardList className="h-6 w-6 text-indigo-600" />
-                  <div>
-                    <h3 className="font-medium">Task Management</h3>
-                    <p className="text-sm text-gray-600">Create, edit, and manage tasks</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/pending-proofs">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Eye className="h-6 w-6 text-blue-600" />
-                  <div>
-                    <h3 className="font-medium">Proof Review</h3>
-                    <p className="text-sm text-gray-600">Review and approve task submissions</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/users">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Users className="h-6 w-6 text-purple-600" />
-                  <div>
-                    <h3 className="font-medium">User Management</h3>
-                    <p className="text-sm text-gray-600">Manage user accounts and roles</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/activities">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Activity className="h-6 w-6 text-green-600" />
-                  <div>
-                    <h3 className="font-medium">Activity Monitor</h3>
-                    <p className="text-sm text-gray-600">Track user activities and system events</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/audit-log">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Shield className="h-6 w-6 text-red-600" />
-                  <div>
-                    <h3 className="font-medium">Audit Log</h3>
-                    <p className="text-sm text-gray-600">Monitor admin actions and changes</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/ai-verification">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Bot className="h-6 w-6 text-purple-600" />
-                  <div>
-                    <h3 className="font-medium">AI Verification Monitor</h3>
-                    <p className="text-sm text-gray-600">Monitor AI verification performance and user submissions</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/duplicate-images">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <AlertTriangle className="h-6 w-6 text-orange-600" />
-                  <div>
-                    <h3 className="font-medium">Duplicate Images</h3>
-                    <p className="text-sm text-gray-600">Review and manage duplicate image submissions</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/create-task">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <Plus className="h-6 w-6 text-emerald-600" />
-                  <div>
-                    <h3 className="font-medium">Create Task</h3>
-                    <p className="text-sm text-gray-600">Add new tasks to the platform</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>

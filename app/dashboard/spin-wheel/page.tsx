@@ -142,7 +142,8 @@ export default function SpinWheelPage() {
       const selectedSegment = wheelSegments[randomSegment];
       
       // Update user stats on backend
-      const coins = selectedSegment.points * 0.1;
+      // Conversion rate: 1000 points = 1 PineCoin
+      const coins = Math.round(selectedSegment.points * 0.001 * 100) / 100;
       const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
       
       if (updateResponse.success) {
@@ -420,7 +421,7 @@ export default function SpinWheelPage() {
                         You won {result.points} points!
                       </p>
                       <p className="text-lg text-yellow-200">
-                        {result.points} points and {(result.points * 0.1).toFixed(1)} coins added to your account!
+                        {result.points} points and {(result.points * 0.001).toFixed(2)} PineCoins added to your account!
                       </p>
                     </div>
                     <div className="flex justify-center gap-4 text-sm">
@@ -428,7 +429,7 @@ export default function SpinWheelPage() {
                         <span className="text-green-300">+{result.points} Points</span>
                       </div>
                       <div className="bg-blue-500/20 px-3 py-1 rounded-full">
-                        <span className="text-blue-300">+{(result.points * 0.1).toFixed(1)} Coins</span>
+                        <span className="text-blue-300">+{(result.points * 0.001).toFixed(2)} PineCoins</span>
                       </div>
                     </div>
                   </CardContent>
@@ -520,7 +521,7 @@ export default function SpinWheelPage() {
                     <p className="text-purple-300 font-semibold">⭐ Bigger rewards have equal chances</p>
                   </div>
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30">
-                    <p className="text-green-300 font-semibold">💰 Points convert to coins (1 point = 0.1 coins)</p>
+                    <p className="text-green-300 font-semibold">💰 Points convert to PineCoins (1000 points = 1 PineCoin)</p>
                   </div>
                   <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg p-3 border border-cyan-400/30">
                     <p className="text-cyan-300 font-semibold">🚀 Use PineCoins to buy extra spins</p>

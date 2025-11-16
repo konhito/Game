@@ -331,7 +331,8 @@ export default function DashboardPage() {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Update user stats on backend - this will handle the new 8-hour reset logic
-      const coins = selectedReward.points * 0.1;
+      // Conversion rate: 1000 points = 1 PineCoin
+      const coins = Math.round(selectedReward.points * 0.001 * 100) / 100;
       const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedReward.points, coins);
       
       if (updateResponse.success) {
@@ -621,6 +622,7 @@ export default function DashboardPage() {
                           fetchDashboardData(user.id);
                         }
                       }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-100 transition-all duration-200 hover:scale-110 active:scale-95"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -637,16 +639,16 @@ export default function DashboardPage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-4 sm:mb-6 md:mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 mb-2 px-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 mb-2 px-2 hover:text-slate-900 transition-colors duration-200">
               Welcome Back, {user?.name || 'Player'}! 👋
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base md:text-lg px-2">Ready to climb the leaderboard and earn PineCoins?</p>
+            <p className="text-slate-600 text-sm sm:text-base md:text-lg px-2 hover:text-slate-700 transition-colors duration-200">Ready to climb the leaderboard and earn PineCoins?</p>
             
             {/* Live Stats Display in Welcome Header */}
             
 
-            <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 px-2">
-              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+            <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 px-2 hover:text-slate-600 transition-colors duration-200">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 hover:text-slate-600 transition-colors duration-200" />
               <span>Last login: {safeLastLoginDate ? new Date(safeLastLoginDate).toLocaleDateString() : 'Today'}</span>
             </div>
           </motion.div>
@@ -664,21 +666,21 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300 overflow-hidden hover:scale-[1.02] cursor-pointer">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 hover:bg-white/20 transition-all duration-300"></div>
                 <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-blue-100 flex items-center gap-2">
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-blue-100 flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 hover:scale-110 transition-transform duration-200" />
                     Total Points
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">{safeTotalPoints.toLocaleString()}</div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2 hover:scale-105 transition-transform duration-200">{safeTotalPoints.toLocaleString()}</div>
                   <Progress 
                                          value={Math.min(100, (safeTotalPoints / 2500) * 100)} 
-                    className="h-2 bg-blue-400/30" 
+                    className="h-2 bg-blue-400/30 hover:bg-blue-400/40 transition-colors duration-200" 
                   />
-                  <p className="text-xs text-blue-100 mt-2">
+                  <p className="text-xs text-blue-100 mt-2 hover:text-white transition-colors duration-200">
                     {nextRewardAt > 0 ? `${nextRewardAt.toLocaleString()} to next reward` : '🎉 Max level reached!'}
                   </p>
                 </CardContent>
@@ -690,18 +692,18 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.1 }}
             >
-              <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+              <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-300 overflow-hidden hover:scale-[1.02] cursor-pointer">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 hover:bg-white/20 transition-all duration-300"></div>
                 <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-emerald-100 flex items-center gap-2">
-                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-emerald-100 flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 hover:scale-110 transition-transform duration-200" />
                     Weekly Points
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">{safeWeeklyPoints.toLocaleString()}</div>
-                  <div className="flex items-center gap-2 text-emerald-100">
-                    <div className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2 hover:scale-105 transition-transform duration-200">{safeWeeklyPoints.toLocaleString()}</div>
+                  <div className="flex items-center gap-2 text-emerald-100 hover:text-white transition-colors duration-200">
+                    <div className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse hover:bg-emerald-100 transition-colors duration-200"></div>
                     <span className="text-xs">This week's progress</span>
                   </div>
                 </CardContent>
@@ -713,20 +715,20 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+              <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-amber-500/50 transition-all duration-300 overflow-hidden hover:scale-[1.02] cursor-pointer">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 hover:bg-white/20 transition-all duration-300"></div>
                 <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-amber-100 flex items-center gap-2">
-                    <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-amber-100 flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <Trophy className="h-3 w-3 sm:h-4 sm:w-4 hover:scale-110 transition-transform duration-200" />
                     Current Rank
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">
+                  <div className="text-2xl sm:text-3xl font-bold mb-2 hover:scale-105 transition-transform duration-200">
                     #{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}
                   </div>
-                  <div className="flex items-center gap-2 text-amber-100">
-                    <div className="w-2 h-2 bg-amber-200 rounded-full"></div>
+                  <div className="flex items-center gap-2 text-amber-100 hover:text-white transition-colors duration-200">
+                    <div className="w-2 h-2 bg-amber-200 rounded-full hover:bg-amber-100 transition-colors duration-200"></div>
                     <span className="text-xs">Leaderboard position</span>
                   </div>
                 </CardContent>
@@ -738,18 +740,18 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2, delay: 0.3 }}
             >
-              <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+              <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-violet-500/50 transition-all duration-300 overflow-hidden hover:scale-[1.02] cursor-pointer">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 hover:bg-white/20 transition-all duration-300"></div>
                 <CardHeader className="pb-2 relative z-10 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-violet-100 flex items-center gap-2">
-                    <span className="text-base sm:text-lg">₽</span>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-violet-100 flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <span className="text-base sm:text-lg hover:scale-110 transition-transform duration-200">₽</span>
                     PineCoins
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative z-10 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">₽{Number(safeTotalCoins).toFixed(2)}</div>
-                  <div className="flex items-center gap-2 text-violet-100">
-                    <div className="w-2 h-2 bg-violet-200 rounded-full animate-pulse"></div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2 hover:scale-105 transition-transform duration-200">₽{Number(safeTotalCoins).toFixed(2)}</div>
+                  <div className="flex items-center gap-2 text-violet-100 hover:text-white transition-colors duration-200">
+                    <div className="w-2 h-2 bg-violet-200 rounded-full animate-pulse hover:bg-violet-100 transition-colors duration-200"></div>
                     <span className="text-xs">Available balance</span>
                   </div>
                 </CardContent>
@@ -768,7 +770,7 @@ export default function DashboardPage() {
                 🎯 DAILY SPIN WHEEL 🎯
                 <Target className="w-8 h-8 ml-3" />
               </Button>
-              <p className="text-slate-600 mt-2">
+              <p className="text-slate-600 mt-2 hover:text-slate-700 transition-colors duration-200">
                 {dashboardData?.userStats?.spins_remaining || 0} spins remaining today
               </p>
             </div>
@@ -837,9 +839,9 @@ export default function DashboardPage() {
                       </>
                     )}
                   </Button>
-                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-emerald-200/50">
-                    <div className="font-medium mb-1">🎁 Win 20-150 points + PineCoins!</div>
-                    <div className="text-slate-500 text-xs">Daily bonus available</div>
+                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-emerald-200/50 hover:bg-white/70 hover:border-emerald-300/70 hover:text-slate-700 transition-all duration-200">
+                    <div className="font-medium mb-1 hover:text-slate-800 transition-colors duration-200">🎁 Win 20-150 points + PineCoins!</div>
+                    <div className="text-slate-500 text-xs hover:text-slate-600 transition-colors duration-200">Daily bonus available</div>
                   </div>
                 </CardContent>
               </Card>
@@ -923,15 +925,15 @@ export default function DashboardPage() {
                     )}
                   </Button>
                   
-                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-blue-200/50">
-                    <div className="font-medium mb-1">
+                  <div className="text-xs text-slate-600 text-center bg-white/50 rounded-lg p-2 sm:p-3 border border-blue-200/50 hover:bg-white/70 hover:border-blue-300/70 hover:text-slate-700 transition-all duration-200">
+                    <div className="font-medium mb-1 hover:text-slate-800 transition-colors duration-200">
                       {dailyRewardClaimed ? '✅ Claimed today!' : '⏰ Come back tomorrow!'}
                     </div>
-                    <div className="text-slate-500 text-xs">
+                    <div className="text-slate-500 text-xs hover:text-slate-600 transition-colors duration-200">
                       {dailyRewardClaimed ? 'Great job maintaining your streak!' : 'Streak bonus increases daily'}
                     </div>
                     {dailyRewardClaimed && (
-                      <div className="mt-2 text-xs text-slate-400">
+                      <div className="mt-2 text-xs text-slate-400 hover:text-slate-500 transition-colors duration-200">
                         Next reward available in {Math.ceil((24 - new Date().getHours()) * 60 - new Date().getMinutes())} minutes
                       </div>
                     )}
@@ -992,27 +994,27 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Streak Info */}
-                  <div className="bg-white/60 rounded-lg p-3 border border-indigo-200/50">
+                  <div className="bg-white/60 rounded-lg p-3 border border-indigo-200/50 hover:bg-white/80 hover:border-indigo-300/70 hover:shadow-md transition-all duration-200 cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">🔥</span>
+                        <span className="text-2xl hover:scale-110 transition-transform duration-200">🔥</span>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{safeCurrentStreak} Day Streak</p>
-                          <p className="text-xs text-slate-600">Keep it going!</p>
+                          <p className="text-sm font-semibold text-slate-800 hover:text-slate-900 transition-colors duration-200">{safeCurrentStreak} Day Streak</p>
+                          <p className="text-xs text-slate-600 hover:text-slate-700 transition-colors duration-200">Keep it going!</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-orange-600">+{Math.min(safeCurrentStreak * 5, 50)}</p>
-                        <p className="text-xs text-slate-500">bonus points</p>
+                        <p className="text-lg font-bold text-orange-600 hover:text-orange-700 transition-colors duration-200">+{Math.min(safeCurrentStreak * 5, 50)}</p>
+                        <p className="text-xs text-slate-500 hover:text-slate-600 transition-colors duration-200">bonus points</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Next Milestone */}
-                  <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-3 border border-indigo-200/50">
+                  <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-3 border border-indigo-200/50 hover:from-indigo-200 hover:to-purple-200 hover:border-indigo-300/70 hover:shadow-md transition-all duration-200 cursor-pointer">
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-slate-800 mb-1">Next Milestone</p>
-                      <p className="text-xs text-slate-600">
+                      <p className="text-sm font-semibold text-slate-800 mb-1 hover:text-slate-900 transition-colors duration-200">Next Milestone</p>
+                      <p className="text-xs text-slate-600 hover:text-slate-700 transition-colors duration-200">
                         {nextRewardAt > 0 
                           ? `${nextRewardAt.toLocaleString()} points to unlock special rewards!`
                           : '🎉 Max level reached!'
@@ -1060,20 +1062,20 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-amber-200/50 hover:border-amber-400/70 hover:scale-[1.02] hover:shadow-md cursor-pointer gap-2"
+                        className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-amber-200/50 hover:border-amber-400/70 hover:scale-[1.02] hover:shadow-md hover:shadow-amber-200/50 cursor-pointer gap-2"
                       >
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                           <span className="text-2xl sm:text-3xl flex-shrink-0">
                             {index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}️⃣`}
                           </span>
                           <div className="min-w-0">
-                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{player.name}</p>
-                            <p className="text-xs sm:text-sm text-slate-500">#{player.rank || index + 1}</p>
+                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate hover:text-slate-900 transition-colors duration-200">{player.name}</p>
+                            <p className="text-xs sm:text-sm text-slate-500 hover:text-slate-600 transition-colors duration-200">#{player.rank || index + 1}</p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-bold text-slate-800 text-base sm:text-lg">{(player.total_points || 0).toLocaleString()}</p>
-                          <p className="text-xs sm:text-sm text-slate-500">+{(player.weekly_points || 0)} this week</p>
+                          <p className="font-bold text-slate-800 text-base sm:text-lg hover:text-slate-900 transition-colors duration-200">{(player.total_points || 0).toLocaleString()}</p>
+                          <p className="text-xs sm:text-sm text-slate-500 hover:text-slate-600 transition-colors duration-200">+{(player.weekly_points || 0)} this week</p>
                         </div>
                       </motion.div>
                     ))}
@@ -1123,16 +1125,16 @@ export default function DashboardPage() {
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-emerald-200/50 hover:border-emerald-400/70 hover:scale-[1.02] hover:shadow-md cursor-pointer gap-2"
+                          className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-white/60 hover:bg-white/90 transition-all duration-300 border border-emerald-200/50 hover:border-emerald-400/70 hover:scale-[1.02] hover:shadow-md hover:shadow-emerald-200/50 cursor-pointer gap-2"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{activity.description || activity.activity_type}</p>
-                            <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1">
-                              <Clock className="w-3 h-3 flex-shrink-0" />
+                            <p className="font-semibold text-slate-800 text-sm sm:text-base truncate hover:text-slate-900 transition-colors duration-200">{activity.description || activity.activity_type}</p>
+                            <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1 hover:text-slate-600 transition-colors duration-200">
+                              <Clock className="w-3 h-3 flex-shrink-0 hover:text-slate-600 transition-colors duration-200" />
                               <span className="truncate">{new Date(activity.created_at).toLocaleDateString()}</span>
                             </p>
                           </div>
-                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0">
+                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0 hover:from-emerald-600 hover:to-green-600 hover:scale-105 transition-all duration-200">
                             +{(activity.points || 10)} pts
                           </Badge>
                         </motion.div>
@@ -1177,20 +1179,20 @@ export default function DashboardPage() {
                 </div>
                 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md hover:shadow-yellow-200/50 transition-all duration-300 cursor-pointer">
                     <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">🔥</div>
-                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{safeCurrentStreak} Day Streak</p>
-                    <p className="text-xs sm:text-sm text-slate-600">Keep it going!</p>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base hover:text-slate-900 transition-colors duration-200">{safeCurrentStreak} Day Streak</p>
+                    <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Keep it going!</p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md hover:shadow-yellow-200/50 transition-all duration-300 cursor-pointer">
                     <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">⭐</div>
-                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{Math.floor((safeTotalPoints || 0) / 100)} Level</p>
-                    <p className="text-xs sm:text-sm text-slate-600">Every 100 points</p>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base hover:text-slate-900 transition-colors duration-200">{Math.floor((safeTotalPoints || 0) / 100)} Level</p>
+                    <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Every 100 points</p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                  <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-yellow-200/50 hover:bg-white/80 hover:border-yellow-300/70 hover:scale-105 hover:shadow-md hover:shadow-yellow-200/50 transition-all duration-300 cursor-pointer">
                     <div className="text-xl sm:text-2xl mb-2 hover:scale-110 transition-transform duration-300">🎯</div>
-                    <p className="font-semibold text-slate-800 text-sm sm:text-base">{safeSpinsRemaining} Spins</p>
-                    <p className="text-xs sm:text-sm text-slate-600">Available today</p>
+                    <p className="font-semibold text-slate-800 text-sm sm:text-base hover:text-slate-900 transition-colors duration-200">{safeSpinsRemaining} Spins</p>
+                    <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Available today</p>
                   </div>
                 </div>
               </CardContent>
@@ -1230,21 +1232,21 @@ export default function DashboardPage() {
 
             {/* Quick Stats Footer */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800">{safeTotalPoints.toLocaleString()}</div>
-                <p className="text-sm text-slate-600">Total Points</p>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">{safeTotalPoints.toLocaleString()}</div>
+                <p className="text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Total Points</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800">₽{Number(safeTotalCoins).toFixed(2)}</div>
-                <p className="text-xs sm:text-sm text-slate-600">PineCoins</p>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">₽{Number(safeTotalCoins).toFixed(2)}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">PineCoins</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800">{safeCurrentStreak}</div>
-                <p className="text-xs sm:text-sm text-slate-600">Day Streak</p>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">{safeCurrentStreak}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Day Streak</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
-                <p className="text-xs sm:text-sm text-slate-600">Current Rank</p>
+              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Current Rank</p>
               </div>
             </div>
           </motion.div>

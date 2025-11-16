@@ -318,19 +318,19 @@ export function Navbar() {
                           item.href === "/dashboard/rewards" ? "nav-rewards" :
                           item.href === "/dashboard/prize-pool" ? "nav-prize-pool" :
                           item.href === "/dashboard/settings" ? "nav-settings" : undefined}
-                className={`relative px-3 lg:px-6 py-2 lg:py-3 rounded-xl text-xs lg:text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
+                className={`relative px-3 lg:px-6 py-2 lg:py-3 rounded-xl text-xs lg:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   item.isActive
                     ? item.isAdmin 
-                      ? "text-red-600 bg-red-50 border border-red-200"
-                      : "text-emerald-600 bg-emerald-50 border border-emerald-200"
-                    : "text-slate-600 hover:text-emerald-600 hover:bg-emerald-50"
+                      ? "text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:shadow-md hover:scale-105"
+                      : "text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-md hover:scale-105"
+                    : "text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm hover:scale-105"
                 }`}
               >
                 <div className="flex items-center gap-2 lg:gap-3">
-                  <item.icon className={`h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0 ${
+                  <item.icon className={`h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0 transition-all duration-200 ${
                     item.isActive 
-                      ? item.isAdmin ? "text-red-600" : "text-emerald-600"
-                      : "text-slate-500"
+                      ? item.isAdmin ? "text-red-600 hover:text-red-700 hover:scale-110" : "text-emerald-600 hover:text-emerald-700 hover:scale-110"
+                      : "text-slate-500 hover:text-emerald-600 hover:scale-110"
                   }`} />
                   <span className="font-semibold">{item.title}</span>
                 </div>
@@ -347,15 +347,15 @@ export function Navbar() {
           <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             {/* Quick Stats - Only Money and Points - Desktop */}
             <div className="hidden md:flex items-center space-x-3">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm">
-                <Coins className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                <span className="font-semibold text-yellow-800 whitespace-nowrap">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <Coins className="w-4 h-4 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
+                <span className="font-semibold text-yellow-800 whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
                   {user.pineCoins === 0 && loading ? '...' : `$${user.pineCoins.toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm">
-                <div className="w-4 h-4 text-blue-600 flex items-center justify-center flex-shrink-0">🎯</div>
-                <span className="font-semibold text-blue-800 whitespace-nowrap">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="w-4 h-4 text-blue-600 flex items-center justify-center flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200">🎯</div>
+                <span className="font-semibold text-blue-800 whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
                   {user.points === 0 && loading ? '...' : `${user.points} pts`}
                 </span>
               </div>
@@ -363,15 +363,15 @@ export function Navbar() {
 
             {/* Quick Stats - Mobile - Compact */}
             <div className="md:hidden flex items-center space-x-2">
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 shadow-sm">
-                <Coins className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0" />
-                <span className="font-semibold text-yellow-800 text-xs whitespace-nowrap">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <Coins className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
+                <span className="font-semibold text-yellow-800 text-xs whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
                   {user.pineCoins === 0 && loading ? '...' : `$${user.pineCoins.toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 border border-blue-200 shadow-sm">
-                <div className="w-3.5 h-3.5 text-blue-600 flex items-center justify-center flex-shrink-0 text-xs">🎯</div>
-                <span className="font-semibold text-blue-800 text-xs whitespace-nowrap">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div className="w-3.5 h-3.5 text-blue-600 flex items-center justify-center flex-shrink-0 text-xs hover:text-blue-700 hover:scale-110 transition-all duration-200">🎯</div>
+                <span className="font-semibold text-blue-800 text-xs whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
                   {user.points === 0 && loading ? '...' : `${user.points} pts`}
                 </span>
               </div>
@@ -380,7 +380,7 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="hover:bg-slate-100 rounded-xl">
+                <Button variant="ghost" size="icon" className="hover:bg-slate-100 hover:text-slate-900 rounded-xl hover:scale-110 active:scale-95 transition-all duration-200">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -414,10 +414,10 @@ export function Navbar() {
             {/* User Menu - Everything Else Goes Here */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl hover:bg-slate-100 transition-colors p-0 flex-shrink-0">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl hover:bg-slate-100 hover:scale-110 active:scale-95 transition-all duration-200 p-0 flex-shrink-0">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 hover:ring-2 hover:ring-slate-300 transition-all duration-200">
                     <AvatarImage src={user.avatar || ""} alt={user.name} />
-                    <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg">
+                    <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
                       {user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -460,44 +460,44 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 
                 {/* All Navigation Items */}
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/leaderboard" className="flex items-center gap-3 w-full">
                     <Trophy className="h-4 w-4 text-yellow-600" />
                     <span>Leaderboard</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/daily-rewards" className="flex items-center gap-3 w-full">
                     <Target className="h-4 w-4 text-purple-600" />
                     <span>Daily Rewards</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/news" className="flex items-center gap-3 w-full">
                     <Newspaper className="h-4 w-4 text-orange-600" />
                     <span>News</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/wallet" className="flex items-center gap-3 w-full">
                     <Wallet className="h-4 w-4 text-blue-600" />
                     <span>Wallet</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/stats" className="flex items-center gap-3 w-full">
                     <BarChart3 className="h-4 w-4 text-green-600" />
                     <span>Statistics</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/settings" className="flex items-center gap-3 w-full">
                     <Settings className="h-4 w-4 text-gray-600" />
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
                 {/* Profile Section */}
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/user" className="flex items-center gap-3 w-full">
                     <User className="h-4 w-4 text-emerald-600" />
                     <div className="flex flex-col">
@@ -506,7 +506,7 @@ export function Navbar() {
                     </div>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/activities" className="flex items-center gap-3 w-full">
                     <Target className="h-4 w-4 text-purple-600" />
                     <div className="flex flex-col">
@@ -515,7 +515,7 @@ export function Navbar() {
                     </div>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50">
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/dashboard/stats" className="flex items-center gap-3 w-full">
                     <BarChart3 className="h-4 w-4 text-green-600" />
                     <div className="flex flex-col">

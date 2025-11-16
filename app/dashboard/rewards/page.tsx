@@ -242,7 +242,7 @@ export default function RewardsPage() {
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:scale-105">
+                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </Button>
@@ -266,7 +266,7 @@ export default function RewardsPage() {
               {/* User Stats */}
               {userStats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:bg-slate-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-default">
+                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:bg-slate-100 hover:shadow-md hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 cursor-pointer">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
                         <Star className="h-4 w-4 text-white" />
@@ -277,7 +277,7 @@ export default function RewardsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:bg-slate-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-default">
+                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:bg-slate-100 hover:shadow-md hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 cursor-pointer">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
                         <Coins className="h-4 w-4 text-white" />
@@ -370,8 +370,8 @@ export default function RewardsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className={`group hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-slate-200 shadow-sm bg-white overflow-hidden cursor-pointer ${
-                  reward.claimed ? 'opacity-60' : 'hover:border-emerald-300'
+                <Card className={`group hover:shadow-xl hover:shadow-emerald-200/50 hover:scale-[1.02] transition-all duration-300 border border-slate-200 shadow-sm bg-white overflow-hidden cursor-pointer ${
+                  reward.claimed ? 'opacity-60 hover:opacity-70' : 'hover:border-emerald-300'
                 }`}>
                   <CardContent className="p-6">
                     <div className="space-y-4">
@@ -394,7 +394,7 @@ export default function RewardsPage() {
                       </div>
 
                       {/* Requirements */}
-                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 group-hover:bg-slate-100 transition-colors duration-300">
+                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 group-hover:bg-slate-100 group-hover:border-slate-300 transition-all duration-300">
                         <div className="flex items-center gap-2 mb-3">
                           <div className="group-hover:scale-110 transition-transform duration-300">
                             {getCategoryIcon(reward.category)}
