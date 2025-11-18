@@ -390,7 +390,9 @@ export default function SignUpPage() {
                         placeholder="First name"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20"
+                        disabled={isLoading}
+                        autoComplete="given-name"
+                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
                         required
                       />
                     </div>
@@ -405,7 +407,9 @@ export default function SignUpPage() {
                         placeholder="Last name"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20"
+                        disabled={isLoading}
+                        autoComplete="family-name"
+                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
                         required
                       />
                     </div>
@@ -422,7 +426,9 @@ export default function SignUpPage() {
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20"
+                      disabled={isLoading}
+                      autoComplete="email"
+                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
                       required
                     />
                   </div>
@@ -439,7 +445,9 @@ export default function SignUpPage() {
                         placeholder="Create a password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10"
+                        disabled={isLoading}
+                        autoComplete="new-password"
+                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10 disabled:opacity-50"
                         required
                       />
                       <button
@@ -464,7 +472,9 @@ export default function SignUpPage() {
                         placeholder="Confirm your password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10"
+                        disabled={isLoading}
+                        autoComplete="new-password"
+                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10 disabled:opacity-50"
                         required
                       />
                       <button
@@ -481,7 +491,8 @@ export default function SignUpPage() {
                     <input
                       type="checkbox"
                       id="terms"
-                      className="mt-1 w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+                      disabled={isLoading}
+                      className="mt-1 w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 disabled:opacity-50"
                       required
                     />
                     <Label htmlFor="terms" className="text-sm text-slate-600">

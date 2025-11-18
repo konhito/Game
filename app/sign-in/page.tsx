@@ -369,7 +369,9 @@ export default function SignInPage() {
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20"
+                      disabled={isLoading}
+                      autoComplete="email"
+                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20 disabled:opacity-50"
                       required
                     />
                   </div>
@@ -385,7 +387,9 @@ export default function SignInPage() {
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20 pr-10"
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20 pr-10 disabled:opacity-50"
                         required
                       />
                       <button
