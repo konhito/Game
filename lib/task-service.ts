@@ -127,6 +127,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/tasks/available?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        cache: 'no-store', // Prevent browser caching
       });
 
       if (!response.ok) {
@@ -317,6 +318,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/tasks/history?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        cache: 'no-store', // Prevent browser caching
       });
 
       if (!response.ok) {
