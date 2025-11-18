@@ -208,6 +208,11 @@ export default function ActivitiesPage() {
     }
   };
 
+  const handleDialogImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedTask) return;
+    handleImageUpload(selectedTask.id, event);
+  };
+
   const openProofDialog = (task: TaskItem) => {
     setSelectedTask(task);
     setShowProofDialog(true);
@@ -346,17 +351,59 @@ export default function ActivitiesPage() {
   };
 
   const getFilteredTasks = () => {
-    if (filter === 'all') return allTasks;
+    let tasks = allTasks;
+    
+    // Apply filter
     if (filter === 'completed') {
-      return allTasks.filter(task => task.status === 'approved' || task.status === 'rejected' || task.status === 'pending');
+      tasks = tasks.filter(task => {
+        const status = task.status?.toLowerCase().trim();
+        return status === 'approved' || status === 'rejected' || status === 'pending';
+      });
+    } else if (filter !== 'all') {
+      tasks = tasks.filter(task => {
+        const status = task.status?.toLowerCase().trim();
+        return status === filter;
+      });
     }
-    return allTasks.filter(task => task.status === filter);
+    
+    // Sort: in progress first, then available, then completed
+    return tasks.sort((a, b) => {
+      const statusA = a.status?.toLowerCase().trim() || '';
+      const statusB = b.status?.toLowerCase().trim() || '';
+      
+      // Priority order: started > available > completed
+      const getPriority = (status: string) => {
+        if (status === 'started') return 1;
+        if (status === 'available') return 2;
+        if (status === 'approved' || status === 'rejected' || status === 'pending') return 3;
+        return 4;
+      };
+      
+      const priorityA = getPriority(statusA);
+      const priorityB = getPriority(statusB);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // If same priority, sort by created_at (newest first)
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    });
   };
 
   const filteredTasks = getFilteredTasks();
-  const availableCount = allTasks.filter(t => t.status === 'available').length;
-  const startedCount = allTasks.filter(t => t.status === 'started').length;
-  const completedCount = allTasks.filter(t => t.status === 'approved' || t.status === 'rejected' || t.status === 'pending').length;
+  const availableCount = allTasks.filter(t => {
+    const status = t.status?.toLowerCase().trim();
+    return status === 'available';
+  }).length;
+  const startedCount = allTasks.filter(t => {
+    const status = t.status?.toLowerCase().trim();
+    return status === 'started';
+  }).length;
+  const completedCount = allTasks.filter(t => {
+    const status = t.status?.toLowerCase().trim();
+    return status === 'approved' || status === 'rejected' || status === 'pending';
+  }).length;
 
   if (loading) {
     return (
@@ -560,14 +607,14 @@ export default function ActivitiesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 * index }}
                   >
-                    <Card className={`bg-white border-2 transition-all duration-300 hover:shadow-xl ${
+                    <Card className={`bg-white border-2 transition-all duration-300 hover:shadow-xl h-full flex flex-col ${
                       isStarted 
                         ? 'border-emerald-400 shadow-md' 
                         : isAvailable
                         ? 'border-blue-300 shadow-sm'
                         : 'border-slate-200 shadow-sm'
                     }`}>
-                      <CardContent className="p-4 sm:p-5">
+                      <CardContent className="p-4 sm:p-5 flex flex-col flex-1">
                         <div className="space-y-3">
                           {/* Task Header */}
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -683,162 +730,71 @@ export default function ActivitiesPage() {
                             )}
                           </AnimatePresence>
 
-                          {/* Submit Proof Form - Directly on Card for Started Tasks */}
-                          {isStarted && (
-                            <div className="pt-4 border-t-2 border-emerald-200 space-y-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Upload className="w-4 h-4 text-emerald-600" />
-                                <h3 className="text-base font-bold text-slate-900">Submit Proof</h3>
-                              </div>
-                              
-                              <div className="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-2.5 mb-3">
-                                <div className="flex items-start gap-2">
-                                  <Info className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                                  <div>
-                                    <p className="text-xs font-semibold text-emerald-900 mb-1">Requirements</p>
-                                    <ul className="text-xs text-emerald-800 space-y-0.5 list-disc list-inside">
-                                      <li>Upload screenshot/image (max 5MB)</li>
-                                      <li>Provide detailed description</li>
-                                    </ul>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <div>
-                                  <Label htmlFor={`proof-image-${task.id}`} className="text-xs font-semibold text-slate-700 mb-2 block flex items-center gap-1">
-                                    <ImageIcon className="w-3 h-3" />
-                                    Proof Image *
-                                  </Label>
-                                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-emerald-400 transition-colors">
-                                    <Input
-                                      id={`proof-image-${task.id}`}
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) => handleImageUpload(task.id, e)}
-                                      className="hidden"
-                                    />
-                                    <label
-                                      htmlFor={`proof-image-${task.id}`}
-                                      className="cursor-pointer flex flex-col items-center gap-2"
-                                    >
-                                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                        <ImageIcon className="w-6 h-6 text-emerald-600" />
-                                      </div>
-                                      <div>
-                                        <p className="text-xs font-medium text-slate-700">
-                                          {proofImages[task.id] 
-                                            ? proofImages[task.id]?.name 
-                                            : 'Click to upload'}
-                                        </p>
-                                        <p className="text-xs text-slate-500 mt-0.5">Max 5MB</p>
-                                      </div>
-                                    </label>
-                                  </div>
-                                  {proofImages[task.id] && (
-                                    <motion.div
-                                      initial={{ opacity: 0, scale: 0.9 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      className="mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2"
-                                    >
-                                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                                      <p className="text-xs text-emerald-700 font-medium truncate">{proofImages[task.id]?.name}</p>
-                                    </motion.div>
-                                  )}
-                                </div>
-                                
-                                <div>
-                                  <Label htmlFor={`proof-description-${task.id}`} className="text-xs font-semibold text-slate-700 mb-2 block flex items-center gap-1">
-                                    <FileText className="w-3 h-3" />
-                                    Description *
-                                  </Label>
-                                  <Textarea
-                                    id={`proof-description-${task.id}`}
-                                    placeholder="Describe how you completed the task..."
-                                    value={proofDescriptions[task.id] || ''}
-                                    onChange={(e) => setProofDescriptions(prev => ({ ...prev, [task.id]: e.target.value }))}
-                                    className="border-slate-300 focus:border-emerald-600 focus:ring-emerald-600 min-h-[80px] text-sm"
-                                    rows={3}
-                                  />
-                                  <p className="text-xs text-slate-500 mt-1">
-                                    {proofDescriptions[task.id]?.length || 0} characters
-                                  </p>
-                                </div>
-                                
-                                <Button 
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    submitProof(task);
-                                  }}
-                                  disabled={uploadingTasks[task.id] || !proofDescriptions[task.id]?.trim() || !proofImages[task.id]}
-                                  size="sm"
-                                  className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
-                                >
-                                  {uploadingTasks[task.id] ? (
-                                    <>
-                                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                      Submitting...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Upload className="h-4 w-4 mr-2" />
-                                      Submit Proof
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Action Section for Available and Completed Tasks */}
-                          {!isStarted && (
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-slate-200">
-                              {/* Expand/Collapse Button */}
-                              <Button
+                          {/* Action Section - Always at bottom */}
+                          <div className="mt-auto pt-3 border-t border-slate-200">
+                            {isStarted ? (
+                              // Submit Proof Button for Started Tasks
+                              <Button 
                                 type="button"
-                                variant="outline"
-                                size="sm"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  setExpandedTaskId(isExpanded ? null : task.id);
+                                  openProofDialog(task);
                                 }}
-                                className="flex-1 sm:flex-initial border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 text-xs h-8"
+                                size="sm"
+                                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 h-9"
                               >
-                                <Eye className="h-3 w-3 mr-1.5" />
-                                {isExpanded ? 'Hide' : 'Details'}
+                                <Upload className="h-4 w-4 mr-2" />
+                                Submit Proof
                               </Button>
-
-                              {/* Primary Action Button */}
-                              {isAvailable && (
-                                <Button 
+                            ) : (
+                              // Action Buttons for Available and Completed Tasks
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                {/* Expand/Collapse Button */}
+                                <Button
                                   type="button"
+                                  variant="outline"
+                                  size="sm"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    openTaskDialog(task);
+                                    setExpandedTaskId(isExpanded ? null : task.id);
                                   }}
-                                  size="sm"
-                                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 h-8"
+                                  className="flex-1 sm:flex-initial border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 text-xs h-9"
                                 >
-                                  <Play className="h-4 w-4 mr-1.5" />
-                                  Start Task
+                                  <Eye className="h-3 w-3 mr-1.5" />
+                                  {isExpanded ? 'Hide' : 'Details'}
                                 </Button>
-                              )}
-                              {isCompleted && (
-                                <div className="flex-1 flex items-center justify-center gap-2 text-slate-600 bg-slate-50 rounded-lg p-2 text-xs">
-                                  <CheckCircle className="h-4 w-4 text-emerald-600" />
-                                  <span className="font-medium">
-                                    {task.status === 'approved' ? 'Approved ✓' : 
-                                     task.status === 'rejected' ? 'Rejected' : 
-                                     'Under Review'}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
+
+                                {/* Primary Action Button */}
+                                {isAvailable && (
+                                  <Button 
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openTaskDialog(task);
+                                    }}
+                                    size="sm"
+                                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 h-9"
+                                  >
+                                    <Play className="h-4 w-4 mr-1.5" />
+                                    Start Task
+                                  </Button>
+                                )}
+                                {isCompleted && (
+                                  <div className="flex-1 flex items-center justify-center gap-2 text-slate-600 bg-slate-50 rounded-lg p-2 text-xs h-9">
+                                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                    <span className="font-medium">
+                                      {normalizedStatus === 'approved' ? 'Approved ✓' : 
+                                       normalizedStatus === 'rejected' ? 'Rejected' : 
+                                       'Under Review'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -981,7 +937,7 @@ export default function ActivitiesPage() {
                       Submit Proof
                     </DialogTitle>
                     <DialogDescription className="text-slate-600 mt-1">
-                      Upload proof of completion for: <span className="font-semibold">{selectedTask?.title}</span>
+                      Upload proof of completion for your task
                     </DialogDescription>
                   </div>
                 </div>
@@ -989,6 +945,35 @@ export default function ActivitiesPage() {
               
               {selectedTask && (
                 <div className="space-y-6">
+                  {/* Task Info Section */}
+                  <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-4 border border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{selectedTask.title}</h3>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">
+                        {selectedTask.platform}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedTask.task_type}
+                      </Badge>
+                      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-xs">
+                        {selectedTask.reward_points} pts
+                      </Badge>
+                      {selectedTask.reward_coins > 0 && (
+                        <Badge className="bg-slate-100 text-slate-700 border-slate-300 text-xs">
+                          ₽{selectedTask.reward_coins} PineCoins
+                        </Badge>
+                      )}
+                    </div>
+                    {'description' in selectedTask && selectedTask.description && (
+                      <p className="text-sm text-slate-700 mb-2">{selectedTask.description}</p>
+                    )}
+                    {'requirements' in selectedTask && selectedTask.requirements && (
+                      <div className="mt-2 pt-2 border-t border-slate-200">
+                        <p className="text-xs font-semibold text-slate-600 mb-1">Requirements:</p>
+                        <p className="text-xs text-slate-600">{selectedTask.requirements}</p>
+                      </div>
+                    )}
+                  </div>
                   <AnimatePresence>
                     {error && (
                       <motion.div
@@ -1027,7 +1012,7 @@ export default function ActivitiesPage() {
                         id="proof-image"
                         type="file"
                         accept="image/*"
-                        onChange={handleImageUpload}
+                        onChange={handleDialogImageUpload}
                         className="hidden"
                       />
                       <label
@@ -1081,6 +1066,7 @@ export default function ActivitiesPage() {
               
               <DialogFooter className="gap-3">
                 <Button 
+                  type="button"
                   variant="outline" 
                   onClick={closeProofDialog} 
                   className="border-slate-300 text-slate-700 hover:bg-slate-100"
@@ -1088,7 +1074,14 @@ export default function ActivitiesPage() {
                   Cancel
                 </Button>
                 <Button 
-                  onClick={submitProof}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (selectedTask) {
+                      submitProof(selectedTask);
+                    }
+                  }}
                   disabled={uploadingTasks[selectedTask?.id || 0] || !proofDescriptions[selectedTask?.id || 0]?.trim() || !proofImages[selectedTask?.id || 0]}
                   className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold shadow-lg disabled:opacity-50"
                 >
