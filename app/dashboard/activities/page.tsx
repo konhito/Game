@@ -147,22 +147,30 @@ export default function ActivitiesPage() {
 
       // Map history tasks to include full task details if available
       const startedAndCompletedTasks = history.map((ht: TaskActivity) => {
-        const correspondingAvailableTask = available.find(at => at.id === ht.task_id);
+        // The backend returns task ID as 'id', but we need to check both id and task_id
+        const taskId = (ht as any).task_id || ht.id;
+        const correspondingAvailableTask = available.find(at => at.id === taskId);
         return {
           ...correspondingAvailableTask, // Include details from available task
           ...ht, // Override with history-specific details like status, proof, etc.
-          id: ht.task_id, // Ensure ID is task_id for consistency
-          status: ht.status,
-          description: correspondingAvailableTask?.description || ht.description,
+          id: taskId, // Ensure ID is task_id for consistency
+          status: ht.status?.toLowerCase().trim() || 'started', // Normalize status
+          description: correspondingAvailableTask?.description || (ht as any).description,
           requirements: correspondingAvailableTask?.requirements || '',
-          url: correspondingAvailableTask?.url || ht.url,
+          url: correspondingAvailableTask?.url || (ht as any).url,
         };
       });
 
       // Filter out tasks from 'available' that are already 'started' or 'completed' in history
-      const uniqueAvailableTasks = available.filter(at => 
-        !startedAndCompletedTasks.some(st => st.id === at.id && (st.status === 'started' || st.status === 'completed'))
-      ).map(at => ({ ...at, status: 'available' })); // Explicitly set status for available tasks
+      const uniqueAvailableTasks = available.filter(at => {
+        const taskId = at.id;
+        const hasHistory = startedAndCompletedTasks.some(st => {
+          const stId = st.id;
+          const stStatus = st.status?.toLowerCase().trim();
+          return stId === taskId && (stStatus === 'started' || stStatus === 'pending' || stStatus === 'approved' || stStatus === 'rejected');
+        });
+        return !hasHistory;
+      }).map(at => ({ ...at, status: 'available' })); // Explicitly set status for available tasks
 
       // Combine and ensure unique tasks by ID, prioritizing started/completed
       const combinedTasksMap = new Map<number, TaskItem>();
@@ -170,7 +178,15 @@ export default function ActivitiesPage() {
         combinedTasksMap.set(task.id, task);
       });
 
-      setAllTasks(Array.from(combinedTasksMap.values()));
+      const finalTasks = Array.from(combinedTasksMap.values());
+      console.log('📊 Loaded tasks summary:', {
+        total: finalTasks.length,
+        available: finalTasks.filter(t => t.status?.toLowerCase().trim() === 'available').length,
+        started: finalTasks.filter(t => t.status?.toLowerCase().trim() === 'started').length,
+        completed: finalTasks.filter(t => ['approved', 'rejected', 'pending'].includes(t.status?.toLowerCase().trim() || '')).length,
+        tasks: finalTasks.map(t => ({ id: t.id, title: t.title, status: t.status }))
+      });
+      setAllTasks(finalTasks);
     } catch (err) {
       console.error('Error loading all tasks:', err);
       setError('Failed to load tasks. Please try again.');
@@ -228,19 +244,30 @@ export default function ActivitiesPage() {
   const startTask = async (taskId: number) => {
     setStartingTask(true);
     try {
+      console.log('🚀 Starting task:', taskId);
       const result = await taskService.startTask(taskId);
+      
+      console.log('📦 Start task result:', result);
       
       if (result.success) {
         toast.success('🎉 Task started successfully! You can now complete it and submit proof.');
-        if (user) {
-          await loadAllTasks(user.id);
-        }
+        // Close dialog first
         closeTaskDialog();
+        // Then reload tasks to update the UI
+        if (user) {
+          console.log('🔄 Reloading tasks after start...');
+          await loadAllTasks(user.id);
+          console.log('✅ Tasks reloaded');
+        }
       } else {
-        toast.error(result.error || 'Failed to start task');
+        const errorMsg = result.error || 'Failed to start task';
+        console.error('❌ Task start failed:', errorMsg);
+        toast.error(errorMsg);
       }
-    } catch (err) {
-      toast.error('Failed to start task. Please try again.');
+    } catch (err: any) {
+      console.error('💥 Task start error:', err);
+      const errorMsg = err?.message || 'Failed to start task. Please try again.';
+      toast.error(errorMsg);
     } finally {
       setStartingTask(false);
     }
@@ -503,6 +530,7 @@ export default function ActivitiesPage() {
                   </p>
                   {filter !== 'all' && (
                     <Button 
+                      type="button"
                       onClick={() => setFilter('all')}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
@@ -513,10 +541,17 @@ export default function ActivitiesPage() {
               </Card>
             ) : (
               filteredTasks.map((task, index) => {
-                const isStarted = task.status?.toLowerCase().trim() === 'started';
-                const isAvailable = task.status?.toLowerCase().trim() === 'available';
-                const isCompleted = task.status === 'approved' || task.status === 'rejected' || task.status === 'pending';
+                // Normalize status for comparison
+                const normalizedStatus = task.status?.toLowerCase().trim() || '';
+                const isStarted = normalizedStatus === 'started';
+                const isAvailable = normalizedStatus === 'available';
+                const isCompleted = normalizedStatus === 'approved' || normalizedStatus === 'rejected' || normalizedStatus === 'pending';
                 const isExpanded = expandedTaskId === task.id;
+                
+                // Debug logging
+                if (isStarted) {
+                  console.log('✅ Task is started:', task.id, task.title, 'status:', task.status);
+                }
                 
                 return (
                   <motion.div
@@ -731,7 +766,12 @@ export default function ActivitiesPage() {
                                 </div>
                                 
                                 <Button 
-                                  onClick={() => submitProof(task)}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    submitProof(task);
+                                  }}
                                   disabled={uploadingTasks[task.id] || !proofDescriptions[task.id]?.trim() || !proofImages[task.id]}
                                   size="sm"
                                   className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
@@ -757,9 +797,14 @@ export default function ActivitiesPage() {
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-slate-200">
                               {/* Expand/Collapse Button */}
                               <Button
+                                type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setExpandedTaskId(isExpanded ? null : task.id);
+                                }}
                                 className="flex-1 sm:flex-initial border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 text-xs h-8"
                               >
                                 <Eye className="h-3 w-3 mr-1.5" />
@@ -769,7 +814,12 @@ export default function ActivitiesPage() {
                               {/* Primary Action Button */}
                               {isAvailable && (
                                 <Button 
-                                  onClick={() => openTaskDialog(task)} 
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    openTaskDialog(task);
+                                  }}
                                   size="sm"
                                   className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 h-8"
                                 >
@@ -883,6 +933,7 @@ export default function ActivitiesPage() {
               
               <DialogFooter className="gap-3">
                 <Button 
+                  type="button"
                   variant="outline" 
                   onClick={closeTaskDialog} 
                   className="border-slate-300 text-slate-700 hover:bg-slate-100"
@@ -890,7 +941,14 @@ export default function ActivitiesPage() {
                   Cancel
                 </Button>
                 <Button 
-                  onClick={() => selectedTask && startTask(selectedTask.id)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (selectedTask) {
+                      startTask(selectedTask.id);
+                    }
+                  }}
                   disabled={startingTask || !selectedTask}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg"
                 >
