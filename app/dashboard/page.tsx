@@ -331,31 +331,70 @@ export default function DashboardPage() {
       // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Update user stats on backend - this will handle the new 8-hour reset logic
+      // Update user stats on backend - this will handle the daily reset logic
       // Conversion rate: 1000 points = 1 PineCoin
       const coins = Math.round(selectedReward.points * 0.001 * 100) / 100;
+      console.log('🎡 Spinning wheel:', { points: selectedReward.points, coins });
+      
       const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedReward.points, coins);
       
       if (updateResponse.success) {
-        // Update local state with the response data
-        setDashboardData(prev => ({
-          ...prev,
-          userStats: prev.userStats ? {
+        console.log('✅ Spin successful');
+        const now = new Date().toISOString();
+        
+        // IMMEDIATELY update all UI state - no reload needed!
+        setDashboardData(prev => {
+          const newUserStats = prev.userStats ? {
             ...prev.userStats,
             total_points: prev.userStats.total_points + selectedReward.points,
             weekly_points: (prev.userStats.weekly_points || 0) + selectedReward.points,
             spins_remaining: updateResponse.data?.spins_remaining || (prev.userStats.spins_remaining || 0) - 1,
             total_coins: prev.userStats.total_coins + coins
-          } : null
-        }));
+          } : null;
+          
+          // Add new spin activity to activities list
+          const newActivity = {
+            id: Date.now(),
+            user_id: user?.id || 0,
+            activity_type: 'spin_wheel',
+            description: `Spin Wheel - Won ${selectedReward.points} points`,
+            points: selectedReward.points,
+            created_at: now,
+            metadata: { reward: selectedReward.points, coins }
+          };
+          
+          const updatedActivities = [newActivity, ...prev.recentActivities].slice(0, 5);
+          
+          // Update leaderboard if user is in it
+          const updatedLeaderboard = prev.leaderboard.map(player => {
+            if (player.user_id === user?.id) {
+              return {
+                ...player,
+                total_points: player.total_points + selectedReward.points,
+                weekly_points: (player.weekly_points || 0) + selectedReward.points
+              };
+            }
+            return player;
+          });
+          
+          return {
+            ...prev,
+            userStats: newUserStats,
+            recentActivities: updatedActivities,
+            leaderboard: updatedLeaderboard
+          };
+        });
 
         // Show result
         setSpinResult({
           points: selectedReward.points,
           message: `🎉 Congratulations! You won ${selectedReward.points} points and ${coins.toFixed(1)} PineCoins!`
         });
+        
+        console.log('✅ All UI updated - no reload needed!');
       } else {
         // Handle error from backend (e.g., no spins remaining in current period)
+        console.error('❌ Spin failed:', updateResponse.error);
         setSpinResult({
           points: 0,
           message: updateResponse.error || 'Failed to update stats. Please try again.'
@@ -389,7 +428,7 @@ export default function DashboardPage() {
       const totalReward = baseReward + streakBonus;
       const coins = Math.round(totalReward * 0.05);
       
-      console.log('Claiming daily reward:', {
+      console.log('🎁 Claiming daily reward:', {
         baseReward,
         currentStreak,
         streakBonus,
@@ -401,36 +440,73 @@ export default function DashboardPage() {
       const response = await dashboardService.updateUserStatsAfterDailyReward(totalReward, coins);
       
       if (response.success) {
-        // Update local state
-        setDashboardData(prev => ({
-          ...prev,
-          userStats: prev.userStats ? {
+        console.log('✅ Daily reward claimed successfully');
+        
+        // IMMEDIATELY update all relevant state - no page reload needed!
+        const now = new Date().toISOString();
+        
+        // 1. Update user stats with new values
+        setDashboardData(prev => {
+          const newUserStats = prev.userStats ? {
             ...prev.userStats,
             total_points: prev.userStats.total_points + totalReward,
             weekly_points: (prev.userStats.weekly_points || 0) + totalReward,
             current_streak: currentStreak + 1,
             total_coins: prev.userStats.total_coins + coins,
-            last_daily_claim_date: new Date().toISOString()
-          } : null
-        }));
+            last_daily_claim_date: now
+          } : null;
+          
+          // 2. Add new activity to the top of activities list
+          const newActivity = {
+            id: Date.now(), // Temporary ID
+            user_id: user?.id || 0,
+            activity_type: 'daily_reward',
+            description: `Daily Login Reward (${currentStreak + 1} day streak)`,
+            points: totalReward,
+            created_at: now,
+            metadata: { streak: currentStreak + 1, coins }
+          };
+          
+          const updatedActivities = [newActivity, ...prev.recentActivities].slice(0, 5);
+          
+          // 3. Update leaderboard position (if user is in top 10)
+          const updatedLeaderboard = prev.leaderboard.map(player => {
+            if (player.user_id === user?.id) {
+              return {
+                ...player,
+                total_points: player.total_points + totalReward,
+                weekly_points: (player.weekly_points || 0) + totalReward
+              };
+            }
+            return player;
+          });
+          
+          return {
+            ...prev,
+            userStats: newUserStats,
+            recentActivities: updatedActivities,
+            leaderboard: updatedLeaderboard
+          };
+        });
 
+        // 4. Update claimed status
         setDailyRewardClaimed(true);
+        
+        // 5. Show success message
         setDailyRewardMessage(`🎉 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus) +${coins} PineCoins`);
         
-        // Refresh the dashboard data to ensure consistency
-        setTimeout(() => {
-          refreshDailyRewardStatus();
-        }, 1000);
+        console.log('✅ All UI updated - no reload needed!');
         
         // Clear message after 5 seconds
         setTimeout(() => {
           setDailyRewardMessage(null);
         }, 5000);
       } else {
+        console.error('❌ Daily reward claim failed:', response.error);
         setDailyRewardMessage(response.error || 'Failed to claim daily reward. Please try again.');
       }
     } catch (error) {
-      console.error('Error claiming daily reward:', error);
+      console.error('❌ Error claiming daily reward:', error);
       if (error instanceof Error && error.message.includes('already claimed')) {
         setDailyRewardClaimed(true);
         setDailyRewardMessage('Daily reward already claimed today! Come back tomorrow.');
