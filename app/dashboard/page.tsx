@@ -55,13 +55,12 @@ export default function DashboardPage() {
         return;
       }
       
-      console.log("Dashboard: Waiting for auth service to initialize...");
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log("Dashboard: Checking authentication...");
       
       // Check authentication status with retry logic
       const checkAuth = async (retryCount = 0) => {
         try {
-          console.log("Dashboard: Checking authentication... (attempt", retryCount + 1, ")");
+          console.log("Dashboard: Authentication check (attempt", retryCount + 1, ")");
           
           // Direct localStorage check first
           const token = localStorage.getItem('auth_token');
@@ -76,56 +75,53 @@ export default function DashboardPage() {
             }
           }
           
-          console.log("Dashboard: Direct localStorage check:");
-          console.log("  token:", token ? 'present' : 'missing');
-          console.log("  user:", user ? 'present' : 'missing');
-          console.log("  user data:", user);
+          console.log("Dashboard: Auth status - token:", token ? '✓' : '✗', "user:", user ? '✓' : '✗');
           
           // Check if we have both token and user
           if (!token || !user) {
-            console.log("Dashboard: Missing token or user data");
+            console.log("Dashboard: Missing auth data");
             
             // If this is the first attempt, wait a bit and retry
             if (retryCount === 0) {
-              console.log("Dashboard: First attempt failed, waiting 1000ms and retrying...");
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              console.log("Dashboard: Retrying after 200ms...");
+              await new Promise(resolve => setTimeout(resolve, 200));
               return checkAuth(1);
             }
             
-            console.log("Dashboard: Retry failed, redirecting to sign-in");
+            console.log("Dashboard: Redirecting to sign-in");
             router.push("/sign-in");
             return;
           }
 
-          console.log("Dashboard: User authenticated, setting user data:", user);
+          console.log("Dashboard: ✓ User authenticated:", user.email);
           setUser(user);
           
-      // Check backend connection
-      await checkBackendConnection();
-      
-      // Fetch next reset time
-      try {
-        const resetResponse = await fetch(`${config.API_BASE}/api/spin-reset/next-reset`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(localStorage.getItem('auth_token') && { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` })
-          }
-        });
-        if (resetResponse.ok) {
-          const resetData = await resetResponse.json();
-          setNextReset(resetData.data);
-        } else {
-          console.warn('Failed to fetch reset time:', resetResponse.status);
-        }
-      } catch (error) {
-        console.error('Error fetching reset time:', error);
-        // Don't set error state for this as it's not critical
-      }
-      
-      // Fetch dashboard data
-      await fetchDashboardData(user.id);
+          // IMMEDIATELY start fetching dashboard data (most critical)
+          const dashboardPromise = fetchDashboardData(user.id);
+          
+          // Run non-critical API calls in parallel WITHOUT blocking
+          Promise.all([
+            // Backend health check (non-blocking)
+            checkBackendConnection().catch(err => 
+              console.warn('Backend connection check failed:', err)
+            ),
+            
+            // Fetch reset time (non-blocking)
+            fetch(`${config.API_BASE}/api/spin-reset/next-reset`, {
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+              }
+            })
+            .then(response => response.ok ? response.json() : Promise.reject(response.status))
+            .then(data => setNextReset(data.data))
+            .catch(error => console.warn('Reset time fetch failed:', error))
+          ]).catch(err => console.warn('Non-critical API calls failed:', err));
+          
+          // Wait only for critical dashboard data
+          await dashboardPromise;
         } catch (error) {
-          console.error('Dashboard: Failed to check authentication:', error);
+          console.error('Dashboard: Authentication failed:', error);
           router.push("/sign-in");
         }
       };
@@ -140,9 +136,9 @@ export default function DashboardPage() {
     try {
       const healthCheck = await dashboardService.healthCheck();
       setBackendConnected(true);
-      console.log('Backend connected:', healthCheck);
+      console.log('✅ Backend connected:', healthCheck);
     } catch (error) {
-      console.error('Backend connection failed:', error);
+      console.error('⚠️ Backend connection failed:', error);
       setBackendConnected(false);
     }
   };
@@ -175,32 +171,37 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async (userId: number) => {
     try {
+      console.log('📊 Loading dashboard data...');
+      const startTime = performance.now();
       setLoading(true);
       setError(null);
 
       // Fetch all data in parallel using Promise.allSettled to handle individual failures gracefully
       const results = await Promise.allSettled([
         dashboardService.getUserStats(userId).catch(err => {
-          console.error('Failed to fetch user stats:', err);
+          console.error('❌ User stats failed:', err);
           return { success: false, error: err.message };
         }),
         dashboardService.getUserActivities(userId, 5).catch(err => {
-          console.error('Failed to fetch user activities:', err);
+          console.error('❌ Activities failed:', err);
           return { success: false, error: err.message };
         }),
         dashboardService.getLeaderboard(10).catch(err => {
-          console.error('Failed to fetch leaderboard:', err);
+          console.error('❌ Leaderboard failed:', err);
           return { success: false, error: err.message };
         }),
         dashboardService.getAvailableTasks().catch(err => {
-          console.error('Failed to fetch available tasks:', err);
+          console.error('❌ Tasks failed:', err);
           return { success: false, error: err.message };
         }),
         dashboardService.getUserTaskHistory(userId).catch(err => {
-          console.error('Failed to fetch task history:', err);
+          console.error('❌ Task history failed:', err);
           return { success: false, error: err.message };
         })
       ]);
+
+      const loadTime = (performance.now() - startTime).toFixed(0);
+      console.log(`✅ Dashboard data loaded in ${loadTime}ms`);
 
       // Process results - handle both fulfilled and rejected promises
       const statsResult = results[0].status === 'fulfilled' 
@@ -1230,7 +1231,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto"
           onClick={() => {
             if (!spinning) {
               setShowSpinWheel(false);
@@ -1244,23 +1245,23 @@ export default function DashboardPage() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-3xl p-8 max-w-5xl w-full shadow-2xl border border-slate-200"
+            className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-slate-200 my-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="text-center mb-8">
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Target className="w-9 h-9 text-white" />
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="flex justify-center mb-2 sm:mb-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                  <Target className="w-6 h-6 sm:w-9 sm:h-9 text-white" />
                 </div>
               </div>
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1 sm:mb-2">
                 Daily Spin Wheel
               </h2>
-              <p className="text-slate-600 text-lg">Test your luck and win amazing rewards!</p>
+              <p className="text-slate-600 text-sm sm:text-base md:text-lg">Test your luck and win amazing rewards!</p>
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-start">
               {/* Improved Spinning Wheel */}
               <div className="flex justify-center">
                 <div className="relative">
@@ -1268,7 +1269,7 @@ export default function DashboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur-2xl opacity-30 animate-pulse"></div>
                   
                   {/* Wheel Container */}
-                  <div className="relative w-80 h-80">
+                  <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
                     {/* Outer Ring with Gradient */}
                     <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 shadow-2xl"></div>
                     
@@ -1372,12 +1373,12 @@ export default function DashboardPage() {
               </div>
 
               {/* Controls & Info */}
-              <div className="space-y-5">
+              <div className="space-y-3 sm:space-y-4 md:space-y-5">
                 {/* Spin Button */}
                 <Button
                   onClick={handleWheelSpin}
                   disabled={spinning || !dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0}
-                  className={`w-full py-6 text-xl font-bold rounded-2xl shadow-xl transition-all duration-300 ${
+                  className={`w-full py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold rounded-xl sm:rounded-2xl shadow-xl transition-all duration-300 ${
                     spinning || !dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0
                       ? 'bg-slate-300 cursor-not-allowed text-slate-500'
                       : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transform hover:scale-105'
@@ -1385,35 +1386,35 @@ export default function DashboardPage() {
                 >
                   {spinning ? (
                     <>
-                      <Loader2 className="w-6 h-6 animate-spin mr-2 inline" />
+                      <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mr-2 inline" />
                       Spinning...
                     </>
                   ) : (
                     <>
-                      <Target className="w-6 h-6 mr-2 inline" />
+                      <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 inline" />
                       SPIN THE WHEEL
                     </>
                   )}
                 </Button>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 text-center border border-blue-200">
-                    <p className="text-blue-600 text-sm font-medium mb-1">Spins Remaining</p>
-                    <p className="text-3xl font-bold text-blue-700">{dashboardData?.userStats?.spins_remaining || 0}</p>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center border border-blue-200">
+                    <p className="text-blue-600 text-xs sm:text-sm font-medium mb-1">Spins Remaining</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-blue-700">{dashboardData?.userStats?.spins_remaining || 0}</p>
                   </div>
-                  <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-4 text-center border border-amber-200">
-                    <p className="text-amber-600 text-sm font-medium mb-1">Daily Streak</p>
-                    <p className="text-3xl font-bold text-amber-700 flex items-center justify-center gap-1">
+                  <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center border border-amber-200">
+                    <p className="text-amber-600 text-xs sm:text-sm font-medium mb-1">Daily Streak</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-amber-700 flex items-center justify-center gap-1">
                       🔥 {dashboardData?.userStats?.current_streak || 0}
                     </p>
                   </div>
                 </div>
 
                 {/* Prizes */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-5 border border-slate-200">
-                  <h3 className="font-bold text-slate-800 mb-4 text-center text-lg">🎁 Prize Pool</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 border border-slate-200">
+                  <h3 className="font-bold text-slate-800 mb-3 sm:mb-4 text-center text-base sm:text-lg">🎁 Prize Pool</h3>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[
                       { icon: '🎯', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', points: '10 pts' },
                       { icon: '💎', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', points: '25 pts' },
@@ -1422,31 +1423,13 @@ export default function DashboardPage() {
                       { icon: '👑', color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-200', points: '200 pts' },
                       { icon: '🚀', color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', points: '500 pts' }
                     ].map((prize, idx) => (
-                      <div key={idx} className={`${prize.bg} ${prize.border} border-2 rounded-xl p-3 flex items-center gap-3 hover:scale-105 transition-transform`}>
-                        <span className="text-2xl">{prize.icon}</span>
-                        <span className={`font-bold ${prize.color}`}>{prize.points}</span>
+                      <div key={idx} className={`${prize.bg} ${prize.border} border-2 rounded-lg sm:rounded-xl p-2 sm:p-3 flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform`}>
+                        <span className="text-xl sm:text-2xl">{prize.icon}</span>
+                        <span className={`font-bold text-xs sm:text-sm ${prize.color}`}>{prize.points}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                {/* Result */}
-                {spinResult && spinResult.points > 0 && (
-                  <motion.div 
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", duration: 0.6 }}
-                    className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border-2 border-emerald-300 shadow-lg"
-                  >
-                    <div className="text-center">
-                      <div className="text-5xl mb-3 animate-bounce">🎉</div>
-                      <h3 className="font-bold text-emerald-800 text-2xl mb-2">Congratulations!</h3>
-                      <p className="text-emerald-700 text-lg font-medium">
-                        You won <span className="text-2xl font-bold">{spinResult.points}</span> points!
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
 
                 {/* Close Button */}
                 <Button
@@ -1457,12 +1440,30 @@ export default function DashboardPage() {
                     setWheelRotation(0);
                   }}
                   disabled={spinning}
-                  className="w-full border-2 border-slate-300 text-slate-700 hover:bg-slate-100 py-4 rounded-xl font-semibold text-base"
+                  className="w-full border-2 border-slate-300 text-slate-700 hover:bg-slate-100 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base"
                 >
                   Close
                 </Button>
               </div>
             </div>
+
+            {/* Result - Moved to bottom, below everything */}
+            {spinResult && spinResult.points > 0 && (
+              <motion.div 
+                initial={{ scale: 0, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="mt-4 sm:mt-6 md:mt-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border-2 border-emerald-300 shadow-lg w-full"
+              >
+                <div className="text-center">
+                  <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 animate-bounce">🎉</div>
+                  <h3 className="font-bold text-emerald-800 text-xl sm:text-2xl mb-1 sm:mb-2">Congratulations!</h3>
+                  <p className="text-emerald-700 text-base sm:text-lg font-medium">
+                    You won <span className="text-xl sm:text-2xl font-bold">{spinResult.points}</span> points!
+                  </p>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       )}
