@@ -843,7 +843,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
               className="mb-6 sm:mb-7 md:mb-8"
             >
-              <Card className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden">
+              <Card className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden" data-tour="spin-wheel-card">
                 <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-white/10 rounded-full -translate-y-24 sm:-translate-y-32 translate-x-24 sm:translate-x-32 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 bg-white/10 rounded-full translate-y-16 sm:translate-y-24 -translate-x-16 sm:-translate-x-24 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <CardContent className="pt-6 sm:pt-7 pb-6 sm:pb-7 px-4 sm:px-5 md:px-6 relative z-10">

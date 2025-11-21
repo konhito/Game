@@ -199,6 +199,15 @@ export function OnboardingTour() {
         width: `${rect.width}px`,
         height: `${rect.height}px`,
       });
+
+      // Scroll target into view if needed (especially on mobile)
+      if (targetElement && typeof (targetElement as HTMLElement).scrollIntoView === 'function') {
+        (targetElement as HTMLElement).scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'center'
+        });
+      }
     } catch (error) {
       console.error("Error updating overlay:", error);
       setOverlayStyle({});
@@ -237,9 +246,12 @@ export function OnboardingTour() {
     ? document.body 
     : document.querySelector(step.target);
 
-  // Calculate tooltip position
+  // Calculate tooltip position with mobile-friendly adjustments
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   let tooltipPosition: React.CSSProperties = {};
-  if (step.position === "center") {
+  
+  if (step.position === "center" || isMobile) {
+    // Always center on mobile for better UX
     tooltipPosition = {
       position: "fixed",
       top: "50%",
@@ -250,47 +262,98 @@ export function OnboardingTour() {
   } else if (targetElement && targetElement !== document.body) {
     try {
       const rect = (targetElement as HTMLElement).getBoundingClientRect();
-      const scrollX = window.scrollX || window.pageXOffset;
-      const scrollY = window.scrollY || window.pageYOffset;
+      const tooltipWidth = 448; // max-w-md in pixels
+      const tooltipHeight = 300; // estimated tooltip height
+      const padding = 20;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let position: React.CSSProperties = {};
 
       switch (step.position) {
         case "top":
-          tooltipPosition = {
+          position = {
             position: "fixed",
-            bottom: `${window.innerHeight - rect.top + 20}px`,
+            bottom: `${window.innerHeight - rect.top + padding}px`,
             left: `${rect.left + rect.width / 2}px`,
             transform: "translateX(-50%)",
             zIndex: 10000,
           };
+          // Check if tooltip would go off screen vertically
+          if (rect.top - padding - tooltipHeight < 0) {
+            // Not enough space above, use center instead
+            position = {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10000,
+            };
+          }
           break;
         case "bottom":
-          tooltipPosition = {
+          position = {
             position: "fixed",
-            top: `${rect.bottom + 20}px`,
+            top: `${rect.bottom + padding}px`,
             left: `${rect.left + rect.width / 2}px`,
             transform: "translateX(-50%)",
             zIndex: 10000,
           };
+          // Check if tooltip would go off screen vertically or horizontally
+          if (rect.bottom + padding + tooltipHeight > viewportHeight) {
+            // Not enough space below, use center instead
+            position = {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10000,
+            };
+          }
           break;
         case "left":
-          tooltipPosition = {
+          position = {
             position: "fixed",
             top: `${rect.top + rect.height / 2}px`,
-            right: `${window.innerWidth - rect.left + 20}px`,
+            right: `${window.innerWidth - rect.left + padding}px`,
             transform: "translateY(-50%)",
             zIndex: 10000,
           };
+          // Check if tooltip would go off screen
+          if (rect.left - padding - tooltipWidth < 0) {
+            // Not enough space on left, use center
+            position = {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10000,
+            };
+          }
           break;
         case "right":
-          tooltipPosition = {
+          position = {
             position: "fixed",
             top: `${rect.top + rect.height / 2}px`,
-            left: `${rect.right + 20}px`,
+            left: `${rect.right + padding}px`,
             transform: "translateY(-50%)",
             zIndex: 10000,
           };
+          // Check if tooltip would go off screen
+          if (rect.right + padding + tooltipWidth > viewportWidth) {
+            // Not enough space on right, use center
+            position = {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10000,
+            };
+          }
           break;
       }
+
+      tooltipPosition = position;
     } catch (error) {
       // Fallback to center if positioning fails
       tooltipPosition = {
@@ -335,21 +398,21 @@ export function OnboardingTour() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             style={tooltipPosition}
-            className="w-full max-w-md"
+            className="w-[calc(100vw-2rem)] sm:w-full max-w-md mx-4 sm:mx-0"
           >
             <Card className="bg-white shadow-2xl border-2 border-emerald-500">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center text-white">
+                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center text-white flex-shrink-0">
                       {step.icon}
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-800">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-800 truncate">
                         {step.title}
                       </h3>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-xs sm:text-sm text-slate-500">
                         Step {currentStep + 1} of {tourSteps.length}
                       </p>
                     </div>
@@ -358,14 +421,14 @@ export function OnboardingTour() {
                     variant="ghost"
                     size="sm"
                     onClick={handleSkip}
-                    className="text-slate-500 hover:text-slate-700"
+                    className="text-slate-500 hover:text-slate-700 flex-shrink-0 ml-2"
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mb-4">
+                <div className="mb-3 sm:mb-4">
                   <div className="w-full bg-slate-200 rounded-full h-2">
                     <motion.div
                       initial={{ width: 0 }}
@@ -378,35 +441,35 @@ export function OnboardingTour() {
                 </div>
 
                 {/* Content */}
-                <p className="text-slate-600 mb-6 leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 leading-relaxed">
                   {step.content}
                 </p>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                   <Button
                     variant="outline"
                     onClick={handlePrevious}
                     disabled={isFirstStep}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 order-2 sm:order-1"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    <span className="text-sm sm:text-base">Previous</span>
                   </Button>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 order-1 sm:order-2">
                     {!isLastStep && (
                       <Button
                         variant="outline"
                         onClick={handleSkip}
-                        className="text-slate-600"
+                        className="text-slate-600 flex-1 sm:flex-none text-sm sm:text-base"
                       >
                         Skip Tour
                       </Button>
                     )}
                     <Button
                       onClick={handleNext}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white flex items-center gap-2"
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white flex items-center justify-center gap-2 flex-1 sm:flex-none text-sm sm:text-base"
                     >
                       {isLastStep ? "Get Started!" : "Next"}
                       {!isLastStep && <ChevronRight className="w-4 h-4" />}

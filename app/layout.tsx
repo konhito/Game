@@ -8,11 +8,11 @@ import SharedFooter from "@/components/shared-footer";
 import { headers } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "Pinecrest - Gamified Rewards Platform",
+  title: "Pinecrest - Share and Earn",
   description:
     "Earn points, climb the leaderboard, and win rewards through engaging activities and challenges. Transform your social media engagement into real rewards.",
   openGraph: {
-    title: "Pinecrest - Gamified Rewards Platform",
+    title: "Pinecrest - Share and Earn",
     description:
       "Earn points, climb the leaderboard, and win rewards through engaging activities and challenges.",
     url: "pinecrest.com",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         url: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png",
         width: 1200,
         height: 630,
-        alt: "Pinecrest - Gamified Rewards Platform",
+        alt: "Pinecrest - Share and Earn",
       },
     ],
     locale: "en-US",
