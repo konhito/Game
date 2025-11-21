@@ -109,15 +109,24 @@
         @apply bg-background text-foreground font-sans;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        /* Prevent text size adjustment on iOS */
+        -webkit-text-size-adjust: 100%;
+        /* Disable pull-to-refresh on mobile */
+        overscroll-behavior-y: contain;
     }
     button,
     input,
     select,
     textarea {
         @apply focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200;
+        /* Better touch targets on mobile */
+        min-height: 44px;
+        min-width: 44px;
     }
     button {
         @apply hover:cursor-pointer;
+        /* Remove tap highlight on mobile */
+        -webkit-tap-highlight-color: transparent;
     }
     h1,
     h2,
@@ -126,5 +135,62 @@
     h5,
     h6 {
         @apply font-medium tracking-tight;
+    }
+    /* Smooth scrolling for better mobile UX */
+    html {
+        scroll-behavior: smooth;
+    }
+    /* Remove default margins on mobile */
+    @media (max-width: 640px) {
+        h1 { @apply text-3xl; }
+        h2 { @apply text-2xl; }
+        h3 { @apply text-xl; }
+    }
+}
+
+/* Mobile-specific utilities */
+@layer utilities {
+    /* Better touch targets */
+    .touch-target {
+        @apply min-h-[44px] min-w-[44px];
+    }
+    
+    /* Mobile-friendly spacing */
+    .mobile-container {
+        @apply px-4 sm:px-6 lg:px-8;
+    }
+    
+    /* Prevent text selection on buttons/cards */
+    .no-select {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Safe area for notched devices */
+    .safe-top {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Better mobile card shadows */
+    @media (max-width: 640px) {
+        .mobile-card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
     }
 }

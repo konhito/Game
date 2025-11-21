@@ -275,29 +275,19 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative py-24 px-4 text-center">
+      <section className="relative py-8 sm:py-12 md:py-16 lg:py-20 px-4 text-center safe-top">
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Background card for better text readability */}
-          <div className="absolute inset-0 bg-white/10 rounded-3xl -m-8"></div>
+          <div className="absolute inset-0 bg-white/10 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 md:-m-8"></div>
           {/* Main Title with Animation */}
           <motion.div 
-            className="mb-12"
+            className="mb-6 sm:mb-8 md:mb-10"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Logo Display */}
-            {/* <motion.div 
-              className="mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-          
-            </motion.div> */}
-            
             <motion.h1 
-              className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-600 bg-clip-text text-transparent"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-6 bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-600 bg-clip-text text-transparent px-2 leading-tight"
               animate={{ 
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
               }}
@@ -307,62 +297,63 @@ export default function HomePage() {
               PineCrest
             </motion.h1>
             <motion.div 
-              className="flex items-center justify-center gap-3 mb-6"
+              className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 px-3"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Sparkles className="w-6 h-6 text-emerald-500" />
-              <span className="text-xl text-slate-600 font-medium">Earn Rewards from Social Media Activities</span>
-              <Sparkles className="w-6 h-6 text-emerald-500" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 hidden sm:block" />
+              <span className="text-sm sm:text-base md:text-lg text-slate-600 font-medium text-center leading-relaxed">Earn Rewards from Social Media Activities</span>
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 hidden sm:block" />
             </motion.div>
           </motion.div>
 
           <motion.p 
-            className="text-xl md:text-2xl mb-12 text-slate-600 max-w-4xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 md:mb-10 text-slate-600 max-w-3xl mx-auto leading-relaxed px-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
             Transform your social media engagement into real rewards. Share content, watch videos, 
             refer friends, and earn PineCoins that you can convert to real money. 
-            Join thousands of users already earning from their online activities!
+            Join thousands of users already earning!
           </motion.p>
 
           {/* Exchange Rate Display */}
           <motion.div 
-            className="mb-12"
+            className="mb-6 sm:mb-8 md:mb-10 px-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="inline-flex items-center space-x-8 p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/50">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-600">₽1 = $0.95</div>
-                <div className="text-sm text-slate-500">Buy Rate</div>
+            <div className="inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 md:gap-6 p-4 sm:p-5 bg-white/90 backdrop-blur-md rounded-xl shadow-md border border-slate-200/50 w-full max-w-md sm:max-w-2xl mx-auto">
+              <div className="text-center flex-1 py-1 sm:py-0">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-600">₽1 = $0.95</div>
+                <div className="text-xs text-slate-500 mt-0.5">Buy Rate</div>
               </div>
-              <div className="w-px h-12 bg-slate-300"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">₽1 = $1.05</div>
-                <div className="text-sm text-slate-500">Sell Rate</div>
+              <div className="hidden sm:block w-px h-10 bg-slate-300 self-center"></div>
+              <div className="block sm:hidden w-full h-px bg-slate-200"></div>
+              <div className="text-center flex-1 py-1 sm:py-0">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">₽1 = $1.05</div>
+                <div className="text-xs text-slate-500 mt-0.5">Sell Rate</div>
               </div>
             </div>
           </motion.div>
 
           {/* CTA Buttons */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center items-stretch sm:items-center px-3 max-w-sm sm:max-w-full mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+            <Link href="/sign-up" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl active:shadow-md transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select">
                 Start Earning Now
               </Button>
             </Link>
-            <Link href="/sign-in">
-              <Button variant="outline" className="border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+            <Link href="/sign-in" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 active:border-emerald-600 active:text-emerald-700 hover:bg-emerald-50/50 active:bg-emerald-100/50 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-md hover:shadow-lg active:shadow-sm transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select">
                 Sign In
               </Button>
             </Link>
@@ -371,25 +362,25 @@ export default function HomePage() {
       </section>
 
       {/* Leaderboard Section */}
-      <section id="leaderboard" className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
+      <section id="leaderboard" className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Trophy className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <Trophy className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               Weekly Leaderboard
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-3 leading-relaxed">
               Compete with other users and climb the ranks to win amazing rewards
             </p>
-            <Link href="/dashboard/leaderboard">
-              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
-                View Full Leaderboard <ArrowRight className="w-5 h-5 ml-2" />
+            <Link href="/dashboard/leaderboard" className="inline-block px-3">
+              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 rounded-xl shadow-lg hover:shadow-xl active:shadow-md transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base md:text-lg touch-target no-select inline-flex items-center gap-2">
+                View Full Leaderboard <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </Link>
           </motion.div>
@@ -397,27 +388,27 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 relative z-10">
+      <section id="features" className="py-10 sm:py-14 md:py-18 px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Subtle background enhancement */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 via-transparent to-blue-50/30 rounded-3xl -m-4"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 via-transparent to-blue-50/30 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4"></div>
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               How You Earn PineCoins
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-3 leading-relaxed">
               Multiple ways to earn rewards from your social media activities
             </p>
           </motion.div>
 
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -470,19 +461,20 @@ export default function HomePage() {
               <motion.div
                 key={feature.title}
                 variants={itemVariants}
-                whileHover={{ y: -5, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                whileHover={{ y: -3, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <Card className="h-full bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader className="text-center pb-4">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
-                      <feature.icon className="w-8 h-8 text-white" />
+                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 cursor-pointer no-select">
+                  <CardHeader className="text-center pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-md`}>
+                      <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     </div>
-                    <CardTitle className="text-xl text-slate-800">{feature.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg text-slate-800 leading-snug">{feature.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-slate-600 mb-4">{feature.description}</p>
-                    <Badge className={`bg-gradient-to-r ${feature.color} text-white px-4 py-2 text-sm font-semibold`}>
+                  <CardContent className="text-center px-4 sm:px-6 pb-4 sm:pb-6">
+                    <p className="text-xs sm:text-sm text-slate-600 mb-3 leading-relaxed">{feature.description}</p>
+                    <Badge className={`bg-gradient-to-r ${feature.color} text-white px-3 py-1.5 text-xs font-semibold shadow-sm`}>
                       {feature.points}
                     </Badge>
                   </CardContent>
@@ -494,27 +486,27 @@ export default function HomePage() {
       </section>
 
       {/* News Section */}
-      <section className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
+      <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           {/* Enhanced background pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/60 to-emerald-50/80 rounded-3xl -m-4"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/60 to-emerald-50/80 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4"></div>
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               Latest News & Updates
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-3 leading-relaxed">
               Stay updated with the latest features, challenges, and community news
             </p>
           </motion.div>
 
           {loadingNews ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10">
               {[...Array(5)].map((_, index) => (
                 <Card key={index} className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg animate-pulse">
                   <CardHeader>
@@ -531,7 +523,7 @@ export default function HomePage() {
           ) : newsItems.length > 0 ? (
             <>
               <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10"
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -541,10 +533,11 @@ export default function HomePage() {
                   <motion.div
                     key={news.id}
                     variants={itemVariants}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    whileHover={{ y: -3, scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   >
-                    <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 no-select">
                       <CardHeader>
                         <div className="flex items-center justify-between mb-2">
                           {news.tags && news.tags.length > 0 && (
@@ -620,33 +613,33 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
+      <section id="about" className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Users className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <Users className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               About PineCrest
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-4 sm:mb-6 px-3 leading-relaxed">
               Transforming social media engagement into real rewards
             </p>
           </motion.div>
 
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-10 items-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-4">Our Mission</h3>
+            <div className="px-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-3 sm:mb-4">Our Mission</h3>
               <p className="text-slate-600 mb-6 leading-relaxed">
                 PineCrest empowers users to earn real value from their social media activities. 
                 We connect users with engaging tasks from brands and creators, making it easy to 
@@ -724,14 +717,14 @@ export default function HomePage() {
           </motion.div>
 
           <motion.div 
-            className="text-center mt-12"
+            className="text-center mt-8 sm:mt-10 md:mt-12 px-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Link href="/about">
-              <Button variant="outline" className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 text-lg">
+              <Button variant="outline" className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-all duration-200 text-base sm:text-lg w-full sm:w-auto">
                 Learn More About Us
               </Button>
             </Link>
@@ -740,25 +733,25 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 relative z-10">
+      <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               What Our Users Say
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-3 leading-relaxed">
               Join thousands of satisfied users earning rewards from social media
             </p>
           </motion.div>
 
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -768,10 +761,11 @@ export default function HomePage() {
               <motion.div
                 key={testimonial.id}
                 variants={itemVariants}
-                whileHover={{ y: -5, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                whileHover={{ y: -3, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <Card className="h-full bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 no-select">
                   <CardHeader className="text-center pb-4">
                     <div className="text-4xl mb-4">{testimonial.avatar}</div>
                     <div className="flex justify-center mb-2">
@@ -793,23 +787,23 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10 safe-bottom">
+        <div className="max-w-3xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 md:mb-6 px-3">
               Ready to Start Earning?
             </h2>
-            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-slate-600 mb-5 sm:mb-6 md:mb-8 max-w-xl mx-auto px-3 leading-relaxed">
               Join PineCrest today and start earning rewards from your social media activities. 
               It's free to join and you can start earning immediately!
             </p>
-            <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+            <Link href="/sign-up" className="inline-block w-full max-w-xs sm:max-w-sm px-3">
+              <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl active:shadow-md transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base md:text-lg touch-target no-select">
                 Get Started Now
               </Button>
             </Link>

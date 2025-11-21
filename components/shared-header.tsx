@@ -97,27 +97,28 @@ export default function SharedHeader() {
         isScrolled 
           ? 'border-slate-200/80 backdrop-blur-xl bg-white/95 shadow-lg' 
           : 'border-slate-200/50 backdrop-blur-md bg-white/70'
-      } sticky top-0`}
+      } sticky top-0 safe-top`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3 sm:py-4">
           <Link href="/">
             <motion.div 
-              className="flex items-center space-x-3 cursor-pointer"
+              className="flex items-center space-x-2 sm:space-x-3 cursor-pointer touch-target"
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <div className="w-8 h-8 flex items-center justify-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                 <img 
                   src="/Icon.png" 
                   alt="PineCrest Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 PineCrest
               </span>
             </motion.div>
@@ -149,13 +150,21 @@ export default function SharedHeader() {
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2"
+              className="p-2 touch-target no-select"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              <motion.div
+                initial={false}
+                animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6 text-slate-700" />
+                ) : (
+                  <Menu className="h-6 w-6 text-slate-700" />
+                )}
+              </motion.div>
             </Button>
           </div>
 
@@ -192,68 +201,76 @@ export default function SharedHeader() {
         </div>
 
         {/* Mobile Menu */}
-        <motion.div
-          className={`mobile-menu-container md:hidden border-t border-slate-200/50 ${
-            isScrolled ? 'bg-white/95 backdrop-blur-xl' : 'bg-white/70 backdrop-blur-md'
-          }`}
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ 
-            opacity: isMobileMenuOpen ? 1 : 0, 
-            height: isMobileMenuOpen ? 'auto' : 0 
-          }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="px-4 py-4 space-y-4">
-            {/* Mobile Navigation Links */}
-            <nav className="space-y-3">
-              {["Features", "News", "Leaderboard", "About"].map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ 
-                    opacity: isMobileMenuOpen ? 1 : 0, 
-                    x: isMobileMenuOpen ? 0 : -20 
-                  }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Link 
-                    href={item === "News" ? "/news" : `/#${item.toLowerCase()}`}
-                    className="block text-slate-600 hover:text-emerald-600 transition-colors font-medium py-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
+        {isMobileMenuOpen && (
+          <motion.div
+            className={`mobile-menu-container md:hidden border-t border-slate-200/50 overflow-hidden ${
+              isScrolled ? 'bg-white/95 backdrop-blur-xl' : 'bg-white/70 backdrop-blur-md'
+            }`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: 1, 
+              height: 'auto'
+            }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className="px-4 py-5 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto scrollbar-hide">
+              {/* Mobile Navigation Links */}
+              <nav className="space-y-1">
+                {["Features", "News", "Leaderboard", "About"].map((item, index) => (
+                  <motion.div
+                    key={item}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0 
+                    }}
+                    transition={{ delay: index * 0.05, duration: 0.2 }}
                   >
-                    {item}
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
+                    <Link 
+                      href={item === "News" ? "/news" : `/#${item.toLowerCase()}`}
+                      className="block text-slate-700 hover:text-emerald-600 active:text-emerald-700 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-emerald-50/50 active:bg-emerald-100/50 touch-target no-select"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item}
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
 
-            {/* Mobile Auth Buttons */}
-            <div className="pt-4 border-t border-slate-200/50">
-              {loading ? (
-                <div className="animate-pulse bg-gray-200 h-10 w-full rounded-xl"></div>
-              ) : isAuthenticated ? (
-                <Link href="/dashboard" className="block">
-                  <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg">
-                    Dashboard
-                  </Button>
-                </Link>
-              ) : (
-                <div className="space-y-3">
-                  <Link href="/sign-in" className="block">
-                    <Button variant="outline" className="w-full border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 font-semibold py-3 rounded-xl transition-all duration-200">
-                      Sign In
+              {/* Mobile Auth Buttons */}
+              <motion.div 
+                className="pt-4 border-t border-slate-200/50"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.2 }}
+              >
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-12 w-full rounded-xl"></div>
+                ) : isAuthenticated ? (
+                  <Link href="/dashboard" className="block">
+                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold py-3.5 rounded-xl shadow-lg touch-target no-select">
+                      Go to Dashboard
                     </Button>
                   </Link>
-                  <Link href="/sign-up" className="block">
-                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg">
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
-              )}
+                ) : (
+                  <div className="space-y-2.5">
+                    <Link href="/sign-in" className="block">
+                      <Button variant="outline" className="w-full border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 font-semibold py-3.5 rounded-xl transition-all duration-200 touch-target no-select">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/sign-up" className="block">
+                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold py-3.5 rounded-xl shadow-lg touch-target no-select">
+                        Get Started Free
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </motion.div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </motion.header>
   );

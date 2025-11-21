@@ -672,9 +672,9 @@ export default function DashboardPage() {
   const nextRewardAt = Math.max(0, 2500 - safeTotalPoints);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-x-hidden safe-top safe-bottom">
       {/* Main Content */}
-      <div className="p-3 sm:p-4 md:p-6 w-full">
+      <div className="p-3 sm:p-4 md:p-5 lg:p-6 w-full">
         <div className="max-w-7xl mx-auto w-full">
           {/* Error Banner */}
           {error && (
@@ -714,18 +714,18 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-center mb-4 sm:mb-6 md:mb-8"
+            className="text-center mb-4 sm:mb-5 md:mb-7"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 mb-2 px-2 hover:text-slate-900 transition-colors duration-200">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-slate-800 mb-1.5 sm:mb-2 px-2 hover:text-slate-900 transition-colors duration-200 leading-tight">
               Welcome Back, {user?.name || 'Player'}! 👋
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base md:text-lg px-2 hover:text-slate-700 transition-colors duration-200">Ready to climb the leaderboard and earn PineCoins?</p>
+            <p className="text-slate-600 text-xs sm:text-sm md:text-base px-2 hover:text-slate-700 transition-colors duration-200">Ready to climb the leaderboard and earn PineCoins?</p>
             
             {/* Live Stats Display in Welcome Header */}
             
 
-            <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 px-2 hover:text-slate-600 transition-colors duration-200">
-              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 hover:text-slate-600 transition-colors duration-200" />
+            <div className="mt-2 sm:mt-3 flex items-center justify-center gap-1.5 sm:gap-2 text-xs text-slate-500 px-2 hover:text-slate-600 transition-colors duration-200">
+              <Calendar className="w-3 h-3 hover:text-slate-600 transition-colors duration-200" />
               <span>Last login: {safeLastLoginDate ? new Date(safeLastLoginDate).toLocaleDateString() : 'Today'}</span>
             </div>
           </motion.div>
@@ -841,30 +841,30 @@ export default function DashboardPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
-              className="mb-8"
+              className="mb-6 sm:mb-7 md:mb-8"
             >
-              <Card className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-2xl overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
-                <CardContent className="pt-8 pb-8 px-6 relative z-10">
+              <Card className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 border-0 shadow-xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-white/10 rounded-full -translate-y-24 sm:-translate-y-32 translate-x-24 sm:translate-x-32 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 bg-white/10 rounded-full translate-y-16 sm:translate-y-24 -translate-x-16 sm:-translate-x-24 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
+                <CardContent className="pt-6 sm:pt-7 pb-6 sm:pb-7 px-4 sm:px-5 md:px-6 relative z-10">
                   <div className="text-center">
-                    <div className="flex justify-center mb-4">
-                      <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/30">
-                        <Target className="w-10 h-10 text-white" />
+                    <div className="flex justify-center mb-3 sm:mb-4">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-3 sm:border-4 border-white/30">
+                        <Target className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-bold text-white mb-2">Daily Spin Wheel</h3>
-                    <p className="text-white/90 text-lg mb-6">Spin to win amazing rewards and PineCoins!</p>
-                    <div className="flex items-center justify-center gap-6 mb-6">
-                      <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/30">
-                        <p className="text-white/80 text-sm mb-1">Spins Remaining</p>
-                        <p className="text-3xl font-bold text-white">{dashboardData?.userStats?.spins_remaining || 0}</p>
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1.5 sm:mb-2">Daily Spin Wheel</h3>
+                    <p className="text-white/90 text-sm sm:text-base md:text-lg mb-4 sm:mb-5 md:mb-6 leading-relaxed">Spin to win amazing rewards and PineCoins!</p>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-5 md:mb-6">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 border border-white/30 flex-1 sm:flex-none">
+                        <p className="text-white/80 text-xs sm:text-sm mb-0.5 sm:mb-1">Spins Remaining</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white">{dashboardData?.userStats?.spins_remaining || 0}</p>
                       </div>
                       {nextReset && (
-                        <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/30">
-                          <p className="text-white/80 text-sm mb-1">Next Reset</p>
-                          <p className="text-xl font-bold text-white flex items-center gap-2">
-                            <Clock className="w-5 h-5" />
+                        <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 border border-white/30 flex-1 sm:flex-none">
+                          <p className="text-white/80 text-xs sm:text-sm mb-0.5 sm:mb-1">Next Reset</p>
+                          <p className="text-lg sm:text-xl font-bold text-white flex items-center justify-center gap-1.5 sm:gap-2">
+                            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                             {nextReset.hoursUntilReset}h
                           </p>
                         </div>
@@ -872,14 +872,14 @@ export default function DashboardPage() {
                     </div>
                     <Button
                       onClick={() => setShowSpinWheel(true)}
-                      className="bg-white text-emerald-600 hover:bg-white/90 text-xl px-10 py-6 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-150 font-bold"
+                      className="bg-white text-emerald-600 hover:bg-white/90 active:bg-white/80 text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl shadow-lg transform hover:scale-105 active:scale-100 transition-all duration-150 font-bold w-full sm:w-auto touch-target no-select"
                       disabled={!dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0}
                     >
-                      <Target className="w-6 h-6 mr-3" />
+                      <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                       SPIN NOW
-                      <ArrowRight className="w-6 h-6 ml-3" />
+                      <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3" />
                     </Button>
-                    <p className="text-white/70 text-sm mt-4">
+                    <p className="text-white/70 text-xs sm:text-sm mt-3 sm:mt-4">
                       Win 10-500 points + bonus PineCoins every spin!
                     </p>
                   </div>
@@ -1279,22 +1279,22 @@ export default function DashboardPage() {
             </Card>
 
             {/* Quick Stats Footer */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">{safeTotalPoints.toLocaleString()}</div>
-                <p className="text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Total Points</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+              <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 md:p-4 text-center border border-slate-200/50 hover:bg-white/80 active:bg-white/90 hover:border-slate-300/70 hover:shadow-md active:shadow-sm hover:scale-105 active:scale-100 transition-all duration-200 cursor-pointer touch-target no-select">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200 leading-tight">{safeTotalPoints.toLocaleString()}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200 mt-0.5">Total Points</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">₽{Number(safeTotalCoins).toFixed(2)}</div>
-                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">PineCoins</p>
+              <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 md:p-4 text-center border border-slate-200/50 hover:bg-white/80 active:bg-white/90 hover:border-slate-300/70 hover:shadow-md active:shadow-sm hover:scale-105 active:scale-100 transition-all duration-200 cursor-pointer touch-target no-select">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200 leading-tight">₽{Number(safeTotalCoins).toFixed(2)}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200 mt-0.5">PineCoins</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">{safeCurrentStreak}</div>
-                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Day Streak</p>
+              <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 md:p-4 text-center border border-slate-200/50 hover:bg-white/80 active:bg-white/90 hover:border-slate-300/70 hover:shadow-md active:shadow-sm hover:scale-105 active:scale-100 transition-all duration-200 cursor-pointer touch-target no-select">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200 leading-tight">{safeCurrentStreak}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200 mt-0.5">Day Streak</p>
               </div>
-              <div className="bg-white/60 rounded-lg p-3 sm:p-4 text-center border border-slate-200/50 hover:bg-white/80 hover:border-slate-300/70 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="text-xl sm:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
-                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200">Current Rank</p>
+              <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 md:p-4 text-center border border-slate-200/50 hover:bg-white/80 active:bg-white/90 hover:border-slate-300/70 hover:shadow-md active:shadow-sm hover:scale-105 active:scale-100 transition-all duration-200 cursor-pointer touch-target no-select">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200 leading-tight">#{(dashboardData.leaderboard || []).find(entry => entry.user_id === user?.id)?.rank || 'N/A'}</div>
+                <p className="text-xs sm:text-sm text-slate-600 hover:text-slate-700 transition-colors duration-200 mt-0.5">Current Rank</p>
               </div>
             </div>
           </motion.div>
@@ -1307,7 +1307,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto safe-top safe-bottom"
           onClick={() => {
             if (!spinning) {
               setShowSpinWheel(false);
@@ -1317,35 +1317,35 @@ export default function DashboardPage() {
           }}
         >
           <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", duration: 0.5 }}
-            className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-slate-200 my-4"
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: "spring", duration: 0.4, bounce: 0.3 }}
+            className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-7 max-w-4xl w-full max-h-[92vh] overflow-y-auto scrollbar-hide shadow-2xl border border-slate-200 my-2"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="text-center mb-4 sm:mb-6">
-              <div className="flex justify-center mb-2 sm:mb-4">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                  <Target className="w-6 h-6 sm:w-9 sm:h-9 text-white" />
+            <div className="text-center mb-4 sm:mb-5">
+              <div className="flex justify-center mb-2 sm:mb-3">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Target className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1 sm:mb-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">
                 Daily Spin Wheel
               </h2>
-              <p className="text-slate-600 text-sm sm:text-base md:text-lg">Test your luck and win amazing rewards!</p>
+              <p className="text-slate-600 text-xs sm:text-sm md:text-base">Test your luck and win amazing rewards!</p>
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6 items-start">
               {/* Improved Spinning Wheel */}
-              <div className="flex justify-center">
+              <div className="flex justify-center py-2">
                 <div className="relative">
                   {/* Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
                   
                   {/* Wheel Container */}
-                  <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
+                  <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80">
                     {/* Outer Ring with Gradient */}
                     <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 shadow-2xl"></div>
                     
@@ -1449,48 +1449,48 @@ export default function DashboardPage() {
               </div>
 
               {/* Controls & Info */}
-              <div className="space-y-3 sm:space-y-4 md:space-y-5">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Spin Button */}
                 <Button
                   onClick={handleWheelSpin}
                   disabled={spinning || !dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0}
-                  className={`w-full py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold rounded-xl sm:rounded-2xl shadow-xl transition-all duration-300 ${
+                  className={`w-full py-3.5 sm:py-4 md:py-5 text-sm sm:text-base md:text-lg font-bold rounded-xl shadow-lg transition-all duration-200 touch-target no-select ${
                     spinning || !dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0
                       ? 'bg-slate-300 cursor-not-allowed text-slate-500'
-                      : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transform hover:scale-105'
+                      : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:from-emerald-700 active:to-teal-700 text-white transform hover:scale-105 active:scale-100'
                   }`}
                 >
                   {spinning ? (
                     <>
-                      <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mr-2 inline" />
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin mr-2 inline" />
                       Spinning...
                     </>
                   ) : (
                     <>
-                      <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 inline" />
+                      <Target className="w-4 h-4 sm:w-5 sm:h-5 mr-2 inline" />
                       SPIN THE WHEEL
                     </>
                   )}
                 </Button>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center border border-blue-200">
-                    <p className="text-blue-600 text-xs sm:text-sm font-medium mb-1">Spins Remaining</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-blue-700">{dashboardData?.userStats?.spins_remaining || 0}</p>
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-2.5 sm:p-3 text-center border border-blue-200">
+                    <p className="text-blue-600 text-xs font-medium mb-0.5 sm:mb-1">Spins Remaining</p>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-700">{dashboardData?.userStats?.spins_remaining || 0}</p>
                   </div>
-                  <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center border border-amber-200">
-                    <p className="text-amber-600 text-xs sm:text-sm font-medium mb-1">Daily Streak</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-amber-700 flex items-center justify-center gap-1">
+                  <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-2.5 sm:p-3 text-center border border-amber-200">
+                    <p className="text-amber-600 text-xs font-medium mb-0.5 sm:mb-1">Daily Streak</p>
+                    <p className="text-xl sm:text-2xl font-bold text-amber-700 flex items-center justify-center gap-1">
                       🔥 {dashboardData?.userStats?.current_streak || 0}
                     </p>
                   </div>
                 </div>
 
                 {/* Prizes */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 border border-slate-200">
-                  <h3 className="font-bold text-slate-800 mb-3 sm:mb-4 text-center text-base sm:text-lg">🎁 Prize Pool</h3>
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-3 sm:p-4 border border-slate-200">
+                  <h3 className="font-bold text-slate-800 mb-2.5 sm:mb-3 text-center text-sm sm:text-base">🎁 Prize Pool</h3>
+                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                     {[
                       { icon: '🎯', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', points: '10 pts' },
                       { icon: '💎', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', points: '25 pts' },
@@ -1499,9 +1499,9 @@ export default function DashboardPage() {
                       { icon: '👑', color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-200', points: '200 pts' },
                       { icon: '🚀', color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', points: '500 pts' }
                     ].map((prize, idx) => (
-                      <div key={idx} className={`${prize.bg} ${prize.border} border-2 rounded-lg sm:rounded-xl p-2 sm:p-3 flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform`}>
-                        <span className="text-xl sm:text-2xl">{prize.icon}</span>
-                        <span className={`font-bold text-xs sm:text-sm ${prize.color}`}>{prize.points}</span>
+                      <div key={idx} className={`${prize.bg} ${prize.border} border-2 rounded-lg p-2 flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-105 active:scale-95 transition-transform no-select`}>
+                        <span className="text-base sm:text-lg">{prize.icon}</span>
+                        <span className={`font-bold text-xs ${prize.color}`}>{prize.points}</span>
                       </div>
                     ))}
                   </div>
@@ -1516,7 +1516,7 @@ export default function DashboardPage() {
                     setWheelRotation(0);
                   }}
                   disabled={spinning}
-                  className="w-full border-2 border-slate-300 text-slate-700 hover:bg-slate-100 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base"
+                  className="w-full border-2 border-slate-300 text-slate-700 hover:bg-slate-100 active:bg-slate-200 py-3 sm:py-3.5 rounded-xl font-semibold text-sm touch-target no-select"
                 >
                   Close
                 </Button>
@@ -1526,16 +1526,16 @@ export default function DashboardPage() {
             {/* Result - Moved to bottom, below everything */}
             {spinResult && spinResult.points > 0 && (
               <motion.div 
-                initial={{ scale: 0, opacity: 0, y: 20 }}
+                initial={{ scale: 0.9, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{ type: "spring", duration: 0.6 }}
-                className="mt-4 sm:mt-6 md:mt-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border-2 border-emerald-300 shadow-lg w-full"
+                transition={{ type: "spring", duration: 0.5, bounce: 0.4 }}
+                className="mt-4 sm:mt-5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-3.5 sm:p-4 md:p-5 border-2 border-emerald-300 shadow-md w-full"
               >
                 <div className="text-center">
-                  <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 animate-bounce">🎉</div>
-                  <h3 className="font-bold text-emerald-800 text-xl sm:text-2xl mb-1 sm:mb-2">Congratulations!</h3>
-                  <p className="text-emerald-700 text-base sm:text-lg font-medium">
-                    You won <span className="text-xl sm:text-2xl font-bold">{spinResult.points}</span> points!
+                  <div className="text-2xl sm:text-3xl mb-1.5 sm:mb-2 animate-bounce">🎉</div>
+                  <h3 className="font-bold text-emerald-800 text-lg sm:text-xl mb-1">Congratulations!</h3>
+                  <p className="text-emerald-700 text-sm sm:text-base font-medium">
+                    You won <span className="text-lg sm:text-xl font-bold">{spinResult.points}</span> points!
                   </p>
                 </div>
               </motion.div>
