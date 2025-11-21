@@ -124,9 +124,33 @@ export default function SpinWheelPage() {
       setResult(null);
       setError(null);
 
+      // Weighted probabilities favoring low points
+      // Map each segment to its probability based on points
+      const segmentProbabilities = wheelSegments.map(seg => {
+        if (seg.points === 0) return 0.02; // 2% for empty
+        if (seg.points === 25) return 0.50; // 50% for 25 points
+        if (seg.points === 50) return 0.30; // 30% for 50 points
+        if (seg.points === 100) return 0.13; // 13% for 100 points
+        if (seg.points === 200) return 0.04; // 4% for 200 points
+        if (seg.points === 500) return 0.01; // 1% for 500 points
+        return 0;
+      });
+
+      // Select segment based on weighted probability
+      const random = Math.random();
+      let cumulativeProbability = 0;
+      let randomSegment = 0;
+      
+      for (let i = 0; i < segmentProbabilities.length; i++) {
+        cumulativeProbability += segmentProbabilities[i];
+        if (random <= cumulativeProbability) {
+          randomSegment = i;
+          break;
+        }
+      }
+
       // Random rotation between 5-10 full rotations plus random segment
       const segmentAngle = 360 / wheelSegments.length;
-      const randomSegment = Math.floor(Math.random() * wheelSegments.length);
       
       // Calculate rotation: multiple full spins + landing on specific segment
       // Subtract half segment angle and 90 degrees to align with top pointer

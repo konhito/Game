@@ -664,14 +664,14 @@ class DashboardService {
         throw new Error('Spin wheel is currently disabled');
       }
 
-      // Use configured rewards or fallback to default
+      // Use configured rewards or fallback to default (heavily weighted toward low points)
       const wheelSegments = spinRewards?.rewards || [
-        { points: 10, probability: 0.3 },
-        { points: 25, probability: 0.25 },
-        { points: 50, probability: 0.2 },
-        { points: 100, probability: 0.15 },
-        { points: 200, probability: 0.08 },
-        { points: 500, probability: 0.02 }
+        { points: 10, probability: 0.70 },
+        { points: 25, probability: 0.20 },
+        { points: 50, probability: 0.08 },
+        { points: 100, probability: 0.015 },
+        { points: 200, probability: 0.004 },
+        { points: 500, probability: 0.001 }
       ];
 
       const random = Math.random();

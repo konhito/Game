@@ -90,47 +90,15 @@ const tourSteps: TourStep[] = [
     id: "navigation",
     target: "[data-tour='navbar']",
     title: "Navigation Menu 🧭",
-    content: "Use the navigation menu to access all features: Activities (complete tasks), Rewards (claim prizes), Spin Wheel, Prize Pools, Leaderboard, and Settings.",
+    content: "Use the navigation menu to explore: Activities (complete tasks), Rewards (claim prizes), Spin Wheel (daily spins), Leaderboard (compete), and Settings (manage profile).",
     position: "bottom",
     icon: <Users className="w-6 h-6" />
-  },
-  {
-    id: "activities-page",
-    target: "[data-tour='nav-activities']",
-    title: "Activities & Tasks ✅",
-    content: "Visit the Activities page to complete tasks like watching videos, sharing posts, and more. Each task rewards you with points and PineCoins!",
-    position: "right",
-    icon: <Target className="w-6 h-6" />
-  },
-  {
-    id: "rewards-page",
-    target: "[data-tour='nav-rewards']",
-    title: "Rewards Store 🎁",
-    content: "Exchange your points and PineCoins for amazing rewards! Browse different categories and claim prizes that match your goals.",
-    position: "right",
-    icon: <Gift className="w-6 h-6" />
-  },
-  {
-    id: "prize-pools",
-    target: "[data-tour='nav-prize-pool']",
-    title: "Prize Pools 💰",
-    content: "Join prize pools by paying an entry fee with PineCoins. Compete with other players and win big prizes! The more you participate, the better your chances.",
-    position: "right",
-    icon: <Trophy className="w-6 h-6" />
-  },
-  {
-    id: "settings",
-    target: "[data-tour='nav-settings']",
-    title: "Settings ⚙️",
-    content: "Manage your profile, update your information, and customize your account settings. Keep your profile updated to get the best experience!",
-    position: "right",
-    icon: <Settings className="w-6 h-6" />
   },
   {
     id: "complete",
     target: "body",
     title: "You're All Set! 🚀",
-    content: "Congratulations! You now know how to navigate PineCoin. Start earning points by completing activities, spinning the wheel, and claiming daily rewards. Good luck and have fun!",
+    content: "Congratulations! You now know how to navigate Pinecrest. Start earning by completing activities, spinning the wheel daily, and claiming rewards. Check the leaderboard to compete with others. Good luck!",
     position: "center",
     icon: <Sparkles className="w-6 h-6" />
   }

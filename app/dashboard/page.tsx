@@ -297,14 +297,14 @@ export default function DashboardPage() {
       setSpinning(true);
       setSpinResult(null);
       
-      // Define wheel segments with rewards
+      // Define wheel segments with rewards (heavily weighted toward low points)
       const wheelSegments = [
-        { points: 10, probability: 0.3, color: "from-red-500 to-red-600", icon: "🎯" },
-        { points: 25, probability: 0.25, color: "from-blue-500 to-blue-600", icon: "💎" },
-        { points: 50, probability: 0.2, color: "from-green-500 to-green-600", icon: "🍀" },
-        { points: 100, probability: 0.15, color: "from-yellow-500 to-yellow-600", icon: "⭐" },
-        { points: 200, probability: 0.08, color: "from-purple-500 to-purple-600", icon: "👑" },
-        { points: 500, probability: 0.02, color: "from-pink-500 to-pink-600", icon: "🚀" }
+        { points: 10, probability: 0.70, color: "from-red-500 to-red-600", icon: "🎯" },
+        { points: 25, probability: 0.20, color: "from-blue-500 to-blue-600", icon: "💎" },
+        { points: 50, probability: 0.08, color: "from-green-500 to-green-600", icon: "🍀" },
+        { points: 100, probability: 0.015, color: "from-yellow-500 to-yellow-600", icon: "⭐" },
+        { points: 200, probability: 0.004, color: "from-purple-500 to-purple-600", icon: "👑" },
+        { points: 500, probability: 0.001, color: "from-pink-500 to-pink-600", icon: "🚀" }
       ];
 
       // Calculate reward based on probability
