@@ -278,7 +278,7 @@ export default function HomePage() {
       <section className="relative py-8 sm:py-12 md:py-16 lg:py-20 px-4 text-center safe-top">
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Background card for better text readability */}
-          <div className="absolute inset-0 bg-white/10 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 md:-m-8"></div>
+          <div className="absolute inset-0 bg-white/10 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 md:-m-8 pointer-events-none"></div>
           {/* Main Title with Animation */}
           <motion.div 
             className="mb-6 sm:mb-8 md:mb-10"
@@ -391,7 +391,7 @@ export default function HomePage() {
       <section id="features" className="py-10 sm:py-14 md:py-18 px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Subtle background enhancement */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 via-transparent to-blue-50/30 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 via-transparent to-blue-50/30 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 pointer-events-none"></div>
           <motion.div 
             className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
@@ -489,7 +489,7 @@ export default function HomePage() {
       <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           {/* Enhanced background pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/60 to-emerald-50/80 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/60 to-emerald-50/80 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 pointer-events-none"></div>
           <motion.div 
             className="text-center mb-6 sm:mb-10 md:mb-14"
             initial={{ opacity: 0, y: 20 }}
