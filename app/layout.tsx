@@ -8,25 +8,77 @@ import SharedFooter from "@/components/shared-footer";
 import { headers } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "Pinecrest - Share and Earn",
+  metadataBase: new URL('https://pinecrest.com'),
+  title: {
+    default: "Pinecrest - Share and Earn Rewards | Social Media Engagement Platform",
+    template: "%s | Pinecrest"
+  },
   description:
-    "Earn points, climb the leaderboard, and win rewards through engaging activities and challenges. Transform your social media engagement into real rewards.",
+    "Earn points, climb the leaderboard, and win real rewards through social media activities. Share content, complete tasks, and get paid. Join thousands earning daily!",
+  keywords: [
+    "earn money online",
+    "social media rewards",
+    "earn points",
+    "online rewards platform",
+    "share and earn",
+    "social engagement",
+    "leaderboard competition",
+    "earn coins",
+    "online tasks",
+    "referral rewards",
+    "daily rewards",
+    "social media platform"
+  ],
+  authors: [{ name: "Pinecrest Team" }],
+  creator: "Pinecrest",
+  publisher: "Pinecrest",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: "Pinecrest - Share and Earn",
+    title: "Pinecrest - Share and Earn Rewards",
     description:
-      "Earn points, climb the leaderboard, and win rewards through engaging activities and challenges.",
-    url: "pinecrest.com",
+      "Earn points, climb the leaderboard, and win real rewards through social media activities. Share content, complete tasks, and get paid!",
+    url: "https://pinecrest.com",
     siteName: "Pinecrest",
     images: [
       {
         url: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png",
         width: 1200,
         height: 630,
-        alt: "Pinecrest - Share and Earn",
+        alt: "Pinecrest - Share and Earn Rewards Platform",
       },
     ],
     locale: "en-US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pinecrest - Share and Earn Rewards",
+    description: "Earn points, climb the leaderboard, and win real rewards through social media activities.",
+    images: ["https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // Add your verification codes here when available
+    // google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
+  alternates: {
+    canonical: 'https://pinecrest.com',
   },
 };
 

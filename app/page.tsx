@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Trophy, Share2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles, Coins, Users, ArrowRight, MessageCircle, ThumbsUp, Eye, UserPlus, Newspaper, Star, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { StructuredData, organizationSchema, websiteSchema, webApplicationSchema } from "@/components/structured-data";
 
 // Animated Counter Component
 function AnimatedCounter({ value, suffix = "", className = "" }: { value: number; suffix?: string; className?: string }) {
@@ -167,9 +168,15 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden relative">
-      {/* Enhanced Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <>
+      {/* Structured Data for SEO */}
+      <StructuredData data={organizationSchema} />
+      <StructuredData data={websiteSchema} />
+      <StructuredData data={webApplicationSchema} />
+      
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden relative">
+        {/* Enhanced Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Main floating orbs */}
         <motion.div 
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-60"
@@ -342,18 +349,18 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center items-stretch sm:items-center px-3 max-w-sm sm:max-w-full mx-auto"
+            className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center items-stretch sm:items-center px-3 max-w-sm sm:max-w-full mx-auto relative z-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <Link href="/sign-up" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl active:shadow-md transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select">
+            <Link href="/sign-up" className="w-full sm:w-auto relative z-10">
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl active:shadow-md transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select relative z-10 pointer-events-auto">
                 Start Earning Now
               </Button>
             </Link>
-            <Link href="/sign-in" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 active:border-emerald-600 active:text-emerald-700 hover:bg-emerald-50/50 active:bg-emerald-100/50 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-md hover:shadow-lg active:shadow-sm transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select">
+            <Link href="/sign-in" className="w-full sm:w-auto relative z-10">
+              <Button variant="outline" className="w-full sm:w-auto border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 active:border-emerald-600 active:text-emerald-700 hover:bg-emerald-50/50 active:bg-emerald-100/50 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-md hover:shadow-lg active:shadow-sm transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select relative z-10 pointer-events-auto">
                 Sign In
               </Button>
             </Link>
@@ -555,8 +562,8 @@ export default function HomePage() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-slate-600 mb-4 line-clamp-3">{news.excerpt}</p>
-                        <Link href={`/news/${news.slug}`}>
-                          <Button variant="ghost" className="text-emerald-600 hover:text-emerald-700 p-0 h-auto font-medium">
+                        <Link href={`/news/${news.slug}`} className="relative z-10">
+                          <Button variant="ghost" className="text-emerald-600 hover:text-emerald-700 p-0 h-auto font-medium relative z-10 pointer-events-auto">
                             Read More <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
@@ -567,7 +574,7 @@ export default function HomePage() {
               </motion.div>
 
               <motion.div 
-                className="text-center"
+                className="text-center relative z-10"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -577,15 +584,15 @@ export default function HomePage() {
                   <Button 
                     onClick={handleLoadMore}
                     disabled={loadingMore}
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed relative z-10 pointer-events-auto"
                   >
                     {loadingMore ? 'Loading...' : 'Load More'}
                   </Button>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 relative z-10">
                     <p className="text-slate-600 text-lg">You've seen all the latest news!</p>
-                    <Link href="/news">
-                      <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+                    <Link href="/news" className="relative z-10">
+                      <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg relative z-10 pointer-events-auto">
                         View All News & Updates
                       </Button>
                     </Link>
@@ -595,15 +602,15 @@ export default function HomePage() {
             </>
           ) : (
             <motion.div 
-              className="text-center py-12"
+              className="text-center py-12 relative z-10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <p className="text-slate-600 text-lg mb-4">No news available at the moment.</p>
-              <Link href="/news">
-                <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg">
+              <Link href="/news" className="relative z-10">
+                <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg relative z-10 pointer-events-auto">
                   View All News & Updates
                 </Button>
               </Link>
@@ -810,6 +817,7 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

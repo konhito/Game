@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { StructuredData, generateFAQSchema } from "@/components/structured-data";
+import Head from "next/head";
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -132,9 +134,17 @@ export default function FAQPage() {
 
   let questionIndex = 0;
 
+  // Generate FAQ schema for structured data
+  const allFAQs = faqs.flatMap(category => 
+    category.questions.map(q => ({ question: q.q, answer: q.a }))
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <>
+      <StructuredData data={generateFAQSchema(allFAQs)} />
+      
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="mb-8">
           <Link
             href="/"
@@ -221,8 +231,9 @@ export default function FAQPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

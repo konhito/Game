@@ -478,9 +478,9 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="space-y-4">
                   {spinPrices.map((offer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:scale-105 hover:shadow-lg hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 transition-all duration-300 cursor-pointer">
                       <div>
-                        <p className="font-black text-lg text-white">{offer.spins} Spins</p>
+                        <p className="font-black text-lg text-slate-900">{offer.spins} Spins</p>
                         <p className="text-sm text-purple-300 font-semibold">
                           {offer.discount} discount
                         </p>
@@ -515,10 +515,10 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-3">
                   {wheelSegments.map((segment) => (
-                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 cursor-pointer`}>
+                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg transition-all duration-300 cursor-pointer`}>
                       <div className="text-3xl mb-2 drop-shadow-lg">{segment.icon}</div>
-                      <p className="text-lg font-black text-white">{segment.label}</p>
-                      <p className="text-xs text-white/80 font-semibold">{segment.points} PTS</p>
+                      <p className="text-lg font-black text-slate-900">{segment.label}</p>
+                      <p className="text-xs text-slate-700 font-semibold">{segment.points} PTS</p>
                     </div>
                   ))}
                 </div>

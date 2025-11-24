@@ -872,7 +872,7 @@ export default function DashboardPage() {
                     </div>
                     <Button
                       onClick={() => setShowSpinWheel(true)}
-                      className="bg-white text-emerald-600 hover:bg-white/90 active:bg-white/80 text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl shadow-lg transform hover:scale-105 active:scale-100 transition-all duration-150 font-bold w-full sm:w-auto touch-target no-select"
+                      className="bg-white text-emerald-600 hover:bg-white/90 active:bg-white/80 text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl shadow-lg transform hover:scale-105 active:scale-100 transition-all duration-150 font-bold w-full sm:w-auto touch-target no-select relative z-10 pointer-events-auto"
                       disabled={!dashboardData.userStats || (dashboardData.userStats.spins_remaining || 0) <= 0}
                     >
                       <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
@@ -900,7 +900,7 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.15 }}
             >
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-shadow duration-150 overflow-hidden" data-tour="daily-reward-card">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-shadow duration-150 overflow-hidden" data-tour="daily-reward-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/30 rounded-full -translate-y-16 translate-x-16 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
                   <div className="flex items-center justify-between gap-2">
@@ -948,7 +948,7 @@ export default function DashboardPage() {
                   )}
                   
                   <Button 
-                    className={`w-full font-bold py-2.5 sm:py-3 text-sm sm:text-base rounded-xl shadow-lg transition-all duration-300 relative overflow-hidden group ${
+                    className={`w-full font-bold py-2.5 sm:py-3 text-sm sm:text-base rounded-xl shadow-lg transition-all duration-300 relative overflow-hidden group z-10 pointer-events-auto ${
                       dailyRewardClaimed 
                         ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
                         : claimingDailyReward
@@ -995,7 +995,7 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.15 }}
             >
-              <Card className="bg-gradient-to-br from-indigo-50 to-purple-100 border-indigo-200 shadow-lg hover:shadow-xl transition-shadow duration-150 overflow-hidden" data-tour="progress-card">
+              <Card className="bg-gradient-to-br from-indigo-50 to-purple-100 border-indigo-200 shadow-lg transition-shadow duration-150 overflow-hidden" data-tour="progress-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/30 rounded-full -translate-y-16 translate-x-16 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -1087,7 +1087,7 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.005 }}
               transition={{ duration: 0.15 }}
             >
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-lg hover:shadow-xl transition-shadow duration-150 overflow-hidden" data-tour="leaderboard-card">
+              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-lg transition-shadow duration-150 overflow-hidden" data-tour="leaderboard-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/30 rounded-full -translate-y-16 translate-x-16 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -1132,7 +1132,7 @@ export default function DashboardPage() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm"
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm relative z-10 pointer-events-auto"
                       onClick={() => router.push('/dashboard/leaderboard')}
                     >
                       <Trophy className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
@@ -1149,7 +1149,7 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.005 }}
               transition={{ duration: 0.15 }}
             >
-              <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 shadow-lg hover:shadow-xl transition-shadow duration-150 overflow-hidden" data-tour="activities-card">
+              <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 shadow-lg transition-shadow duration-150 overflow-hidden" data-tour="activities-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-full -translate-y-16 translate-x-16 opacity-0 hover:opacity-100 transition-opacity duration-150"></div>
                 <CardHeader className="relative z-10 px-4 sm:px-6 pt-4 sm:pt-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -1196,7 +1196,7 @@ export default function DashboardPage() {
                     )}
                   </div>
                   <div className="mt-4 sm:mt-6 text-center">
-                    <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm">
+                    <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:scale-105 transition-all duration-200 text-xs sm:text-sm relative z-10 pointer-events-auto">
                       <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       <span className="hidden sm:inline">View All Activities</span>
                       <span className="sm:hidden">Activities</span>
