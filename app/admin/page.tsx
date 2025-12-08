@@ -24,7 +24,8 @@ import {
   Bot,
   Brain,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  Newspaper
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
@@ -176,6 +177,13 @@ export default function AdminDashboard() {
       href: "/admin/create-task",
       icon: Plus,
       color: "emerald"
+    },
+    {
+      title: "Manage News",
+      description: "Edit articles & posts",
+      href: "/admin/news",
+      icon: Newspaper,
+      color: "indigo"
     },
     {
       title: "Manage Users",

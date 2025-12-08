@@ -1,316 +1,293 @@
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="mb-8">
           <Link
             href="/"
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 transition-colors"
           >
-            ← Back to home
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to home
           </Link>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardContent className="p-8 md:p-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-8">
-              Terms of Service
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+              Terms of Service — Pinecrest
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-8">
-              Last updated: {new Date().toLocaleDateString()}
+            <p className="text-sm text-slate-600 mb-8">
+              Effective Date: {new Date().toLocaleDateString()}
             </p>
 
-            <div className="space-y-8 text-gray-700 dark:text-gray-300">
+            <div className="space-y-8 text-slate-700">
               <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  1. Acceptance of Terms
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  1) Acceptance
                 </h2>
                 <p className="leading-relaxed">
-                  By accessing and using Apple Pass (&apos;Service&apos;), you
-                  accept and agree to be bound by the terms and provisions of
-                  this agreement. If you do not agree to abide by the above,
-                  please do not use this Service.
+                  By creating an account or using the Services, you agree to these Terms and our Privacy Policy. If
+                  you do not agree, do not use the Services.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  2. Description of Service
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  2) Eligibility
                 </h2>
-                <p className="leading-relaxed">
-                  Apple Pass provides a platform for creating, managing, and
-                  distributing digital passes for Apple Wallet. Our Service
-                  includes tools for designing passes, managing pass data,
-                  tracking pass usage, and sending push notifications to pass
-                  holders.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  3. User Accounts
-                </h2>
-                <div className="space-y-3">
-                  <p className="leading-relaxed">
-                    To use certain features of the Service, you must register
-                    for an account. When you register for an account, you agree
-                    to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Provide accurate, current, and complete information</li>
-                    <li>
-                      Maintain and update your information to keep it accurate
-                      and complete
-                    </li>
-                    <li>Maintain the security of your account credentials</li>
-                    <li>
-                      Accept responsibility for all activities that occur under
-                      your account
-                    </li>
-                    <li>
-                      Notify us immediately of any unauthorized use of your
-                      account
-                    </li>
-                  </ul>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  4. Subscription and Payment
-                </h2>
-                <div className="space-y-3">
-                  <p className="leading-relaxed">
-                    Some aspects of our Service are provided on a subscription
-                    basis. By subscribing, you agree to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>
-                      Pay all applicable fees as described in our pricing plans
-                    </li>
-                    <li>
-                      Provide current, complete, and accurate billing
-                      information
-                    </li>
-                    <li>
-                      Authorize us to charge your payment method on a recurring
-                      basis
-                    </li>
-                    <li>
-                      Be responsible for all charges incurred under your account
-                    </li>
-                  </ul>
-                  <p className="leading-relaxed mt-3">
-                    Subscription fees are non-refundable except as required by
-                    law. We reserve the right to change our subscription plans
-                    or adjust pricing with 30 days&apos; notice.
-                  </p>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  5. User Responsibilities and Conduct
-                </h2>
-                <div className="space-y-3">
-                  <p className="leading-relaxed">
-                    You agree to use the Service only for lawful purposes and in
-                    accordance with these Terms. You agree not to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>
-                      Use the Service in any way that violates any applicable
-                      laws or regulations
-                    </li>
-                    <li>
-                      Create passes that contain false, misleading, or
-                      fraudulent information
-                    </li>
-                    <li>
-                      Impersonate any person or entity or misrepresent your
-                      affiliation
-                    </li>
-                    <li>
-                      Upload or transmit viruses or any other type of malicious
-                      code
-                    </li>
-                    <li>
-                      Attempt to gain unauthorized access to any portion of the
-                      Service
-                    </li>
-                    <li>Interfere with or disrupt the Service or servers</li>
-                    <li>
-                      Use the Service to send spam or unsolicited communications
-                    </li>
-                    <li>Violate the privacy rights of others</li>
-                  </ul>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  6. Intellectual Property Rights
-                </h2>
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium mb-2">
-                    Our Intellectual Property
-                  </h3>
-                  <p className="leading-relaxed">
-                    The Service and its original content, features, and
-                    functionality are owned by Apple Pass and are protected by
-                    international copyright, trademark, patent, trade secret,
-                    and other intellectual property laws.
-                  </p>
-
-                  <h3 className="text-lg font-medium mb-2 mt-4">
-                    Your Content
-                  </h3>
-                  <p className="leading-relaxed">
-                    You retain ownership of any content you create using our
-                    Service. By using our Service, you grant us a worldwide,
-                    non-exclusive, royalty-free license to use, reproduce, and
-                    display your content solely for the purpose of providing the
-                    Service to you.
-                  </p>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  7. Privacy
-                </h2>
-                <p className="leading-relaxed">
-                  Your use of our Service is also governed by our Privacy
-                  Policy. Please review our Privacy Policy, which also governs
-                  the Site and informs users of our data collection practices.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  8. Disclaimers
-                </h2>
-                <div className="space-y-3">
-                  <p className="leading-relaxed uppercase font-medium">
-                    The Service is provided on an &aposAS IS&apos and &aposAS
-                    AVAILABLE&apos basis without warranties of any kind, either
-                    express or implied, including but not limited to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Warranties of merchantability</li>
-                    <li>Fitness for a particular purpose</li>
-                    <li>Non-infringement</li>
-                    <li>
-                      That the Service will be uninterrupted or error-free
-                    </li>
-                    <li>That defects will be corrected</li>
-                    <li>
-                      That the Service is free of viruses or harmful components
-                    </li>
-                  </ul>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  9. Limitation of Liability
-                </h2>
-                <p className="leading-relaxed uppercase font-medium">
-                  To the maximum extent permitted by law, Apple Pass shall not
-                  be liable for any indirect, incidental, special,
-                  consequential, or punitive damages, or any loss of profits or
-                  revenues, whether incurred directly or indirectly, or any loss
-                  of data, use, goodwill, or other intangible losses resulting
-                  from:
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4 mt-3">
-                  <li>Your use or inability to use the Service</li>
-                  <li>Any unauthorized access to or use of our servers</li>
-                  <li>
-                    Any interruption or cessation of transmission to or from the
-                    Service
-                  </li>
-                  <li>
-                    Any bugs, viruses, or similar harmful code transmitted
-                    through the Service
-                  </li>
-                  <li>Any errors or omissions in any content</li>
+                <ul className="list-disc list-inside space-y-2 ml-4">
+                  <li>Minimum age: 13+ (or the age required by your jurisdiction).</li>
+                  <li>One person → one account.</li>
+                  <li>We may require KYC before prize redemption or at anti-fraud thresholds.</li>
+                  <li>The Services are promotional and skill/engagement-based, not gambling. No user wagering is permitted.</li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  10. Indemnification
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  3) Accounts & security
                 </h2>
                 <p className="leading-relaxed">
-                  You agree to defend, indemnify, and hold harmless Apple Pass
-                  and its affiliates, officers, directors, employees, and agents
-                  from and against any claims, liabilities, damages, judgments,
-                  awards, losses, costs, expenses, or fees arising out of or
-                  relating to your violation of these Terms or your use of the
-                  Service.
+                  You&apos;re responsible for your credentials and all activity under your account. Notify{" "}
+                  <a href="mailto:support@pinecrest247.com" className="text-emerald-600 hover:underline">support@pinecrest247.com</a> of any breach. We may require 2FA.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  11. Termination
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  4) The Services
                 </h2>
-                <p className="leading-relaxed">
-                  We may terminate or suspend your account and bar access to the
-                  Service immediately, without prior notice or liability, under
-                  our sole discretion, for any reason whatsoever, including
-                  without limitation if you breach the Terms. Upon termination,
-                  your right to use the Service will cease immediately.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  12. Governing Law
-                </h2>
-                <p className="leading-relaxed">
-                  These Terms shall be governed and construed in accordance with
-                  the laws of [Your Jurisdiction], without regard to its
-                  conflict of law provisions. Our failure to enforce any right
-                  or provision of these Terms will not be considered a waiver of
-                  those rights.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  13. Changes to Terms
-                </h2>
-                <p className="leading-relaxed">
-                  We reserve the right, at our sole discretion, to modify or
-                  replace these Terms at any time. If a revision is material, we
-                  will provide at least 30 days notice prior to any new terms
-                  taking effect.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  14. Contact Information
-                </h2>
-                <p className="leading-relaxed">
-                  If you have any questions about these Terms, please contact us
-                  at:
-                </p>
-                <div className="mt-3 space-y-1">
-                  <p>Email: legal@applepass.com</p>
-                  <p>Address: [Your Company Address]</p>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Leaderboard & Points</h3>
+                    <p className="leading-relaxed">
+                      Points accrue from tasks (e.g., spins, shares, referrals, challenges).
+                      Weekly leaderboards reset; we may publish winners&apos; usernames/avatars (you can opt for display name).
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Randomized rewards</h3>
+                    <p className="leading-relaxed">
+                      Odds and prize pools may vary and are capped per user to prevent abuse.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Campaign tasks</h3>
+                    <p className="leading-relaxed">
+                      Some tasks require posting/sharing content on third-party platforms. You must comply with those platforms&apos; rules.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Verification</h3>
+                    <p className="leading-relaxed">
+                      We may verify engagement via APIs, telemetry, proof uploads, or signals (e.g., public post links). Verification methods may change.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Referrals</h3>
+                    <p className="leading-relaxed">
+                      Only real, consenting people. Self-referrals, phone-book spam, and fake/multiple accounts are prohibited.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Payouts/Prizes</h3>
+                    <p className="leading-relaxed">
+                      Airtime/data/vouchers/merch/other rewards as listed. Cash-outs may require KYC. Processing times can vary. Taxes are your responsibility unless required otherwise by law.
+                    </p>
+                  </div>
                 </div>
               </section>
 
-              <section className="pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  By using Apple Pass, you acknowledge that you have read,
-                  understood, and agree to be bound by these Terms of Service.
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  5) Advertisers
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Content standards</h3>
+                    <p className="leading-relaxed">
+                      You warrant you have rights to all creatives and they are lawful, non-infringing, and compliant (no illegal, hateful, adult, deceptive, medical/financial claims without substantiation, or restricted goods).
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Pricing & billing</h3>
+                    <p className="leading-relaxed">
+                      As per order form/IO. Late payments may incur interest and campaign pause.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Metrics & verification</h3>
+                    <p className="leading-relaxed">
+                      Pinecrest&apos;s anti-fraud/verification decisions are final for billing unless audit rights are expressly agreed in writing.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">License</h3>
+                    <p className="leading-relaxed">
+                      You grant Pinecrest a non-exclusive, worldwide license to use campaign materials to deliver, measure, and promote the campaign.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  6) User content (UGC)
+                </h2>
+                <p className="leading-relaxed">
+                  You retain ownership of UGC and grant Pinecrest a royalty-free, worldwide license to host, display,
+                  adapt, and promote it in connection with the Services. You warrant you have necessary rights and won&apos;t post unlawful or infringing content.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  7) Prohibited conduct
+                </h2>
+                <p className="leading-relaxed mb-3">No:</p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>Bots, automated scripts, device farms, VPN farm abuse</li>
+                  <li>Multiple accounts per person</li>
+                  <li>False verification artifacts</li>
+                  <li>Scraping, reverse engineering, interfering with the Service</li>
+                  <li>Harassing others</li>
+                  <li>Violating third-party platform policies</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  8) Anti-fraud & enforcement
+                </h2>
+                <p className="leading-relaxed">
+                  We may delay/withhold rewards, suspend or terminate accounts, adjust points, or disqualify entries
+                  where manipulation or policy breaches are suspected. Appeals: <a href="mailto:compliance@pinecrest247.com" className="text-emerald-600 hover:underline">compliance@pinecrest247.com</a>.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  9) Intellectual property
+                </h2>
+                <p className="leading-relaxed">
+                  Pinecrest trademarks, logos, code, and content are owned by us or our licensors. Don&apos;t use them without written permission.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  10) Changes to the Services
+                </h2>
+                <p className="leading-relaxed">
+                  We may modify or discontinue features, campaigns, or rewards. Where material changes impact paid orders, we&apos;ll provide reasonable notice or refunds per contract.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  11) Disclaimers
+                </h2>
+                <p className="leading-relaxed">
+                  Services are provided &quot;as is&quot;. We disclaim warranties of merchantability, fitness, non-infringement,
+                  and uninterrupted availability. Social platforms may change APIs at any time; verification is provided on a best-effort basis.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  12) Limitation of liability
+                </h2>
+                <p className="leading-relaxed">
+                  To the fullest extent permitted by law, Pinecrest is not liable for indirect, incidental, special,
+                  consequential, or punitive damages, lost profits, lost data, or reputational harm.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  13) Indemnity
+                </h2>
+                <p className="leading-relaxed">
+                  You agree to indemnify and hold Pinecrest harmless from claims arising out of your misuse,
+                  unlawful content, violation of these Terms, or infringement of third-party rights.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  14) Suspension & termination
+                </h2>
+                <p className="leading-relaxed">
+                  We may suspend or terminate accounts for violations or risk. You may delete your account at any
+                  time. Certain sections survive termination (IP, payments due, indemnity, liability limits, dispute resolution).
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  15) Governing law & disputes
+                </h2>
+                <div className="space-y-3">
+                  <p className="leading-relaxed">
+                    <strong>Governing law:</strong> Laws of the Federal Republic of Nigeria, without conflict-of-laws rules.
+                  </p>
+                  <p className="leading-relaxed">
+                    <strong>Venue:</strong> Competent courts in Lagos, Nigeria.
+                  </p>
+                  <p className="leading-relaxed">
+                    <strong>Arbitration (optional but recommended):</strong> Any dispute not resolved within 30 days shall
+                    be finally settled by arbitration under the Lagos Court of Arbitration Rules, one arbitrator,
+                    Lagos, English language. You waive class/representative actions to the extent permitted by law.
+                  </p>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  16) DMCA/Content complaints
+                </h2>
+                <p className="leading-relaxed">
+                  For copyright complaints, email <a href="mailto:dmca@pinecrest247.com" className="text-emerald-600 hover:underline">dmca@pinecrest247.com</a> with: your contact, work claimed,
+                  infringing URL, statement of good faith, and a sworn statement that information is accurate.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  17) Third-party services
+                </h2>
+                <p className="leading-relaxed">
+                  Facebook, Instagram, TikTok, X/Twitter, YouTube, WhatsApp and others are third parties with their
+                  own terms. Pinecrest is not responsible for their availability or changes.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  18) Changes to Terms
+                </h2>
+                <p className="leading-relaxed">
+                  We&apos;ll post updates with an Effective Date and notify materially where appropriate. Continued use means acceptance.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
+                  19) Contact
+                </h2>
+                <p className="leading-relaxed">
+                  <a href="mailto:support@pinecrest247.com" className="text-emerald-600 hover:underline">support@pinecrest247.com</a>
+                </p>
+              </section>
+
+              <section className="pt-8 border-t border-slate-200">
+                <p className="text-sm text-slate-600">
+                  By using Pinecrest, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
                 </p>
               </section>
             </div>

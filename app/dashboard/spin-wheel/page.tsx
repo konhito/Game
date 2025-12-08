@@ -124,9 +124,33 @@ export default function SpinWheelPage() {
       setResult(null);
       setError(null);
 
+      // Weighted probabilities favoring low points
+      // Map each segment to its probability based on points
+      const segmentProbabilities = wheelSegments.map(seg => {
+        if (seg.points === 0) return 0.02; // 2% for empty
+        if (seg.points === 25) return 0.50; // 50% for 25 points
+        if (seg.points === 50) return 0.30; // 30% for 50 points
+        if (seg.points === 100) return 0.13; // 13% for 100 points
+        if (seg.points === 200) return 0.04; // 4% for 200 points
+        if (seg.points === 500) return 0.01; // 1% for 500 points
+        return 0;
+      });
+
+      // Select segment based on weighted probability
+      const random = Math.random();
+      let cumulativeProbability = 0;
+      let randomSegment = 0;
+      
+      for (let i = 0; i < segmentProbabilities.length; i++) {
+        cumulativeProbability += segmentProbabilities[i];
+        if (random <= cumulativeProbability) {
+          randomSegment = i;
+          break;
+        }
+      }
+
       // Random rotation between 5-10 full rotations plus random segment
       const segmentAngle = 360 / wheelSegments.length;
-      const randomSegment = Math.floor(Math.random() * wheelSegments.length);
       
       // Calculate rotation: multiple full spins + landing on specific segment
       // Subtract half segment angle and 90 degrees to align with top pointer
@@ -170,53 +194,53 @@ export default function SpinWheelPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
-          <p className="text-white">Loading spin wheel...</p>
+          <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white text-sm sm:text-base">Loading spin wheel...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-3 sm:p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4 animate-pulse">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-3 sm:mb-4 animate-pulse px-2">
             🎰 FORTUNE WHEEL 🎰
           </h1>
-          <p className="text-xl text-yellow-300 font-semibold">Spin to win massive points and incredible rewards!</p>
+          <p className="text-base sm:text-lg md:text-xl text-yellow-300 font-semibold px-2">Spin to win massive points and incredible rewards!</p>
           {error && (
-            <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
+            <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm sm:text-base">
               {error}
             </div>
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           {/* Wheel Section */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Wheel Display */}
             <Card className="bg-gradient-to-br from-purple-900/30 via-blue-900/30 to-indigo-900/30 backdrop-blur-lg border-2 border-yellow-400/30 text-white shadow-2xl">
-              <CardHeader className="text-center">
-                <CardTitle className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <CardHeader className="text-center px-3 sm:px-6 py-4 sm:py-6">
+                <CardTitle className="text-xl sm:text-2xl md:text-3xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                   🎯 MEGA SPIN WHEEL 🎯
                 </CardTitle>
-                <CardDescription className="text-yellow-200 text-lg font-semibold">
+                <CardDescription className="text-yellow-200 text-base sm:text-lg font-semibold">
                   {spinsRemaining} spins remaining
                 </CardDescription>
                 {nextReset && (
-                  <div className="mt-2 text-sm text-gray-400">
-                    <Clock className="w-4 h-4 inline mr-1" />
+                  <div className="mt-2 text-xs sm:text-sm text-gray-400">
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                     Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent className="text-center px-3 sm:px-6 pb-4 sm:pb-6">
                 {/* Wheel Container */}
-                <div className="relative w-80 h-80 mx-auto mb-6">
+                <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 mx-auto mb-4 sm:mb-6">
                   {/* Pointer at top */}
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-30">
                     <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-red-500"></div>
@@ -353,36 +377,36 @@ export default function SpinWheelPage() {
                 <Button 
                   onClick={spinWheel}
                   disabled={spinsRemaining <= 0 || isSpinning}
-                  className={`w-40 h-16 text-xl font-black rounded-full shadow-2xl transition-all duration-300 relative overflow-hidden group ${
+                  className={`w-32 h-14 sm:w-36 sm:h-15 md:w-40 md:h-16 text-base sm:text-lg md:text-xl font-black rounded-full shadow-2xl transition-all duration-300 relative overflow-hidden group ${
                     spinsRemaining > 0 && !isSpinning
                       ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-300 hover:via-orange-400 hover:to-red-400 text-white hover:scale-110 hover:shadow-yellow-500/50 active:scale-95'
                       : 'bg-gray-500 cursor-not-allowed'
                   }`}
                 >
                   {isSpinning ? (
-                    <div className="flex items-center gap-2">
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      <span>Spinning...</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                      <span className="text-sm sm:text-base">Spinning...</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <span>🎯</span>
-                      <span>SPIN!</span>
-                      <span>🎯</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-sm sm:text-base">🎯</span>
+                      <span className="text-sm sm:text-base">SPIN!</span>
+                      <span className="text-sm sm:text-base">🎯</span>
                     </div>
                   )}
                 </Button>
 
                 {/* Spins Info */}
-                <div className="mt-6 space-y-2">
-                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30">
-                    <p className="text-green-300 font-semibold">🎯 Daily free spin</p>
+                <div className="mt-4 sm:mt-6 space-y-2">
+                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-2 sm:p-3 border border-green-400/30">
+                    <p className="text-green-300 font-semibold text-xs sm:text-sm md:text-base">🎯 Daily free spin</p>
                   </div>
-                  <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-3 border border-orange-400/30">
-                    <p className="text-orange-300 font-semibold">🔥 3-day streak = 2 bonus spins</p>
+                  <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-2 sm:p-3 border border-orange-400/30">
+                    <p className="text-orange-300 font-semibold text-xs sm:text-sm md:text-base">🔥 3-day streak = 2 bonus spins</p>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-3 border border-purple-400/30">
-                    <p className="text-purple-300 font-semibold">💎 Buy extra spins below</p>
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-2 sm:p-3 border border-purple-400/30">
+                    <p className="text-purple-300 font-semibold text-xs sm:text-sm md:text-base">💎 Buy extra spins below</p>
                   </div>
                 </div>
               </CardContent>
@@ -454,9 +478,9 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="space-y-4">
                   {spinPrices.map((offer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:scale-105 hover:shadow-lg hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 transition-all duration-300 cursor-pointer">
                       <div>
-                        <p className="font-black text-lg text-white">{offer.spins} Spins</p>
+                        <p className="font-black text-lg text-slate-900">{offer.spins} Spins</p>
                         <p className="text-sm text-purple-300 font-semibold">
                           {offer.discount} discount
                         </p>
@@ -491,10 +515,10 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-3">
                   {wheelSegments.map((segment) => (
-                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 cursor-pointer`}>
+                    <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg transition-all duration-300 cursor-pointer`}>
                       <div className="text-3xl mb-2 drop-shadow-lg">{segment.icon}</div>
-                      <p className="text-lg font-black text-white">{segment.label}</p>
-                      <p className="text-xs text-white/80 font-semibold">{segment.points} PTS</p>
+                      <p className="text-lg font-black text-slate-900">{segment.label}</p>
+                      <p className="text-xs text-slate-700 font-semibold">{segment.points} PTS</p>
                     </div>
                   ))}
                 </div>

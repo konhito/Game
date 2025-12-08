@@ -16,9 +16,6 @@ export const config = {
   // Google OAuth Configuration
   GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
-  // Instagram/Facebook OAuth Configuration
-  FACEBOOK_APP_ID: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
-  INSTAGRAM_APP_ID: process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID || '',
   APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   
   // Feature Flags

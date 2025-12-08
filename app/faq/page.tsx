@@ -4,67 +4,61 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { StructuredData, generateFAQSchema } from "@/components/structured-data";
+import Head from "next/head";
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const faqs = [
     {
-      category: "Getting Started",
+      category: "About Pinecrest",
       questions: [
         {
-          q: "How do I create an account?",
-          a: "Click the 'Sign Up' button in the header or footer, fill in your details, and verify your email. You can also sign up using Google OAuth for faster registration.",
+          q: "What is Pinecrest?",
+          a: "A gamified promotions platform where users complete tasks—like sharing brand posts, referrals, daily spins, and challenges—to earn Pinecoins and win weekly prizes on a public leaderboard.",
         },
         {
-          q: "Is PineCrest free to use?",
-          a: "Yes! Creating an account and using PineCrest is completely free. You only earn rewards - there are no fees or charges.",
+          q: "Is this gambling?",
+          a: "No. Users do not wager money. Rewards are tied to tasks/skill/engagement and randomized bonuses. Pinecrest is a promotional platform.",
         },
         {
-          q: "How do I start earning rewards?",
-          a: "Once you're logged in, go to the Activities page to see available tasks. Start a task, complete the requirements, submit proof, and get verified to earn points and PineCoins.",
+          q: "Who can join?",
+          a: "Anyone 13+ (or the legal minimum in your region). Some rewards may be country-specific due to sponsor or legal constraints.",
         },
       ],
     },
     {
-      category: "Tasks & Verification",
+      category: "Earning Points",
       questions: [
         {
-          q: "How do I complete a task?",
-          a: "1. Browse available tasks on the Activities page. 2. Click 'Start Task' to begin. 3. Complete the task requirements (like, share, follow, etc.). 4. Submit proof (screenshot or description). 5. Wait for verification. Once approved, you'll receive your rewards!",
+          q: "How do I earn points?",
+          a: "• Daily spins, challenges, streaks.\n• Verified sharing/engagement on supported social platforms.\n• Referrals of real friends.\n• Sponsored tasks from advertisers.",
         },
         {
-          q: "What kind of proof do I need to submit?",
-          a: "Most tasks require a screenshot showing you completed the action. For example, a screenshot of a liked post, shared content, or your follow. Make sure the screenshot is clear and shows the required action.",
+          q: "How is sharing verified?",
+          a: "We use a mix of API checks (where permitted), telemetry (e.g., reachable post URLs, timestamps, public visibility), proof uploads, callback webhooks or SDK signals, and fraud-risk scoring. If a share is deleted rapidly, set to private, or flagged by our anti-fraud systems, points may be withheld.",
         },
         {
-          q: "How long does verification take?",
-          a: "Most tasks are verified automatically using AI within minutes. Some tasks may require manual review, which typically takes 24-48 hours. You'll be notified once your task is verified.",
-        },
-        {
-          q: "What if my task is rejected?",
-          a: "If your task is rejected, you'll receive a reason. You can restart the task and submit new proof. Make sure to carefully follow all task requirements.",
+          q: "How often does the leaderboard reset?",
+          a: "Weekly. Winners are announced in-app and via email.",
         },
       ],
     },
     {
-      category: "Points & Rewards",
+      category: "Rewards & Redemption",
       questions: [
         {
-          q: "What are PineCoins?",
-          a: "PineCoins are the virtual currency on PineCrest. You earn PineCoins by completing tasks, and you can redeem them for real rewards like gift cards, cash, and prizes.",
+          q: "What can I redeem?",
+          a: "Airtime/data, vouchers, gift cards, merchandise, event tickets, and occasional cash equivalents where permitted. Some redemptions require KYC and may be subject to tax reporting.",
         },
         {
-          q: "What's the difference between points and PineCoins?",
-          a: "Points are used for leaderboard rankings and achievements. PineCoins are the currency you can redeem for rewards. Both are earned by completing tasks.",
+          q: "When is KYC required?",
+          a: "If your cumulative rewards exceed ₦100,000 or for certain prize types (cash equivalents), we'll request ID verification to comply with AML/CFT, fraud prevention, and sponsor rules.",
         },
         {
-          q: "How do I redeem my PineCoins?",
-          a: "Go to the Rewards section in your dashboard to see available redemption options. Select the reward you want and follow the redemption process.",
-        },
-        {
-          q: "Do weekly points reset?",
-          a: "Yes, weekly points reset every Monday at midnight UTC. This ensures fair competition on the leaderboard. Your PineCoins and lifetime points are never reset - only weekly points.",
+          q: "Why were my points removed or my prize delayed?",
+          a: "Likely due to failed verification (e.g., private/deleted share), suspected bot activity, duplicate accounts, or policy violations. See Anti-fraud & Enforcement. You can appeal via support.",
         },
       ],
     },
@@ -72,37 +66,63 @@ export default function FAQPage() {
       category: "Account & Security",
       questions: [
         {
-          q: "How do I change my password?",
-          a: "Go to Settings in your dashboard, then click on 'Change Password'. Enter your current password and your new password twice.",
+          q: "Can I use multiple accounts?",
+          a: "No. One account per person. Multi-accounting leads to disqualification and forfeiture of rewards.",
         },
         {
-          q: "What if I forget my password?",
-          a: "Click 'Forgot Password' on the sign-in page. Enter your email, and we'll send you a reset link.",
+          q: "Are there daily limits?",
+          a: "Yes. To keep things fair, we cap spins, shares, and referral credit per day. Limits are shown in-app and may change during anti-fraud events.",
         },
         {
-          q: "Is my data secure?",
-          a: "Yes! We use industry-standard security measures to protect your data. Your password is encrypted, and we never share your personal information with third parties.",
+          q: "How do I delete my account or data?",
+          a: "In Settings → Privacy, request deletion. We'll confirm via email. Some records may be retained for legal/fraud reasons (see Privacy Policy).",
         },
         {
-          q: "Can I delete my account?",
-          a: "Yes, you can delete your account from the Settings page. Note that this action is permanent and will remove all your data, points, and PineCoins.",
+          q: "How do you handle my data?",
+          a: "We follow NDPR/GDPR/CCPA-style principles. See our Privacy Policy for rights, transfers, and retention. Contact privacy@pinecrest247.com for requests.",
         },
       ],
     },
     {
-      category: "Leaderboard & Competition",
+      category: "For Advertisers",
       questions: [
         {
-          q: "How does the leaderboard work?",
-          a: "The leaderboard ranks users by their total points. Weekly points reset every Monday, but lifetime points continue to accumulate. Top performers can win additional rewards!",
+          q: "Can brands advertise on Pinecrest?",
+          a: "Yes. Contact info@pinecrest247.com or ads@pinecrest247.com. We offer pay-per-engagement, fixed campaign packages, and campus/geo targeting with real-time dashboards.",
         },
         {
-          q: "When does the leaderboard reset?",
-          a: "Weekly points reset every Monday at midnight UTC. This gives everyone a fresh start each week for fair competition.",
+          q: "How much does advertising cost?",
+          a: "Packages start at ₦100,000. Pay-per-engagement (shares, comments, saves) also available. We'll recommend the most cost-effective mix for your goals.",
         },
         {
-          q: "Are there prizes for top leaderboard positions?",
-          a: "Yes! Top performers on the weekly leaderboard can win bonus PineCoins and special rewards. Check the leaderboard page for current prizes.",
+          q: "Will Pinecrest post on my social accounts?",
+          a: "Only if you explicitly grant permission. Most tasks require you to share content yourself.",
+        },
+      ],
+    },
+    {
+      category: "Age & Taxes",
+      questions: [
+        {
+          q: "I'm under 18. Can I win?",
+          a: "Yes, subject to your country's laws and sponsor restrictions. Some prizes require a parent/guardian for delivery.",
+        },
+        {
+          q: "Taxes on prizes?",
+          a: "Local tax laws vary. You are responsible for any taxes unless stated otherwise in a campaign's rules.",
+        },
+      ],
+    },
+    {
+      category: "Support & Reporting",
+      questions: [
+        {
+          q: "Reporting a bug or vulnerability?",
+          a: "Email info@pinecrest247.com (PGP available). We appreciate responsible disclosure.",
+        },
+        {
+          q: "Contact support",
+          a: "support@pinecrest247.com | In-app chat | @pinecrest247 (social)",
         },
       ],
     },
@@ -114,9 +134,17 @@ export default function FAQPage() {
 
   let questionIndex = 0;
 
+  // Generate FAQ schema for structured data
+  const allFAQs = faqs.flatMap(category => 
+    category.questions.map(q => ({ question: q.q, answer: q.a }))
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <>
+      <StructuredData data={generateFAQSchema(allFAQs)} />
+      
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="mb-8">
           <Link
             href="/"
@@ -132,7 +160,7 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-lg text-slate-600">
-            Everything you need to know about PineCrest
+            Everything you need to know about Pinecrest
           </p>
         </div>
 
@@ -163,7 +191,7 @@ export default function FAQPage() {
                         </button>
                         {isOpen && (
                           <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
-                            <p className="text-slate-700 leading-relaxed">{faq.a}</p>
+                            <p className="text-slate-700 leading-relaxed whitespace-pre-line">{faq.a}</p>
                           </div>
                         )}
                       </div>
@@ -179,27 +207,33 @@ export default function FAQPage() {
           <CardContent className="p-8 text-center">
             <h3 className="text-2xl font-bold mb-4">Still have questions?</h3>
             <p className="text-slate-600 mb-6">
-              Can't find the answer you're looking for? Our support team is ready to help.
+              Can&apos;t find the answer you&apos;re looking for? Our support team is ready to help.
             </p>
-            <div className="flex gap-4 justify-center">
-              <Link
-                href="/contact"
+            <div className="flex gap-4 justify-center flex-wrap">
+              <a
+                href="mailto:support@pinecrest247.com"
                 className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
               >
                 Contact Support
-              </Link>
+              </a>
               <Link
-                href="/help"
+                href="/privacy"
                 className="px-6 py-3 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300 transition-colors"
               >
-                Visit Help Center
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms"
+                className="px-6 py-3 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300 transition-colors"
+              >
+                Terms of Service
               </Link>
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
-
 

@@ -484,18 +484,6 @@ export function Navbar() {
                     <span>Wallet</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/stats" className="flex items-center gap-3 w-full">
-                    <BarChart3 className="h-4 w-4 text-green-600" />
-                    <span>Statistics</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/settings" className="flex items-center gap-3 w-full">
-                    <Settings className="h-4 w-4 text-gray-600" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
                 {/* Profile Section */}
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
                   <Link href="/user" className="flex items-center gap-3 w-full">
@@ -514,28 +502,6 @@ export function Navbar() {
                       <span className="text-xs text-slate-500">Task history & progress</span>
                     </div>
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/stats" className="flex items-center gap-3 w-full">
-                    <BarChart3 className="h-4 w-4 text-green-600" />
-                    <div className="flex flex-col">
-                      <span>Detailed Stats</span>
-                      <span className="text-xs text-slate-500">Analytics & insights</span>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                {/* Notifications */}
-                <DropdownMenuItem className="cursor-pointer hover:bg-slate-50">
-                  <div className="flex items-center gap-3 w-full">
-                    <Bell className="h-4 w-4 text-orange-600" />
-                    <span>Notifications</span>
-                    <Badge className="ml-auto h-5 w-5 rounded-full p-0 text-xs bg-red-500 hover:bg-red-600">
-                      3
-                    </Badge>
-                  </div>
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />

@@ -12,57 +12,57 @@ export default function SharedFooter() {
   }
 
   return (
-    <footer className="bg-slate-800 text-white py-16 px-4 relative z-10">
+    <footer className="bg-slate-800 text-white py-8 sm:py-10 md:py-14 px-4 relative z-10 safe-bottom">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center  mb-4">
-              <div className="w-12 h-12 flex items-center justify-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 md:gap-8">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center mb-3 sm:mb-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
                 <img 
                   src="/Icon.png" 
                   alt="PineCrest Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-xl font-bold">PineCrest</span>
+              <span className="text-base sm:text-lg md:text-xl font-bold ml-2">PineCrest</span>
             </div>
-            <p className="text-slate-300 mb-4">
+            <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed">
               Earn rewards from your social media activities and convert them to real money.
             </p>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-slate-300">
-              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Quick Links</h3>
+            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
+              <li><Link href="/dashboard" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Dashboard</Link></li>
+              <li><Link href="/leaderboard" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Leaderboard</Link></li>
+              <li><Link href="/about" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">About</Link></li>
+              <li><Link href="/contact" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Contact</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-slate-300">
-              <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Support</h3>
+            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
+              <li><Link href="/help" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Help Center</Link></li>
+              <li><Link href="/terms" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Privacy Policy</Link></li>
+              <li><Link href="/faq" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">FAQ</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <ul className="space-y-2 text-slate-300">
-              <li><Link href="/news" className="hover:text-white transition-colors">News & Updates</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/community" className="hover:text-white transition-colors">Community</Link></li>
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Connect</h3>
+            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
+              <li><Link href="/news" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">News & Updates</Link></li>
+              <li><Link href="/blog" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Blog</Link></li>
+              <li><Link href="/community" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Community</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="border-t border-slate-700 mt-12 pt-8 text-center text-slate-400">
-          <p>&copy; 2025 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
+        <div className="border-t border-slate-700 mt-6 sm:mt-8 md:mt-10 pt-5 sm:pt-6 md:pt-8 text-center text-slate-400 text-xs sm:text-sm">
+          <p className="leading-relaxed">&copy; 2025 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
         </div>
       </div>
     </footer>
