@@ -7,7 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Save, RefreshCw, DollarSign, Gift, Settings as SettingsIcon, TrendingUp } from "lucide-react";
+import { Loader2, Save, RefreshCw, DollarSign, Gift, Settings as SettingsIcon, TrendingUp, Plus, Trash2, Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Setting {
   id: number;
@@ -29,6 +45,16 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editedValues, setEditedValues] = useState<{ [key: string]: any }>({});
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newSetting, setNewSetting] = useState({
+    key: '',
+    value: '',
+    data_type: 'string',
+    category: 'general',
+    description: '',
+    is_editable: true
+  });
 
   useEffect(() => {
     fetchSettings();
@@ -38,8 +64,9 @@ export default function AdminSettingsPage() {
     try {
       setLoading(true);
       const authToken = localStorage.getItem("auth_token");
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`, {
+      const response = await fetch(`${API_BASE}/api/settings/admin`, {
         headers: {
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
@@ -87,7 +114,8 @@ export default function AdminSettingsPage() {
         value
       }));
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/batch`, {
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const response = await fetch(`${API_BASE}/api/settings/batch`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -122,7 +150,8 @@ export default function AdminSettingsPage() {
     try {
       const authToken = localStorage.getItem("auth_token");
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/${key}`, {
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const response = await fetch(`${API_BASE}/api/settings/${key}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -140,6 +169,74 @@ export default function AdminSettingsPage() {
     } catch (error) {
       console.error("Error saving setting:", error);
       toast.error("Failed to save setting");
+    }
+  };
+
+  const handleCreateSetting = async () => {
+    try {
+      if (!newSetting.key || !newSetting.value) {
+        toast.error("Key and value are required");
+        return;
+      }
+
+      const authToken = localStorage.getItem("auth_token");
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const response = await fetch(`${API_BASE}/api/settings`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newSetting),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create setting");
+      }
+
+      toast.success("Setting created successfully");
+      setShowCreateDialog(false);
+      setNewSetting({
+        key: '',
+        value: '',
+        data_type: 'string',
+        category: 'general',
+        description: '',
+        is_editable: true
+      });
+      await fetchSettings();
+    } catch (error: any) {
+      console.error("Error creating setting:", error);
+      toast.error(error.message || "Failed to create setting");
+    }
+  };
+
+  const handleDeleteSetting = async (key: string) => {
+    if (!confirm(`Are you sure you want to delete the setting "${key}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const authToken = localStorage.getItem("auth_token");
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const response = await fetch(`${API_BASE}/api/settings/${key}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete setting");
+      }
+
+      toast.success("Setting deleted successfully");
+      await fetchSettings();
+    } catch (error) {
+      console.error("Error deleting setting:", error);
+      toast.error("Failed to delete setting");
     }
   };
 
@@ -258,6 +355,88 @@ export default function AdminSettingsPage() {
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Setting
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Setting</DialogTitle>
+                  <DialogDescription>
+                    Add a new system setting that can be configured
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="new-key">Setting Key</Label>
+                    <Input
+                      id="new-key"
+                      value={newSetting.key}
+                      onChange={(e) => setNewSetting({...newSetting, key: e.target.value})}
+                      placeholder="e.g., max_daily_tasks"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new-value">Value</Label>
+                    <Input
+                      id="new-value"
+                      value={newSetting.value}
+                      onChange={(e) => setNewSetting({...newSetting, value: e.target.value})}
+                      placeholder="Enter value"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new-type">Data Type</Label>
+                    <Select value={newSetting.data_type} onValueChange={(value) => setNewSetting({...newSetting, data_type: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="string">String</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="boolean">Boolean</SelectItem>
+                        <SelectItem value="json">JSON</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="new-category">Category</Label>
+                    <Select value={newSetting.category} onValueChange={(value) => setNewSetting({...newSetting, category: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="rewards">Rewards</SelectItem>
+                        <SelectItem value="bonuses">Bonuses</SelectItem>
+                        <SelectItem value="limits">Limits</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="new-description">Description</Label>
+                    <Input
+                      id="new-description"
+                      value={newSetting.description}
+                      onChange={(e) => setNewSetting({...newSetting, description: e.target.value})}
+                      placeholder="Describe what this setting does"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateSetting}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Button
               onClick={handleSaveAll}
               disabled={saving}
@@ -279,8 +458,21 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search settings..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       {/* Settings Tabs */}
-      <Tabs defaultValue={Object.keys(settings)[0]} className="space-y-6">
+      <Tabs defaultValue={Object.keys(settings)[0] || 'general'} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 lg:w-fit">
           {Object.keys(settings).map((category) => (
             <TabsTrigger key={category} value={category} className="capitalize">
@@ -321,17 +513,28 @@ export default function AdminSettingsPage() {
                         </div>
                       </div>
                       
-                      {setting.is_editable && (
-                        <Button
-                          onClick={() => handleSaveSingle(setting.setting_key)}
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                        >
-                          <Save className="h-3 w-3 mr-2" />
-                          Save
-                        </Button>
-                      )}
+                      <div className="flex gap-2">
+                        {setting.is_editable && (
+                          <>
+                            <Button
+                              onClick={() => handleSaveSingle(setting.setting_key)}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Save className="h-3 w-3 mr-2" />
+                              Save
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteSetting(setting.setting_key)}
+                              variant="destructive"
+                              size="sm"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

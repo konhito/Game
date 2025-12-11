@@ -191,7 +191,7 @@ export default function UsersPage() {
       const result = await taskService.deleteUser(selectedUser.id);
       
       if (result.success) {
-        toast.success('User deactivated successfully!');
+        toast.success('User deleted successfully!');
         // Remove the user from the list
         setUsers(users.filter(u => u.id !== selectedUser.id));
         closeDeleteDialog();
@@ -203,10 +203,10 @@ export default function UsersPage() {
           fetchUsers();
         }
       } else {
-        toast.error(result.error || 'Failed to deactivate user');
+        toast.error(result.error || 'Failed to delete user');
       }
     } catch (err) {
-      toast.error('Failed to deactivate user');
+      toast.error('Failed to delete user');
     } finally {
       setDeleting(false);
     }
@@ -422,10 +422,9 @@ export default function UsersPage() {
                         size="sm"
                         variant="destructive"
                         className="w-full"
-                        disabled={user.role === 'admin'}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {user.is_active ? 'Deactivate' : 'Activate'}
+                        Delete Account
                       </Button>
                     </div>
                     
@@ -555,25 +554,24 @@ export default function UsersPage() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirm User Action</DialogTitle>
+            <DialogTitle>Confirm Account Deletion</DialogTitle>
             <DialogDescription>
-              {selectedUser?.is_active 
-                ? `Are you sure you want to deactivate ${selectedUser?.name}? This will prevent them from accessing the system.`
-                : `Are you sure you want to activate ${selectedUser?.name}? This will restore their access to the system.`
-              }
+              Are you sure you want to permanently delete {selectedUser?.name}'s account? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              <span className="text-sm text-yellow-800">
-                {selectedUser?.is_active 
-                  ? 'The user will be marked as inactive and cannot log in.'
-                  : 'The user will be marked as active and can log in again.'
-                }
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <span className="text-sm text-red-800 font-medium">
+                Warning: This will permanently delete the user account and all associated data.
               </span>
             </div>
+            {selectedUser?.role === 'admin' && (
+              <div className="mt-2 text-sm text-red-700">
+                This user has admin privileges. Make sure you want to remove their admin access.
+              </div>
+            )}
           </div>
           
           <DialogFooter>
@@ -583,23 +581,14 @@ export default function UsersPage() {
             <Button 
               onClick={handleDeleteUser} 
               disabled={deleting}
-              variant={selectedUser?.is_active ? "destructive" : "default"}
+              variant="destructive"
             >
               {deleting ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mx-auto"></div>
               ) : (
                 <>
-                  {selectedUser?.is_active ? (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Deactivate User
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Activate User
-                    </>
-                  )}
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Account
                 </>
               )}
             </Button>

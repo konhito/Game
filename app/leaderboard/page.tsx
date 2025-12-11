@@ -18,17 +18,17 @@ interface LeaderboardEntry {
   tasks_completed: number;
 }
 
+interface WeeklyPool {
+  pinecoins: number;
+  naira: number;
+  exchange_rate: number;
+}
+
 export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-
-  const weeklyRewards = [
-    { rank: 1, reward: "50%", amount: "₽2,500", color: "bg-yellow-500" },
-    { rank: 2, reward: "30%", amount: "₽1,500", color: "bg-gray-400" },
-    { rank: 3, reward: "15%", amount: "₽750", color: "bg-orange-500" },
-    { rank: "Random", reward: "5%", amount: "₽250", color: "bg-purple-500" },
-  ];
+  const [weeklyPool, setWeeklyPool] = useState<WeeklyPool | null>(null);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -53,6 +53,11 @@ export default function LeaderboardPage() {
           rank: index + 1
         }));
         setLeaderboardData(rankedData);
+        
+        // Set weekly pool data if available
+        if (result.data.weekly_pool) {
+          setWeeklyPool(result.data.weekly_pool);
+        }
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -60,6 +65,19 @@ export default function LeaderboardPage() {
       setLoading(false);
     }
   };
+
+  // Calculate weekly rewards based on actual pool price
+  const weeklyRewards = weeklyPool ? [
+    { rank: 1, reward: "50%", amount: `₽${(weeklyPool.pinecoins * 0.5).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.5).toLocaleString()}`, color: "bg-yellow-500" },
+    { rank: 2, reward: "30%", amount: `₽${(weeklyPool.pinecoins * 0.3).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.3).toLocaleString()}`, color: "bg-gray-400" },
+    { rank: 3, reward: "15%", amount: `₽${(weeklyPool.pinecoins * 0.15).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.15).toLocaleString()}`, color: "bg-orange-500" },
+    { rank: "Random", reward: "5%", amount: `₽${(weeklyPool.pinecoins * 0.05).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.05).toLocaleString()}`, color: "bg-purple-500" },
+  ] : [
+    { rank: 1, reward: "50%", amount: "₽2,500", naira: "₦0", color: "bg-yellow-500" },
+    { rank: 2, reward: "30%", amount: "₽1,500", naira: "₦0", color: "bg-gray-400" },
+    { rank: 3, reward: "15%", amount: "₽750", naira: "₦0", color: "bg-orange-500" },
+    { rank: "Random", reward: "5%", amount: "₽250", naira: "₦0", color: "bg-purple-500" },
+  ];
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -130,14 +148,37 @@ export default function LeaderboardPage() {
               </Button>
             </div>
             <p className="text-slate-600 text-lg">Compete for weekly rewards and climb to the top! 🚀</p>
+            
+            {/* Weekly Pool Display */}
+            {weeklyPool && (
+              <div className="mt-6 mb-4 p-6 bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 rounded-2xl border-2 border-yellow-300 shadow-lg">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Crown className="w-6 h-6 text-yellow-600" />
+                    <span className="text-sm font-semibold text-slate-700">Weekly Prize Pool</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-slate-800">₽{weeklyPool.pinecoins.toLocaleString()}</div>
+                      <div className="text-sm text-slate-600 mt-1">PineCoins</div>
+                    </div>
+                    <div className="w-px h-12 bg-slate-400"></div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-emerald-700">₦{weeklyPool.naira.toLocaleString()}</div>
+                      <div className="text-sm text-slate-600 mt-1">Naira</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-slate-500">
+                    Exchange Rate: 1 PineCoin = 1 USDT = ₦{weeklyPool.exchange_rate.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>Resets every Monday at 00:00 UTC</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4 text-yellow-500" />
-                <span>₽5,000 Prize Pool</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-emerald-600 font-semibold">
@@ -268,15 +309,20 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-lg text-slate-800">{reward.amount}</p>
+                        {reward.naira && reward.naira !== "₦0" && (
+                          <p className="text-sm text-emerald-600 font-medium">{reward.naira}</p>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-300 shadow-sm">
-                  <p className="text-sm text-center text-yellow-800 font-bold">
-                    💰 Total Prize Pool: ₽5,000
-                  </p>
-                </div>
+                {weeklyPool && (
+                  <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-300 shadow-sm">
+                    <p className="text-sm text-center text-yellow-800 font-bold">
+                      💰 Total Prize Pool: ₽{weeklyPool.pinecoins.toLocaleString()} / ₦{weeklyPool.naira.toLocaleString()}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
