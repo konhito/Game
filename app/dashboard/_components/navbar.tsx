@@ -43,11 +43,12 @@ export function Navbar() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/stats`, {
+      const response = await fetch(`https://pinecrest.up.railway.app/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (response.ok) {

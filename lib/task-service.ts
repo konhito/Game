@@ -128,6 +128,7 @@ class TaskService {
         method: 'GET',
         headers: this.getAuthHeaders(),
         cache: 'no-store', // Prevent browser caching
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -148,6 +149,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/tasks/${id}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -173,6 +175,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/tasks/start`, {
         method: 'POST',
         headers,
+        credentials: 'include',
         body: JSON.stringify({ task_id: taskId }),
       });
 
@@ -208,6 +211,7 @@ class TaskService {
         const response = await fetch(`${API_BASE}/api/tasks/status/${taskId}`, {
           method: 'GET',
           headers: this.getAuthHeaders(),
+          credentials: 'include',
         });
 
         console.log('📡 Response status:', response.status);
@@ -264,6 +268,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/tasks/complete`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -319,6 +324,7 @@ class TaskService {
         method: 'GET',
         headers: this.getAuthHeaders(),
         cache: 'no-store', // Prevent browser caching
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -354,6 +360,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/tasks?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -374,6 +381,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/tasks`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -395,6 +403,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/tasks/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -416,6 +425,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/tasks/${id}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -447,6 +457,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/submissions/pending?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -467,6 +478,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/submissions/${id}/approve`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ admin_notes: adminNotes }),
       });
 
@@ -488,6 +500,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/submissions/${id}/reject`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ admin_notes: adminNotes }),
       });
 
@@ -559,6 +572,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/users?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -584,6 +598,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/users/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -605,6 +620,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/users/${id}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -642,6 +658,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/activities?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -679,6 +696,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/audit-log?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -716,6 +734,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/ai-verification?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -736,6 +755,7 @@ class TaskService {
       const response = await fetch(`${API_BASE}/api/admin/ai-verification/${verificationId}/retry`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {

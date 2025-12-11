@@ -61,10 +61,11 @@ export default function RewardsPage() {
   const fetchUserStats = async () => {
     try {
       const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/dashboard/stats`, {
+      const response = await fetch(`https://pinecrest.up.railway.app/api/dashboard/stats`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
+        credentials: 'include',
       });
       
       if (response.ok) {

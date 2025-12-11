@@ -226,6 +226,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -256,6 +257,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -361,6 +363,7 @@ class AuthService {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({
             googleId: googleUser.sub || googleUser.id,
             name: googleUser.name || googleUser.displayName || 'Google User',
@@ -462,6 +465,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -485,6 +489,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -521,6 +526,7 @@ class AuthService {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -563,6 +569,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -605,6 +612,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ currentPassword, newPassword }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

@@ -194,7 +194,9 @@ class DashboardService {
   // Health check endpoint
   async healthCheck(): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE}/api/health`);
+      const response = await fetch(`${API_BASE}/api/health`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         return {
@@ -216,6 +218,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -256,6 +259,7 @@ class DashboardService {
         
         const response = await fetch(`${API_BASE}/api/users/activities?limit=${limit}`, {
           headers: this.getAuthHeaders(),
+          credentials: 'include',
         });
 
         console.log('📡 Response status:', response.status);
@@ -294,7 +298,8 @@ class DashboardService {
           throw new Error('Invalid response format from backend');
         }
       } catch (error) {
-        if (retryCount < maxRetries && (error.message.includes('429') || error.message.includes('rate limit'))) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (retryCount < maxRetries && (errorMessage.includes('429') || errorMessage.includes('rate limit'))) {
           retryCount++;
           const delay = Math.pow(2, retryCount) * 1000;
           console.log(`⏳ Request failed, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
@@ -315,6 +320,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/users/leaderboard?limit=${limit}`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -349,6 +355,7 @@ class DashboardService {
       
       const response = await fetch(`${API_BASE}/api/tasks/available`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       console.log('DashboardService: Response status:', response.status);
@@ -388,6 +395,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/tasks/history`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -421,6 +429,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/tasks/categories`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -448,6 +457,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/products/user`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -475,6 +485,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/orders/user`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -502,6 +513,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/users/achievements`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -529,6 +541,7 @@ class DashboardService {
     try {
       const response = await fetch(`${API_BASE}/api/users/notifications`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -557,6 +570,7 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -577,6 +591,7 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/activities`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           activity_type: activityType,
           description,
@@ -650,6 +665,7 @@ class DashboardService {
       // Get spin wheel configuration from point system
       const response = await fetch(`${API_BASE}/api/points/config`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -734,6 +750,7 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/buy-spin`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -755,6 +772,7 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           action: 'daily_reward',
           points,

@@ -6,8 +6,8 @@ console.log("Environment variables:", {
 });
 
 export const config = {
-  // API Configuration
-  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app',
+  // API Configuration - Hardcoded to fix CORS
+  API_BASE: 'https://pinecrest.up.railway.app',
   
   // App Configuration
   APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'PineCoin',

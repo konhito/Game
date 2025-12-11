@@ -111,7 +111,8 @@ export default function DashboardPage() {
               headers: {
                 'Content-Type': 'application/json',
                 ...(token && { 'Authorization': `Bearer ${token}` })
-              }
+              },
+              credentials: 'include',
             })
             .then(response => response.ok ? response.json() : Promise.reject(response.status))
             .then(data => setNextReset(data.data))
