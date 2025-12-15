@@ -287,7 +287,8 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          // Support both POSIX (/) and Windows (\) paths coming from the backend
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split(/[\\/]/).pop()}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"
@@ -423,7 +424,8 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          // Support both POSIX (/) and Windows (\) paths
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${news.featured_image.split(/[\\/]/).pop()}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"

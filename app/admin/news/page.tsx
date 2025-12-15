@@ -66,6 +66,8 @@ export default function AdminNewsPage() {
     meta_title: "",
     meta_description: ""
   });
+  // Simple comma-separated view of tags for the form input
+  const tagsInput = formData.tags.join(", ");
 
   useEffect(() => {
     fetchArticles();
@@ -212,19 +214,8 @@ export default function AdminNewsPage() {
       });
 
       if (response.ok) {
+        // Keep the edited content visible; just refresh the list and close the modal
         setEditingArticle(null);
-        setFormData({
-          title: "",
-          slug: "",
-          excerpt: "",
-          content: "",
-          featured_image: "",
-          status: "draft",
-          featured: false,
-          tags: [],
-          meta_title: "",
-          meta_description: ""
-        });
         clearFile();
         fetchArticles();
       } else {
@@ -602,6 +593,25 @@ export default function AdminNewsPage() {
                     />
                     <span className="text-sm text-slate-700">Featured Article</span>
                   </label>
+                </div>
+
+                {/* Tags input (comma-separated) */}
+                <div>
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input
+                    id="tags"
+                    value={tagsInput}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tags: e.target.value
+                          .split(",")
+                          .map((tag) => tag.trim())
+                          .filter((tag) => tag.length > 0),
+                      })
+                    }
+                    placeholder="e.g. leaderboard, rewards, challenge"
+                  />
                 </div>
 
                 <div className="flex justify-end space-x-4">
