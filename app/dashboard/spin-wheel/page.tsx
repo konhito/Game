@@ -139,31 +139,59 @@ export default function SpinWheelPage() {
       // Select segment based on weighted probability
       const random = Math.random();
       let cumulativeProbability = 0;
-      let randomSegment = 0;
+      let selectedSegmentIndex = 0;
       
       for (let i = 0; i < segmentProbabilities.length; i++) {
         cumulativeProbability += segmentProbabilities[i];
         if (random <= cumulativeProbability) {
-          randomSegment = i;
+          selectedSegmentIndex = i;
           break;
         }
       }
 
-      // Random rotation between 5-10 full rotations plus random segment
-      const segmentAngle = 360 / wheelSegments.length;
+      // Get the selected segment BEFORE calculating rotation
+      const selectedSegment = wheelSegments[selectedSegmentIndex];
+      console.log('🎡 Selected segment:', selectedSegment, 'Index:', selectedSegmentIndex);
+
+      // Calculate rotation to land on the selected segment
+      const segmentAngle = 360 / wheelSegments.length; // 60 degrees per segment
       
-      // Calculate rotation: multiple full spins + landing on specific segment
-      // Subtract half segment angle and 90 degrees to align with top pointer
-      const baseRotation = 1800 + Math.random() * 1800; // 5-10 full rotations
-      const targetAngle = randomSegment * segmentAngle;
-      const finalRotation = baseRotation + (360 - targetAngle) + (segmentAngle / 2) - 90;
+      // Calculate the target angle for the selected segment
+      // Each segment starts at: index * segmentAngle - 90 (to start from top)
+      // We want to land in the middle of the segment
+      const segmentStartAngle = selectedSegmentIndex * segmentAngle - 90;
+      const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+      
+      // Calculate rotation: multiple full spins + landing on specific segment center
+      // We need to rotate so that the segment center aligns with the top pointer (0 degrees)
+      // The pointer is at 0 degrees (top), so we need to rotate the segment center to 0
+      const baseSpins = 5 + Math.random() * 5; // 5-10 full rotations
+      const baseRotation = baseSpins * 360; // Full rotations in degrees
+      
+      // Calculate how much more to rotate to align segment center with pointer
+      // We want: currentRotation + additionalRotation = baseRotation + (360 - segmentCenterAngle)
+      // This ensures the segment center ends up at the top (0 degrees)
+      const additionalRotation = 360 - segmentCenterAngle;
+      
+      // Add a small random offset within the segment to make it look more natural
+      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.6); // ±30% of segment
+      
+      const finalRotation = baseRotation + additionalRotation + segmentOffset;
+
+      console.log('🎡 Rotation calculation:', {
+        selectedSegmentIndex,
+        segmentAngle,
+        segmentCenterAngle,
+        baseRotation,
+        additionalRotation,
+        segmentOffset,
+        finalRotation
+      });
 
       setRotation(prev => prev + finalRotation);
 
       // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 4000));
-      
-      const selectedSegment = wheelSegments[randomSegment];
       
       // Update user stats on backend
       // Conversion rate: 1000 points = 1 PineCoin
@@ -174,6 +202,7 @@ export default function SpinWheelPage() {
         setResult(selectedSegment);
         setShowResult(true);
         setSpinsRemaining(prev => prev - 1);
+        console.log('✅ Spin successful - Points:', selectedSegment.points, 'Coins:', coins);
       } else {
         setError(updateResponse.error || 'Failed to update stats');
       }

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Save, RefreshCw, DollarSign, Gift, Settings as SettingsIcon, TrendingUp, Plus, Trash2, Search } from "lucide-react";
+import { Loader2, Save, RefreshCw, DollarSign, Gift, Settings as SettingsIcon, TrendingUp, Plus, Trash2, Search, Trophy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +55,15 @@ export default function AdminSettingsPage() {
     description: '',
     is_editable: true
   });
+  
+  // Weekly Leaderboard Rewards
+  const [leaderboardRewards, setLeaderboardRewards] = useState({
+    rank_1_reward: '100.00',
+    rank_2_reward: '50.00',
+    rank_3_reward: '25.00'
+  });
+  const [savingRewards, setSavingRewards] = useState(false);
+  const [distributingRewards, setDistributingRewards] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -86,6 +95,15 @@ export default function AdminSettingsPage() {
         initial[setting.setting_key] = setting.parsed_value;
       });
       setEditedValues(initial);
+      
+      // Load leaderboard rewards if they exist in settings
+      if (initial.weekly_leaderboard_rank_1_reward) {
+        setLeaderboardRewards({
+          rank_1_reward: initial.weekly_leaderboard_rank_1_reward?.toString() || '100.00',
+          rank_2_reward: initial.weekly_leaderboard_rank_2_reward?.toString() || '50.00',
+          rank_3_reward: initial.weekly_leaderboard_rank_3_reward?.toString() || '25.00'
+        });
+      }
       
       toast.success("Settings loaded successfully");
     } catch (error) {
@@ -237,6 +255,98 @@ export default function AdminSettingsPage() {
     } catch (error) {
       console.error("Error deleting setting:", error);
       toast.error("Failed to delete setting");
+    }
+  };
+
+  const handleSaveLeaderboardRewards = async () => {
+    try {
+      setSavingRewards(true);
+      const authToken = localStorage.getItem("auth_token");
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      
+      // Validate rewards
+      const rank1 = parseFloat(leaderboardRewards.rank_1_reward);
+      const rank2 = parseFloat(leaderboardRewards.rank_2_reward);
+      const rank3 = parseFloat(leaderboardRewards.rank_3_reward);
+      
+      if (isNaN(rank1) || rank1 < 0 || isNaN(rank2) || rank2 < 0 || isNaN(rank3) || rank3 < 0) {
+        toast.error("Please enter valid PineCoin amounts (must be positive numbers)");
+        return;
+      }
+
+      const settingsArray = [
+        { key: 'weekly_leaderboard_rank_1_reward', value: rank1.toString() },
+        { key: 'weekly_leaderboard_rank_2_reward', value: rank2.toString() },
+        { key: 'weekly_leaderboard_rank_3_reward', value: rank3.toString() }
+      ];
+
+      const response = await fetch(`${API_BASE}/api/settings/batch`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ settings: settingsArray }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save leaderboard rewards");
+      }
+
+      toast.success("Weekly leaderboard rewards saved successfully");
+      await fetchSettings();
+    } catch (error) {
+      console.error("Error saving leaderboard rewards:", error);
+      toast.error("Failed to save leaderboard rewards");
+    } finally {
+      setSavingRewards(false);
+    }
+  };
+
+  const handleDistributeRewards = async () => {
+    if (!confirm("Are you sure you want to distribute weekly leaderboard rewards? This will award PineCoins to the top 3 users from the current week's leaderboard.")) {
+      return;
+    }
+
+    try {
+      setDistributingRewards(true);
+      const authToken = localStorage.getItem("auth_token");
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      
+      // Calculate current week dates
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+      weekStart.setHours(0, 0, 0, 0);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const response = await fetch(`${API_BASE}/api/admin/leaderboard-rewards/distribute`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          week_start: weekStart.toISOString(),
+          week_end: weekEnd.toISOString()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to distribute rewards");
+      }
+
+      toast.success(`Successfully distributed rewards to ${data.data.distributed?.length || 0} users!`);
+    } catch (error: any) {
+      console.error("Error distributing rewards:", error);
+      toast.error(error.message || "Failed to distribute leaderboard rewards");
+    } finally {
+      setDistributingRewards(false);
     }
   };
 
@@ -470,6 +580,120 @@ export default function AdminSettingsPage() {
           />
         </div>
       </div>
+
+      {/* Weekly Leaderboard Rewards Section */}
+      <Card className="mb-8 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50">
+        <CardHeader className="bg-gradient-to-r from-emerald-600 to-green-600 text-white">
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-6 w-6" />
+            Weekly Leaderboard Rewards
+          </CardTitle>
+          <CardDescription className="text-emerald-100">
+            Configure PineCoin rewards for top 3 users on the weekly leaderboard. These rewards are automatically distributed when the leaderboard resets.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="rank_1" className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-2xl">🥇</span>
+                1st Place Reward
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-bold">₽</span>
+                <Input
+                  id="rank_1"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={leaderboardRewards.rank_1_reward}
+                  onChange={(e) => setLeaderboardRewards({ ...leaderboardRewards, rank_1_reward: e.target.value })}
+                  className="pl-8 border-slate-300 focus:border-emerald-600"
+                  placeholder="100.00"
+                />
+              </div>
+              <p className="text-xs text-slate-500">PineCoins awarded to 1st place</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rank_2" className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-2xl">🥈</span>
+                2nd Place Reward
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-bold">₽</span>
+                <Input
+                  id="rank_2"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={leaderboardRewards.rank_2_reward}
+                  onChange={(e) => setLeaderboardRewards({ ...leaderboardRewards, rank_2_reward: e.target.value })}
+                  className="pl-8 border-slate-300 focus:border-emerald-600"
+                  placeholder="50.00"
+                />
+              </div>
+              <p className="text-xs text-slate-500">PineCoins awarded to 2nd place</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rank_3" className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-2xl">🥉</span>
+                3rd Place Reward
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-bold">₽</span>
+                <Input
+                  id="rank_3"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={leaderboardRewards.rank_3_reward}
+                  onChange={(e) => setLeaderboardRewards({ ...leaderboardRewards, rank_3_reward: e.target.value })}
+                  className="pl-8 border-slate-300 focus:border-emerald-600"
+                  placeholder="25.00"
+                />
+              </div>
+              <p className="text-xs text-slate-500">PineCoins awarded to 3rd place</p>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              onClick={handleDistributeRewards}
+              disabled={distributingRewards}
+              variant="outline"
+              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+            >
+              {distributingRewards ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Distributing...
+                </>
+              ) : (
+                <>
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Distribute Rewards Now
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleSaveLeaderboardRewards}
+              disabled={savingRewards}
+              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
+            >
+              {savingRewards ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Leaderboard Rewards
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Settings Tabs */}
       <Tabs defaultValue={Object.keys(settings)[0] || 'general'} className="space-y-6">

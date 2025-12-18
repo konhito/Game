@@ -62,9 +62,21 @@ export default function DashboardPage() {
         try {
           console.log("Dashboard: Authentication check (attempt", retryCount + 1, ")");
           
-          // Direct localStorage check first
-          const token = localStorage.getItem('auth_token');
-          const userStr = localStorage.getItem('auth_user');
+          // Direct localStorage check first (with defensive check)
+          let token: string | null = null;
+          let userStr: string | null = null;
+          try {
+            if (typeof localStorage !== 'undefined') {
+              // Test if localStorage works
+              const testKey = '__test__';
+              localStorage.setItem(testKey, 'test');
+              localStorage.removeItem(testKey);
+              token = localStorage.getItem('auth_token');
+              userStr = localStorage.getItem('auth_user');
+            }
+          } catch (e) {
+            console.warn('Dashboard: localStorage not available:', e);
+          }
           let user = null;
           
           if (userStr) {
@@ -312,22 +324,66 @@ export default function DashboardPage() {
       const random = Math.random();
       let cumulativeProbability = 0;
       let selectedReward = wheelSegments[0];
+      let selectedRewardIndex = 0;
 
-      for (const segment of wheelSegments) {
+      for (let i = 0; i < wheelSegments.length; i++) {
+        const segment = wheelSegments[i];
         cumulativeProbability += segment.probability;
         if (random <= cumulativeProbability) {
           selectedReward = segment;
+          selectedRewardIndex = i;
           break;
         }
       }
 
-      // Calculate rotation (5-10 full spins + random segment)
-      const baseSpins = 5 + Math.random() * 5;
-      const segmentAngle = 360 / wheelSegments.length;
-      const segmentIndex = wheelSegments.indexOf(selectedReward);
-      const finalRotation = (baseSpins * 360) + (segmentIndex * segmentAngle) + (Math.random() * segmentAngle);
+      console.log('🎡 Selected reward:', selectedReward.points, 'at index:', selectedRewardIndex);
+
+      // Calculate rotation to land on the selected segment
+      const segmentAngle = 360 / wheelSegments.length; // 60 degrees per segment (6 segments)
       
-      setWheelRotation(finalRotation);
+      // The wheel segments are drawn starting from -90 degrees (top)
+      // Each segment spans 60 degrees
+      // Segment 0: -90 to -30, center at -60
+      // Segment 1: -30 to 30, center at 0
+      // Segment 2: 30 to 90, center at 60
+      // etc.
+      
+      // Calculate the center angle of the selected segment
+      // Segment starts at: (index * segmentAngle) - 90
+      // Segment center is at: start + (segmentAngle / 2)
+      const segmentStartAngle = (selectedRewardIndex * segmentAngle) - 90;
+      const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+      
+      // Calculate rotation: multiple full spins + landing on specific segment center
+      // The pointer is at 0 degrees (top), so we need to rotate the segment center to 0
+      const baseSpins = 5 + Math.random() * 5; // 5-10 full rotations
+      const baseRotation = baseSpins * 360; // Full rotations in degrees
+      
+      // To align segment center with pointer (0 degrees):
+      // We need to rotate by: 0 - segmentCenterAngle = -segmentCenterAngle
+      // But we want positive rotation, so: 360 - segmentCenterAngle
+      // However, since we're adding to current rotation, we need to account for the offset
+      const additionalRotation = -segmentCenterAngle; // Negative because we want to rotate the segment center to 0
+      
+      // Add a small random offset within the segment (±20% of segment) to make it look more natural
+      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.4);
+      
+      // Final rotation: base spins + alignment + small random offset
+      const finalRotation = baseRotation + additionalRotation + segmentOffset;
+
+      console.log('🎡 Rotation calculation:', {
+        selectedRewardIndex,
+        segmentAngle,
+        segmentStartAngle,
+        segmentCenterAngle,
+        baseRotation,
+        additionalRotation,
+        segmentOffset,
+        finalRotation,
+        'expected_segment': wheelSegments[selectedRewardIndex].points
+      });
+      
+      setWheelRotation(prev => prev + finalRotation);
 
       // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 3000));

@@ -17,7 +17,29 @@ export default function SharedHeader() {
   useEffect(() => {
     // Check if user is authenticated using localStorage
     const checkAuth = () => {
+      // Only access localStorage in the browser and ensure it's properly available
+      if (typeof window === 'undefined') {
+        setLoading(false);
+        return;
+      }
+      
       try {
+        // Test if localStorage actually works
+        if (typeof localStorage === 'undefined') {
+          setLoading(false);
+          return;
+        }
+        
+        const testKey = '__test__';
+        try {
+          localStorage.setItem(testKey, 'test');
+          localStorage.removeItem(testKey);
+        } catch (e) {
+          // localStorage doesn't work properly
+          setLoading(false);
+          return;
+        }
+        
         // Check for auth token and user data in localStorage
         const token = localStorage.getItem('auth_token');
         const userStr = localStorage.getItem('auth_user');

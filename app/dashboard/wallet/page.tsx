@@ -18,9 +18,7 @@ import {
   XCircle,
   Clock,
   AlertCircle,
-  Loader2,
-  ArrowRightLeft,
-  TrendingUp
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -40,7 +38,6 @@ interface WithdrawalRequest {
 
 // Conversion rate: 1 PineCoin = ₽1 = $0.95
 const PINE_COIN_TO_USD = 0.95;
-const POINTS_TO_COINS_RATE = 0.001; // 1 point = 0.001 PineCoins (1000 points = 1 PineCoin)
 
 export default function WalletPage() {
   const router = useRouter();
@@ -48,7 +45,6 @@ export default function WalletPage() {
   const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [converting, setConverting] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   
   // Form state
@@ -66,9 +62,6 @@ export default function WalletPage() {
     account_type: '',
     notes: ''
   });
-
-  // Points conversion state
-  const [pointsToConvert, setPointsToConvert] = useState('');
 
   useEffect(() => {
     const checkAuth = () => {
@@ -129,49 +122,6 @@ export default function WalletPage() {
       }
     } catch (error) {
       console.error('Error fetching withdrawals:', error);
-    }
-  };
-
-  const handleConvertPoints = async () => {
-    const points = parseInt(pointsToConvert);
-    
-    if (!points || points <= 0) {
-      toast.error('Please enter a valid number of points');
-      return;
-    }
-
-    const currentPoints = userStats?.total_points || 0;
-    if (points > currentPoints) {
-      toast.error(`Insufficient points. You have ${currentPoints} points`);
-      return;
-    }
-
-    setConverting(true);
-    try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${config.API_BASE}/api/points/convert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ points }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        toast.success(`Converted ${points} points to ${data.data.coins_received} PineCoins!`);
-        setPointsToConvert('');
-        fetchUserStats();
-      } else {
-        toast.error(data.error || 'Failed to convert points');
-      }
-    } catch (error) {
-      console.error('Error converting points:', error);
-      toast.error('Failed to convert points');
-    } finally {
-      setConverting(false);
     }
   };
 
@@ -278,9 +228,7 @@ export default function WalletPage() {
   }
 
   const currentBalance = parseFloat(userStats?.total_coins || 0);
-  const currentPoints = userStats?.total_points || 0;
   const usdEquivalent = (currentBalance * PINE_COIN_TO_USD).toFixed(2);
-  const coinsFromPoints = pointsToConvert ? (parseFloat(pointsToConvert) * POINTS_TO_COINS_RATE).toFixed(2) : '0.00';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
@@ -323,85 +271,6 @@ export default function WalletPage() {
                   <p>1 PineCoin = ₽1 = ${PINE_COIN_TO_USD}</p>
                 </div>
                 <p className="text-emerald-100 text-sm mt-2">Minimum withdrawal: ₽10.00 PineCoins</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Points to PineCoins Converter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-slate-800">
-                  <ArrowRightLeft className="w-5 h-5 text-emerald-600" />
-                  Convert Points to PineCoins
-                </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Exchange your points for PineCoins (1000 points = 1 PineCoin)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4 items-end">
-                  <div className="space-y-2">
-                    <Label htmlFor="points" className="text-slate-700 font-medium">
-                      Points to Convert
-                    </Label>
-                    <Input
-                      id="points"
-                      type="number"
-                      min="1"
-                      max={currentPoints}
-                      value={pointsToConvert}
-                      onChange={(e) => setPointsToConvert(e.target.value)}
-                      placeholder="Enter points"
-                      className="border-slate-300 focus:border-emerald-600 focus:ring-emerald-600"
-                    />
-                    <p className="text-xs text-slate-500">
-                      Available: {currentPoints.toLocaleString()} points
-                    </p>
-                    <p className="text-xs text-emerald-600 font-medium">
-                      Rate: 1000 points = 1 PineCoin
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 font-medium">
-                      You'll Receive
-                    </Label>
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      <p className="text-lg font-bold text-emerald-700">
-                        ₽{coinsFromPoints} PineCoins
-                      </p>
-                      <p className="text-xs text-emerald-600">
-                        ≈ ${(parseFloat(coinsFromPoints) * PINE_COIN_TO_USD).toFixed(2)} USD
-                      </p>
-                      {parseFloat(coinsFromPoints) > 0 && (
-                        <p className="text-xs text-slate-500 mt-1">
-                          {Math.floor(parseFloat(pointsToConvert) / 1000)} PineCoin(s) from {pointsToConvert} points
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleConvertPoints}
-                    disabled={converting || !pointsToConvert || parseInt(pointsToConvert) <= 0 || parseInt(pointsToConvert) > currentPoints}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-                  >
-                    {converting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Converting...
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="w-4 h-4 mr-2" />
-                        Convert Now
-                      </>
-                    )}
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </motion.div>
