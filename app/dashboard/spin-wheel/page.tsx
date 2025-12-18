@@ -27,11 +27,11 @@ const wheelSegments = [
   },
   { 
     id: 3, 
-    label: "", 
-    points: 0, 
+    label: "10", 
+    points: 10, 
     color: "#3B82F6", 
     gradient: "from-blue-500 to-blue-600",
-    icon: ""
+    icon: "🎯"
   },
   { 
     id: 4, 
@@ -127,12 +127,12 @@ export default function SpinWheelPage() {
       // Weighted probabilities favoring low points
       // Map each segment to its probability based on points
       const segmentProbabilities = wheelSegments.map(seg => {
-        if (seg.points === 0) return 0.02; // 2% for empty
-        if (seg.points === 25) return 0.50; // 50% for 25 points
-        if (seg.points === 50) return 0.30; // 30% for 50 points
-        if (seg.points === 100) return 0.13; // 13% for 100 points
-        if (seg.points === 200) return 0.04; // 4% for 200 points
-        if (seg.points === 500) return 0.01; // 1% for 500 points
+        if (seg.points === 10) return 0.70; // 70% for 10 points
+        if (seg.points === 25) return 0.20; // 20% for 25 points
+        if (seg.points === 50) return 0.08; // 8% for 50 points
+        if (seg.points === 100) return 0.015; // 1.5% for 100 points
+        if (seg.points === 200) return 0.004; // 0.4% for 200 points
+        if (seg.points === 500) return 0.001; // 0.1% for 500 points
         return 0;
       });
 
@@ -156,25 +156,39 @@ export default function SpinWheelPage() {
       // Calculate rotation to land on the selected segment
       const segmentAngle = 360 / wheelSegments.length; // 60 degrees per segment
       
-      // Calculate the target angle for the selected segment
+      // Calculate the center angle of the selected segment
       // Each segment starts at: index * segmentAngle - 90 (to start from top)
-      // We want to land in the middle of the segment
+      // Segment center is at start + half the segment angle
       const segmentStartAngle = selectedSegmentIndex * segmentAngle - 90;
-      const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+      let segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
       
-      // Calculate rotation: multiple full spins + landing on specific segment center
-      // We need to rotate so that the segment center aligns with the top pointer (0 degrees)
-      // The pointer is at 0 degrees (top), so we need to rotate the segment center to 0
-      const baseSpins = 5 + Math.random() * 5; // 5-10 full rotations
-      const baseRotation = baseSpins * 360; // Full rotations in degrees
+      // Normalize segmentCenterAngle to 0-360 range
+      while (segmentCenterAngle < 0) segmentCenterAngle += 360;
+      while (segmentCenterAngle >= 360) segmentCenterAngle -= 360;
       
-      // Calculate how much more to rotate to align segment center with pointer
-      // We want: currentRotation + additionalRotation = baseRotation + (360 - segmentCenterAngle)
-      // This ensures the segment center ends up at the top (0 degrees)
-      const additionalRotation = 360 - segmentCenterAngle;
+      // The pointer is at the TOP of the wheel (270° in standard 0-360, or -90°)
+      // When CSS rotates the wheel by R degrees clockwise, a point at angle A moves to A + R
+      // We want the segment center to appear at 270° (top where pointer is)
+      // So: segmentCenterAngle + totalRotation = 270 (mod 360)
+      // Therefore: targetRotation = 270 - segmentCenterAngle (mod 360)
+      const targetPosition = (270 - segmentCenterAngle + 360) % 360;
+      
+      // Account for current rotation to calculate how much more to rotate
+      const currentPosition = rotation % 360;
+      let additionalRotation = (targetPosition - currentPosition + 360) % 360;
+      
+      // Ensure we always rotate forward (add at least 360 if additionalRotation is too small)
+      if (additionalRotation < 30) {
+        additionalRotation += 360;
+      }
+      
+      // Add multiple full spins for dramatic effect
+      const baseSpins = 5 + Math.random() * 3; // 5-8 full rotations
+      const baseRotation = Math.floor(baseSpins) * 360;
       
       // Add a small random offset within the segment to make it look more natural
-      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.6); // ±30% of segment
+      // Keep offset small (±10% of segment = ±6 degrees) to ensure it stays within bounds
+      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.2);
       
       const finalRotation = baseRotation + additionalRotation + segmentOffset;
 

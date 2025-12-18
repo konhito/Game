@@ -343,30 +343,36 @@ export default function DashboardPage() {
       
       // The wheel segments are drawn starting from -90 degrees (top)
       // Each segment spans 60 degrees
-      // Segment 0: -90 to -30, center at -60
-      // Segment 1: -30 to 30, center at 0
-      // Segment 2: 30 to 90, center at 60
-      // etc.
-      
       // Calculate the center angle of the selected segment
-      // Segment starts at: (index * segmentAngle) - 90
-      // Segment center is at: start + (segmentAngle / 2)
       const segmentStartAngle = (selectedRewardIndex * segmentAngle) - 90;
-      const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+      let segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
       
-      // Calculate rotation: multiple full spins + landing on specific segment center
-      // The pointer is at 0 degrees (top), so we need to rotate the segment center to 0
-      const baseSpins = 5 + Math.random() * 5; // 5-10 full rotations
-      const baseRotation = baseSpins * 360; // Full rotations in degrees
+      // Normalize to 0-360 range
+      while (segmentCenterAngle < 0) segmentCenterAngle += 360;
+      while (segmentCenterAngle >= 360) segmentCenterAngle -= 360;
       
-      // To align segment center with pointer (0 degrees):
-      // We need to rotate by: 0 - segmentCenterAngle = -segmentCenterAngle
-      // But we want positive rotation, so: 360 - segmentCenterAngle
-      // However, since we're adding to current rotation, we need to account for the offset
-      const additionalRotation = -segmentCenterAngle; // Negative because we want to rotate the segment center to 0
+      // The pointer is at the TOP (270° in 0-360 range)
+      // When we rotate the wheel by R degrees, a point at angle A moves to (A + R) % 360
+      // We want the segment center to appear at 270° (top where pointer is)
+      // So: (segmentCenterAngle + totalRotation) % 360 = 270
+      // Therefore: targetRotation = (270 - segmentCenterAngle + 360) % 360
+      const targetPosition = (270 - segmentCenterAngle + 360) % 360;
       
-      // Add a small random offset within the segment (±20% of segment) to make it look more natural
-      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.4);
+      // Account for current wheel rotation
+      const currentPosition = wheelRotation % 360;
+      let additionalRotation = (targetPosition - currentPosition + 360) % 360;
+      
+      // Ensure we always rotate forward
+      if (additionalRotation < 30) {
+        additionalRotation += 360;
+      }
+      
+      // Add multiple full spins for dramatic effect
+      const baseSpins = 5 + Math.random() * 3; // 5-8 full rotations
+      const baseRotation = Math.floor(baseSpins) * 360;
+      
+      // Add a small random offset within the segment (±10% of segment) to stay within bounds
+      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.2);
       
       // Final rotation: base spins + alignment + small random offset
       const finalRotation = baseRotation + additionalRotation + segmentOffset;
@@ -385,8 +391,8 @@ export default function DashboardPage() {
       
       setWheelRotation(prev => prev + finalRotation);
 
-      // Wait for animation to complete
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Wait for animation to complete (4.5s to ensure 4s animation finishes)
+      await new Promise(resolve => setTimeout(resolve, 4500));
       
       // Update user stats on backend - this will handle the daily reset logic
       // Conversion rate: 1000 points = 1 PineCoin

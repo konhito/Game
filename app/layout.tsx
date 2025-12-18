@@ -81,10 +81,10 @@ export const metadata: Metadata = {
     canonical: 'https://pinecrest.com',
   },
   icons: {
-    // Ensure browser tab uses our branded logo from /public
-    icon: '/Logo1.png',
-    shortcut: '/Logo1.png',
-    apple: '/Logo1.png',
+    // Ensure browser tab uses our branded Icon from /public
+    icon: '/Icon.png',
+    shortcut: '/Icon.png',
+    apple: '/Icon.png',
   },
 };
 
