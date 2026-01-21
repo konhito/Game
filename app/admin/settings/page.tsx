@@ -64,7 +64,7 @@ export default function AdminSettingsPage() {
     try {
       setLoading(true);
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
       
       const response = await fetch(`${API_BASE}/api/settings/admin`, {
         headers: {
@@ -114,7 +114,7 @@ export default function AdminSettingsPage() {
         value
       }));
 
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
       const response = await fetch(`${API_BASE}/api/settings/batch`, {
         method: "PUT",
         headers: {
@@ -150,7 +150,7 @@ export default function AdminSettingsPage() {
     try {
       const authToken = localStorage.getItem("auth_token");
       
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
       const response = await fetch(`${API_BASE}/api/settings/${key}`, {
         method: "PUT",
         headers: {
@@ -180,7 +180,7 @@ export default function AdminSettingsPage() {
       }
 
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
       const response = await fetch(`${API_BASE}/api/settings`, {
         method: "POST",
         headers: {
@@ -219,7 +219,7 @@ export default function AdminSettingsPage() {
 
     try {
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
       const response = await fetch(`${API_BASE}/api/settings/${key}`, {
         method: "DELETE",
         headers: {

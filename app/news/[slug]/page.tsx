@@ -33,7 +33,6 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
-  const [linkedContent, setLinkedContent] = useState<string>("");
 
   useEffect(() => {
     if (params.slug) {
@@ -46,23 +45,15 @@ export default function ArticlePage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/${slug}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/${slug}`);
       
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data.article) {
-          const art = result.data.article as NewsArticle;
-          setArticle(art);
-
-          // Preprocess content to make plain URLs clickable
-          const urlRegex = /(https?:\/\/[^\s<]+)/g;
-          const htmlContent = art.content
-            .replace(/\n/g, "<br />")
-            .replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 underline">${url}</a>`);
-          setLinkedContent(htmlContent);
+          setArticle(result.data.article);
           
           // Fetch related articles
-          await fetchRelatedArticles(art.tags);
+          await fetchRelatedArticles(result.data.article.tags);
         } else {
           setError('Article not found');
         }
@@ -84,7 +75,7 @@ export default function ArticlePage() {
       if (tags.length === 0) return;
       
       const tagParam = tags[0]; // Use first tag for related articles
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news?tag=${tagParam}&limit=3`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?tag=${tagParam}&limit=3`);
       
       if (response.ok) {
         const result = await response.json();
@@ -199,8 +190,7 @@ export default function ArticlePage() {
                     <img
                       src={article.featured_image.startsWith('http') 
                         ? article.featured_image 
-                        // Support both POSIX (/) and Windows (\) paths saved from multer
-                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${article.featured_image.split(/[\\/]/).pop()}`
+                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${article.featured_image.split('/').pop()}`
                       }
                       alt={article.title}
                       className="w-full h-full object-cover"
@@ -305,7 +295,7 @@ export default function ArticlePage() {
                         lineHeight: '1.8'
                       }}
                       dangerouslySetInnerHTML={{ 
-                        __html: linkedContent || article.content.replace(/\n/g, '<br />') 
+                        __html: article.content.replace(/\n/g, '<br />') 
                       }}
                     />
                   </div>
@@ -457,8 +447,7 @@ export default function ArticlePage() {
                         <img
                           src={relatedArticle.featured_image.startsWith('http') 
                             ? relatedArticle.featured_image 
-                            // Support both POSIX (/) and Windows (\) paths
-                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/images/${relatedArticle.featured_image.split(/[\\/]/).pop()}`
+                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${relatedArticle.featured_image.split('/').pop()}`
                           }
                           alt={relatedArticle.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

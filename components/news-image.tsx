@@ -36,7 +36,7 @@ export function NewsImage({ src, alt, className = "", width = 400, height = 300 
   // Construct full URL if it's a relative path
   const imageUrl = src.startsWith('http') 
     ? src 
-    : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}${src}`;
+    : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}${src}`;
 
   return (
     <Image

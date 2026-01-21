@@ -86,7 +86,6 @@ export default function UsersPage() {
     phone: '',
     whatsapp: ''
   });
-  const [copiedEmails, setCopiedEmails] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -213,24 +212,6 @@ export default function UsersPage() {
     }
   };
 
-  // Helper: copy all user emails for email marketing / communications
-  const handleCopyEmails = () => {
-    const emails = users
-      .map((u) => u.email)
-      .filter((email) => !!email)
-      .join(", ");
-    if (!emails) return;
-
-    try {
-      navigator.clipboard.writeText(emails);
-      setCopiedEmails(true);
-      setTimeout(() => setCopiedEmails(false), 2000);
-    } catch {
-      // Fallback: do nothing, user can still select manually
-      setCopiedEmails(false);
-    }
-  };
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
@@ -267,21 +248,9 @@ export default function UsersPage() {
           </Link>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="text-gray-600">
-            Manage user accounts, roles, and permissions ({users.length} users)
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopyEmails}
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            {copiedEmails ? "Copied emails!" : "Copy all emails"}
-          </Button>
-        </div>
+        <p className="text-gray-600">
+          Manage user accounts, roles, and permissions ({users.length} users)
+        </p>
       </div>
 
       {error && (

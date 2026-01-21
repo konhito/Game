@@ -37,7 +37,7 @@ export default function LeaderboardPage() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
       const response = await fetch(`${API_BASE}/api/users/leaderboard/public?limit=50`);
       
       if (!response.ok) {
@@ -339,52 +339,20 @@ export default function LeaderboardPage() {
               <CardContent className="p-6">
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-2xl">🆕</span>
-                    <span className="font-medium text-slate-700">
-                      Sign up: <span className="text-green-600 font-bold">+50 points</span>
-                    </span>
+                    <span className="text-2xl">🎯</span>
+                    <span className="font-medium text-slate-700">Daily Login: <span className="text-green-600 font-bold">+20 points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <span className="text-2xl">👥</span>
-                    <span className="font-medium text-slate-700">
-                      Referral: <span className="text-blue-600 font-bold">+30 points</span>
-                    </span>
+                    <span className="text-2xl">🎮</span>
+                    <span className="font-medium text-slate-700">Spin Wheel: <span className="text-blue-600 font-bold">10-500 pts</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                    <span className="text-2xl">✅</span>
+                    <span className="font-medium text-slate-700">Complete Tasks: <span className="text-purple-600 font-bold">+50 pts</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
                     <span className="text-2xl">📱</span>
-                    <span className="font-medium text-slate-700">
-                      Share a post on our social page: <span className="text-orange-600 font-bold">+20 points</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                    <span className="text-2xl">📰</span>
-                    <span className="font-medium text-slate-700">
-                      Share a news post on your social: <span className="text-amber-600 font-bold">+10 points</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
-                    <span className="text-2xl">💬</span>
-                    <span className="font-medium text-slate-700">
-                      Comment on our social post: <span className="text-purple-600 font-bold">+5 points</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-pink-50 border border-pink-200">
-                    <span className="text-2xl">❤️</span>
-                    <span className="font-medium text-slate-700">
-                      Like our social post: <span className="text-pink-600 font-bold">+5 points</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-teal-50 border border-teal-200">
-                    <span className="text-2xl">📅</span>
-                    <span className="font-medium text-slate-700">
-                      Daily login: <span className="text-teal-600 font-bold">+5 points</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                    <span className="text-2xl">🔥</span>
-                    <span className="font-medium text-slate-700">
-                      3‑day login streak: <span className="text-yellow-600 font-bold">+2 extra spins</span> on day 3
-                    </span>
+                    <span className="font-medium text-slate-700">Share Posts: <span className="text-orange-600 font-bold">+20 pts</span></span>
                   </div>
                 </div>
               </CardContent>

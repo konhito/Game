@@ -43,7 +43,7 @@ export function Navbar() {
         return;
       }
 
-      const response = await fetch(`https://pinecrest.up.railway.app/api/users/stats`, {
+      const response = await fetch(`https://pinecrest.konhito.me/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
