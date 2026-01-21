@@ -46,17 +46,44 @@ class AuthService {
   private token: string | null = null;
   private user: User | null = null;
 
+  // Helper to safely check if localStorage is available
+  private isLocalStorageAvailable(): boolean {
+    try {
+      if (typeof window === 'undefined') {
+        return false;
+      }
+      if (typeof localStorage === 'undefined') {
+        return false;
+      }
+      // Test if localStorage methods actually work
+      const testKey = '__localStorage_test__';
+      try {
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   constructor() {
     // Load token and user from localStorage on initialization
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('auth_token');
-      const userStr = localStorage.getItem('auth_user');
-      if (userStr) {
-        try {
-          this.user = JSON.parse(userStr);
-        } catch (e) {
-          console.error('Failed to parse stored user:', e);
+    if (this.isLocalStorageAvailable()) {
+      try {
+        this.token = localStorage.getItem('auth_token');
+        const userStr = localStorage.getItem('auth_user');
+        if (userStr) {
+          try {
+            this.user = JSON.parse(userStr);
+          } catch (e) {
+            console.error('Failed to parse stored user:', e);
+          }
         }
+      } catch (e) {
+        console.warn('AuthService: Could not access localStorage during initialization:', e);
       }
     }
   }
@@ -66,7 +93,7 @@ class AuthService {
     console.log('AuthService: Setting auth - token:', token ? 'present' : 'missing', 'user:', user);
     this.token = token;
     this.user = user;
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       // Set localStorage first
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', JSON.stringify(user));
@@ -139,29 +166,9 @@ class AuthService {
     }
   }
 
-  // Clear auth and remove from localStorage
-  private clearAuth() {
-    console.log('AuthService: Clearing auth');
-    this.token = null;
-    this.user = null;
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      
-      // Also clear cookies
-      document.cookie = 'custom_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'custom_user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('authStateChanged'));
-      
-      console.log('AuthService: Cleared from localStorage and cookies');
-    }
-  }
-
   // Refresh auth state from localStorage
   refreshAuthState(): void {
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       this.token = localStorage.getItem('auth_token');
       const userStr = localStorage.getItem('auth_user');
       if (userStr) {
@@ -178,7 +185,7 @@ class AuthService {
   // Get current token
   getToken(): string | null {
     // Always read from localStorage to ensure we have the latest data
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       this.token = localStorage.getItem('auth_token');
     }
     return this.token;
@@ -187,7 +194,7 @@ class AuthService {
   // Get current user
   getUser(): User | null {
     // Always read from localStorage to ensure we have the latest data
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       const userStr = localStorage.getItem('auth_user');
       if (userStr) {
         try {
@@ -203,7 +210,7 @@ class AuthService {
   // Check if user is authenticated
   isAuthenticated(): boolean {
     // Always read from localStorage to ensure we have the latest data
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       this.token = localStorage.getItem('auth_token');
       const userStr = localStorage.getItem('auth_user');
       if (userStr) {
@@ -289,7 +296,7 @@ class AuthService {
     this.token = null;
     this.user = null;
     
-    if (typeof window !== 'undefined') {
+    if (this.isLocalStorageAvailable()) {
       // Clear localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
@@ -540,7 +547,7 @@ class AuthService {
 
       const user = await response.json();
       this.user = user; // Update stored user
-      if (typeof window !== 'undefined') {
+      if (this.isLocalStorageAvailable()) {
         localStorage.setItem('auth_user', JSON.stringify(user));
       }
       return user;
@@ -583,7 +590,7 @@ class AuthService {
 
       const result = await response.json();
       this.user = result.user; // Update stored user
-      if (typeof window !== 'undefined') {
+      if (this.isLocalStorageAvailable()) {
         localStorage.setItem('auth_user', JSON.stringify(result.user));
       }
       return result;

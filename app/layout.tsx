@@ -80,6 +80,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://pinecrest.com',
   },
+  icons: {
+    // Ensure browser tab uses our branded Icon from /public
+    icon: '/Icon.png',
+    shortcut: '/Icon.png',
+    apple: '/Icon.png',
+  },
 };
 
 export default function RootLayout({

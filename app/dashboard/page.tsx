@@ -62,9 +62,21 @@ export default function DashboardPage() {
         try {
           console.log("Dashboard: Authentication check (attempt", retryCount + 1, ")");
           
-          // Direct localStorage check first
-          const token = localStorage.getItem('auth_token');
-          const userStr = localStorage.getItem('auth_user');
+          // Direct localStorage check first (with defensive check)
+          let token: string | null = null;
+          let userStr: string | null = null;
+          try {
+            if (typeof localStorage !== 'undefined') {
+              // Test if localStorage works
+              const testKey = '__test__';
+              localStorage.setItem(testKey, 'test');
+              localStorage.removeItem(testKey);
+              token = localStorage.getItem('auth_token');
+              userStr = localStorage.getItem('auth_user');
+            }
+          } catch (e) {
+            console.warn('Dashboard: localStorage not available:', e);
+          }
           let user = null;
           
           if (userStr) {
@@ -312,25 +324,75 @@ export default function DashboardPage() {
       const random = Math.random();
       let cumulativeProbability = 0;
       let selectedReward = wheelSegments[0];
+      let selectedRewardIndex = 0;
 
-      for (const segment of wheelSegments) {
+      for (let i = 0; i < wheelSegments.length; i++) {
+        const segment = wheelSegments[i];
         cumulativeProbability += segment.probability;
         if (random <= cumulativeProbability) {
           selectedReward = segment;
+          selectedRewardIndex = i;
           break;
         }
       }
 
-      // Calculate rotation (5-10 full spins + random segment)
-      const baseSpins = 5 + Math.random() * 5;
-      const segmentAngle = 360 / wheelSegments.length;
-      const segmentIndex = wheelSegments.indexOf(selectedReward);
-      const finalRotation = (baseSpins * 360) + (segmentIndex * segmentAngle) + (Math.random() * segmentAngle);
-      
-      setWheelRotation(finalRotation);
+      console.log('🎡 Selected reward:', selectedReward.points, 'at index:', selectedRewardIndex);
 
-      // Wait for animation to complete
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Calculate rotation to land on the selected segment
+      const segmentAngle = 360 / wheelSegments.length; // 60 degrees per segment (6 segments)
+      
+      // The wheel segments are drawn starting from -90 degrees (top)
+      // Each segment spans 60 degrees
+      // Calculate the center angle of the selected segment
+      const segmentStartAngle = (selectedRewardIndex * segmentAngle) - 90;
+      let segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+      
+      // Normalize to 0-360 range
+      while (segmentCenterAngle < 0) segmentCenterAngle += 360;
+      while (segmentCenterAngle >= 360) segmentCenterAngle -= 360;
+      
+      // The pointer is at the TOP (270° in 0-360 range)
+      // When we rotate the wheel by R degrees, a point at angle A moves to (A + R) % 360
+      // We want the segment center to appear at 270° (top where pointer is)
+      // So: (segmentCenterAngle + totalRotation) % 360 = 270
+      // Therefore: targetRotation = (270 - segmentCenterAngle + 360) % 360
+      const targetPosition = (270 - segmentCenterAngle + 360) % 360;
+      
+      // Account for current wheel rotation
+      const currentPosition = wheelRotation % 360;
+      let additionalRotation = (targetPosition - currentPosition + 360) % 360;
+      
+      // Ensure we always rotate forward
+      if (additionalRotation < 30) {
+        additionalRotation += 360;
+      }
+      
+      // Add multiple full spins for dramatic effect
+      const baseSpins = 5 + Math.random() * 3; // 5-8 full rotations
+      const baseRotation = Math.floor(baseSpins) * 360;
+      
+      // Add a small random offset within the segment (±10% of segment) to stay within bounds
+      const segmentOffset = (Math.random() - 0.5) * (segmentAngle * 0.2);
+      
+      // Final rotation: base spins + alignment + small random offset
+      const finalRotation = baseRotation + additionalRotation + segmentOffset;
+
+      console.log('🎡 Rotation calculation:', {
+        selectedRewardIndex,
+        segmentAngle,
+        segmentStartAngle,
+        segmentCenterAngle,
+        baseRotation,
+        additionalRotation,
+        segmentOffset,
+        finalRotation,
+        'expected_segment': wheelSegments[selectedRewardIndex].points
+      });
+      
+      setWheelRotation(prev => prev + finalRotation);
+
+      // Wait for animation to complete (4.5s to ensure 4s animation finishes)
+      await new Promise(resolve => setTimeout(resolve, 4500));
       
       // Update user stats on backend - this will handle the daily reset logic
       // Conversion rate: 1000 points = 1 PineCoin

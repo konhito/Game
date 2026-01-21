@@ -57,7 +57,24 @@ export interface PointSystemAnalytics {
 
 class PointSystemService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');
+    // Only access localStorage in the browser and ensure it's properly available
+    let token: string | null = null;
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        // Test if localStorage actually works
+        const testKey = '__test__';
+        try {
+          localStorage.setItem(testKey, 'test');
+          localStorage.removeItem(testKey);
+          // If we get here, localStorage works
+          token = localStorage.getItem('auth_token');
+        } catch (e) {
+          // localStorage exists but doesn't work properly
+        }
+      }
+    } catch (e) {
+      // Silently fail - we're probably in SSR
+    }
     return {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` }),

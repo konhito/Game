@@ -151,8 +151,20 @@ export function Navbar() {
     const checkAuth = () => {
       try {
         // Check localStorage first (most reliable and complete)
-        const token = localStorage.getItem('auth_token');
-        const userStr = localStorage.getItem('auth_user');
+        let token: string | null = null;
+        let userStr: string | null = null;
+        try {
+          if (typeof localStorage !== 'undefined') {
+            // Test if localStorage works
+            const testKey = '__test__';
+            localStorage.setItem(testKey, 'test');
+            localStorage.removeItem(testKey);
+            token = localStorage.getItem('auth_token');
+            userStr = localStorage.getItem('auth_user');
+          }
+        } catch (e) {
+          console.warn('Navbar: localStorage not available:', e);
+        }
         
         if (token && userStr) {
           try {
@@ -351,7 +363,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Coins className="w-4 h-4 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-yellow-800 whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
-                  {user.pineCoins === 0 && loading ? '...' : `$${user.pineCoins.toFixed(2)}`}
+                  {user.pineCoins === 0 && loading ? '...' : `₽${user.pineCoins.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
@@ -367,7 +379,7 @@ export function Navbar() {
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Coins className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-yellow-800 text-xs whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
-                  {user.pineCoins === 0 && loading ? '...' : `$${user.pineCoins.toFixed(2)}`}
+                  {user.pineCoins === 0 && loading ? '...' : `₽${user.pineCoins.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
@@ -452,7 +464,7 @@ export function Navbar() {
                         <div className="text-xs text-slate-500">Coins</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-sm font-bold text-purple-600">{user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'User'}</div>
+                        <div className="text-sm font-bold text-purple-600">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}</div>
                         <div className="text-xs text-slate-500">Level</div>
                       </div>
                     </div>

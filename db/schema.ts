@@ -131,6 +131,19 @@ export const leaderboard = pgTable("leaderboard", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const weeklyLeaderboardReward = pgTable("weekly_leaderboard_reward", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  rank: integer("rank").notNull(),
+  pineCoins: numeric("pine_coins", { precision: 10, scale: 2 }).notNull(),
+  weekStart: timestamp("week_start").notNull(),
+  weekEnd: timestamp("week_end").notNull(),
+  distributedAt: timestamp("distributed_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const dailyReward = pgTable("daily_reward", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("userId")

@@ -98,7 +98,24 @@ export interface TaskResponse {
 
 class TaskService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');
+    // Only access localStorage in the browser and ensure it's properly available
+    let token: string | null = null;
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        // Test if localStorage actually works
+        const testKey = '__test__';
+        try {
+          localStorage.setItem(testKey, 'test');
+          localStorage.removeItem(testKey);
+          // If we get here, localStorage works
+          token = localStorage.getItem('auth_token');
+        } catch (e) {
+          // localStorage exists but doesn't work properly
+        }
+      }
+    } catch (e) {
+      // Silently fail - we're probably in SSR
+    }
     console.log('🔑 Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NOT FOUND');
     
     const headers = {

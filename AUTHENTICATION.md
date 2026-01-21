@@ -7,7 +7,6 @@ This project implements a hybrid authentication system that supports both **Goog
 ### 🔐 Dual Authentication Methods
 - **Google OAuth**: Uses Better Auth for seamless Google sign-in
 - **Email/Password**: Connects to hosted backend at `https://pinecrest.konhito.me`
-
 ### 🚀 Authentication Flow
 
 #### Google OAuth
