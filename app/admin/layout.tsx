@@ -24,7 +24,8 @@ import {
   TrendingUp,
   ImageIcon,
   Menu,
-  X
+  X,
+  TestTube
 } from 'lucide-react';
 
 const adminPages = [
@@ -42,6 +43,7 @@ const adminPages = [
   { name: 'AI Verification', href: '/admin/ai-verification', icon: Bot },
   { name: 'Duplicate Images', href: '/admin/duplicate-images', icon: ImageIcon },
   { name: 'Audit Log', href: '/admin/audit-log', icon: Shield },
+  { name: 'Test Page', href: '/admin/test-page', icon: TestTube },
 ];
 
 export default function AdminLayout({
