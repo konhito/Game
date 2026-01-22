@@ -11,6 +11,8 @@ import { Trophy, Gift, Users, Loader2, RefreshCw, ArrowRight, Star, TrendingUp, 
 import { dashboardService, UserStats, UserActivity, LeaderboardEntry } from "@/lib/dashboard-service";
 import config from "@/lib/config";
 import { OnboardingTour } from "@/components/dashboard/onboarding-tour";
+import { isTokenExpired } from "@/lib/token-utils";
+import { authService } from "@/lib/auth-service";
 
 interface DashboardData {
   userStats: UserStats | null;
@@ -101,6 +103,15 @@ export default function DashboardPage() {
             }
             
             console.log("Dashboard: Redirecting to sign-in");
+            authService.clearAuth();
+            router.push("/sign-in");
+            return;
+          }
+
+          // Check if token is expired
+          if (isTokenExpired(token)) {
+            console.log("Dashboard: Token expired, clearing auth and redirecting to sign-in");
+            authService.clearAuth();
             router.push("/sign-in");
             return;
           }
@@ -133,8 +144,16 @@ export default function DashboardPage() {
           
           // Wait only for critical dashboard data
           await dashboardPromise;
-        } catch (error) {
+        } catch (error: any) {
           console.error('Dashboard: Authentication failed:', error);
+          
+          // Check if it's a 401 error (token expired)
+          if (error?.message?.includes('401') || error?.message?.includes('Unauthorized') || 
+              error?.message?.includes('expired') || error?.message?.includes('Authentication expired')) {
+            console.log('Dashboard: Token expired, clearing auth and redirecting');
+            authService.clearAuth();
+          }
+          
           router.push("/sign-in");
         }
       };
@@ -189,26 +208,53 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
+      // Helper to handle 401 errors
+      const handle401Error = (error: any) => {
+        if (error?.message?.includes('401') || error?.message?.includes('Unauthorized') || 
+            error?.message?.includes('expired') || error?.message?.includes('Authentication expired')) {
+          console.log('Dashboard: 401 Unauthorized - token expired, redirecting to sign-in');
+          authService.clearAuth();
+          router.push("/sign-in");
+          return true;
+        }
+        return false;
+      };
+
       // Fetch all data in parallel using Promise.allSettled to handle individual failures gracefully
       const results = await Promise.allSettled([
         dashboardService.getUserStats(userId).catch(err => {
           console.error('❌ User stats failed:', err);
+          if (handle401Error(err)) {
+            throw err; // Re-throw to stop execution
+          }
           return { success: false, error: err.message };
         }),
         dashboardService.getUserActivities(userId, 5).catch(err => {
           console.error('❌ Activities failed:', err);
+          if (handle401Error(err)) {
+            throw err;
+          }
           return { success: false, error: err.message };
         }),
         dashboardService.getLeaderboard(10).catch(err => {
           console.error('❌ Leaderboard failed:', err);
+          if (handle401Error(err)) {
+            throw err;
+          }
           return { success: false, error: err.message };
         }),
         dashboardService.getAvailableTasks().catch(err => {
           console.error('❌ Tasks failed:', err);
+          if (handle401Error(err)) {
+            throw err;
+          }
           return { success: false, error: err.message };
         }),
         dashboardService.getUserTaskHistory(userId).catch(err => {
           console.error('❌ Task history failed:', err);
+          if (handle401Error(err)) {
+            throw err;
+          }
           return { success: false, error: err.message };
         })
       ]);
@@ -290,6 +336,16 @@ export default function DashboardPage() {
 
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
+      
+      // Check if it's a 401 error (token expired)
+      if (error?.message?.includes('401') || error?.message?.includes('Unauthorized') || 
+          error?.message?.includes('expired') || error?.message?.includes('Authentication expired')) {
+        console.log('Dashboard: Token expired during data fetch, redirecting to sign-in');
+        authService.clearAuth();
+        router.push("/sign-in");
+        return;
+      }
+      
       const errorMessage = error?.message || error?.toString() || 'Failed to fetch dashboard data';
       
       // Check for network errors

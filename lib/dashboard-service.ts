@@ -239,6 +239,12 @@ class DashboardService {
       });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized (token expired)
+        if (response.status === 401) {
+          const error = new Error('Authentication expired');
+          (error as any).status = 401;
+          throw error;
+        }
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new Error(`Failed to fetch user stats: ${response.status} ${errorText}`);
       }
@@ -283,6 +289,13 @@ class DashboardService {
         console.log('📡 Response headers:', response.headers);
 
         if (!response.ok) {
+          // Handle 401 Unauthorized (token expired) - don't retry
+          if (response.status === 401) {
+            const error = new Error('Authentication expired');
+            (error as any).status = 401;
+            throw error;
+          }
+          
           if (response.status === 429 && retryCount < maxRetries) {
             retryCount++;
             const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
@@ -341,6 +354,12 @@ class DashboardService {
       });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized (token expired)
+        if (response.status === 401) {
+          const error = new Error('Authentication expired');
+          (error as any).status = 401;
+          throw error;
+        }
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new Error(`Failed to fetch leaderboard: ${response.status} ${errorText}`);
       }
@@ -379,6 +398,12 @@ class DashboardService {
       console.log('DashboardService: Response headers:', response.headers);
 
       if (!response.ok) {
+        // Handle 401 Unauthorized (token expired)
+        if (response.status === 401) {
+          const error = new Error('Authentication expired');
+          (error as any).status = 401;
+          throw error;
+        }
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error('DashboardService: Response not OK:', errorText);
         throw new Error(`Failed to fetch available tasks: ${response.status} ${errorText}`);
@@ -416,6 +441,12 @@ class DashboardService {
       });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized (token expired)
+        if (response.status === 401) {
+          const error = new Error('Authentication expired');
+          (error as any).status = 401;
+          throw error;
+        }
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new Error(`Failed to fetch user task history: ${response.status} ${errorText}`);
       }
