@@ -80,7 +80,7 @@ export default function HomePage() {
       params.append('limit', itemsPerPage.toString());
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news?${params}`
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`
       );
 
       if (response.ok) {

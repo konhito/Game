@@ -66,8 +66,6 @@ export default function AdminNewsPage() {
     meta_title: "",
     meta_description: ""
   });
-  // Simple comma-separated view of tags for the form input
-  const tagsInput = formData.tags.join(", ");
 
   useEffect(() => {
     fetchArticles();
@@ -103,7 +101,7 @@ export default function AdminNewsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter !== 'all') params.append('status', statusFilter);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/admin/all?${params}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -147,7 +145,7 @@ export default function AdminNewsPage() {
         formDataToSend.append('featured_image', formData.featured_image);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/admin/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -205,7 +203,7 @@ export default function AdminNewsPage() {
         formDataToSend.append('featured_image', formData.featured_image);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/admin/${editingArticle.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${editingArticle.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -214,8 +212,19 @@ export default function AdminNewsPage() {
       });
 
       if (response.ok) {
-        // Keep the edited content visible; just refresh the list and close the modal
         setEditingArticle(null);
+        setFormData({
+          title: "",
+          slug: "",
+          excerpt: "",
+          content: "",
+          featured_image: "",
+          status: "draft",
+          featured: false,
+          tags: [],
+          meta_title: "",
+          meta_description: ""
+        });
         clearFile();
         fetchArticles();
       } else {
@@ -231,7 +240,7 @@ export default function AdminNewsPage() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/admin/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -257,7 +266,7 @@ export default function AdminNewsPage() {
     
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/news/admin/${article.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${article.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -593,25 +602,6 @@ export default function AdminNewsPage() {
                     />
                     <span className="text-sm text-slate-700">Featured Article</span>
                   </label>
-                </div>
-
-                {/* Tags input (comma-separated) */}
-                <div>
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="tags"
-                    value={tagsInput}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        tags: e.target.value
-                          .split(",")
-                          .map((tag) => tag.trim())
-                          .filter((tag) => tag.length > 0),
-                      })
-                    }
-                    placeholder="e.g. leaderboard, rewards, challenge"
-                  />
                 </div>
 
                 <div className="flex justify-end space-x-4">

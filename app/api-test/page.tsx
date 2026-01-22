@@ -23,7 +23,7 @@ export default function ApiTestPage() {
       setLoading(true);
       setError(null);
       
-              const response = await fetch('https://pinecrest.up.railway.app/api/health');
+              const response = await fetch('https://pinecrest.konhito.me/api/health');
       if (response.ok) {
         setIsConnected(true);
         setError(null);
@@ -145,7 +145,7 @@ export default function ApiTestPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm">
-                            <p><strong>Backend URL:</strong> https://pinecrest.up.railway.app</p>
+                            <p><strong>Backend URL:</strong> https://pinecrest.konhito.me</p>
             <p><strong>Health Check:</strong> /api/health</p>
             <p><strong>Tasks API:</strong> /api/tasks/*</p>
             <p><strong>Admin API:</strong> /api/admin/*</p>

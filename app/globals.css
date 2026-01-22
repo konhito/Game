@@ -103,7 +103,8 @@
         @apply border-border outline-ring/50;
     }
     html, body {
-        @apply overflow-x-hidden w-full max-w-full;
+        /* Ensure vertical scrolling is always available */
+        @apply overflow-x-hidden overflow-y-auto w-full max-w-full min-h-screen;
     }
     body {
         @apply bg-background text-foreground font-sans;

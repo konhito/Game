@@ -92,7 +92,7 @@ class UserProfileService {
   async getUserProfile(userId: number): Promise<ApiResponse<ProfileData>> {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/${userId}`,
         {
           headers: this.getAuthHeaders(),
         }
@@ -122,7 +122,7 @@ class UserProfileService {
   async updateUserProfile(userId: number, profileData: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/profile`,
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/profile`,
         {
           method: 'PUT',
           headers: this.getAuthHeaders(),
@@ -151,7 +151,7 @@ class UserProfileService {
   async getUserStats(userId: number): Promise<ApiResponse<UserStats>> {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/stats`,
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/stats`,
         {
           headers: this.getAuthHeaders(),
         }
@@ -178,7 +178,7 @@ class UserProfileService {
   async getUserActivities(userId: number, limit: number = 10): Promise<ApiResponse<UserActivity[]>> {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/activities?limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/activities?limit=${limit}`,
         {
           headers: this.getAuthHeaders(),
         }
@@ -205,7 +205,7 @@ class UserProfileService {
   async searchUsers(query: string): Promise<ApiResponse<UserProfile[]>> {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.up.railway.app'}/api/users/search?q=${encodeURIComponent(query)}`,
+        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/search?q=${encodeURIComponent(query)}`,
         {
           headers: this.getAuthHeaders(),
         }
