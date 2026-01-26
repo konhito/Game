@@ -16,6 +16,7 @@ export interface PrizePool {
   status: 'active' | 'upcoming' | 'completed';
   winner_id?: number;
   winner_name?: string;
+  image_url?: string; // URL to image of the prize (for physical items)
 }
 
 export interface Participant {

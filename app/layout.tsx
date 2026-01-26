@@ -81,8 +81,12 @@ export const metadata: Metadata = {
     canonical: 'https://pinecrest.com',
   },
   icons: {
-    // Ensure browser tab uses our branded Icon from /public
-    icon: '/Icon.png',
+    // Next.js 13+ automatically handles icon.png in app directory
+    // These are fallbacks for older browsers
+    icon: [
+      { url: '/Icon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/Icon.png', sizes: '16x16', type: 'image/png' },
+    ],
     shortcut: '/Icon.png',
     apple: '/Icon.png',
   },

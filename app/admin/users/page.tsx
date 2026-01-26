@@ -24,7 +24,10 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Clock
+  Clock,
+  Download,
+  Copy,
+  Check
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
@@ -78,6 +81,9 @@ export default function UsersPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [editForm, setEditForm] = useState({
@@ -212,6 +218,57 @@ export default function UsersPage() {
     }
   };
 
+  const handleCopyEmails = async () => {
+    try {
+      setCopying(true);
+      setCopied(false);
+      const result = await taskService.getUserEmails({
+        role: roleFilter === 'all' ? undefined : roleFilter,
+        status: statusFilter === 'all' ? undefined : statusFilter
+      });
+      
+      if (result.success && result.data?.emailList) {
+        const emails = result.data.emailList.join(', ');
+        await navigator.clipboard.writeText(emails);
+        setCopied(true);
+        toast.success(`Copied ${result.data.count} email(s) to clipboard!`);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        toast.error('No emails found to copy');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to copy emails');
+    } finally {
+      setCopying(false);
+    }
+  };
+
+  const handleExportEmails = async () => {
+    try {
+      setExporting(true);
+      const blob = await taskService.exportUserEmails({
+        role: roleFilter === 'all' ? undefined : roleFilter,
+        status: statusFilter === 'all' ? undefined : statusFilter
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `user-emails-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('User emails exported successfully!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to export emails');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
@@ -247,10 +304,55 @@ export default function UsersPage() {
             </Button>
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
-        <p className="text-gray-600">
-          Manage user accounts, roles, and permissions ({users.length} users)
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
+            <p className="text-gray-600">
+              Manage user accounts, roles, and permissions ({users.length} users)
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={handleCopyEmails} 
+              disabled={copying}
+              variant="outline"
+            >
+              {copying ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                  Copying...
+                </>
+              ) : copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Emails
+                </>
+              )}
+            </Button>
+            <Button 
+              onClick={handleExportEmails} 
+              disabled={exporting}
+              variant="outline"
+            >
+              {exporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {error && (
@@ -321,7 +423,8 @@ export default function UsersPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 line-clamp-1">{user.name}</h3>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="text-xs text-gray-500">ID: {user.id}</span>
                           <Badge className={`${getRoleColor(user.role)} text-xs`}>
                             {user.role}
                           </Badge>

@@ -54,6 +54,12 @@ export function Sidebar({ className, userStats }: SidebarProps) {
       isActive: pathname === "/dashboard/leaderboard",
     },
     {
+      title: "Prize Pools",
+      href: "/dashboard/prize-pool",
+      icon: Gift,
+      isActive: pathname === "/dashboard/prize-pool",
+    },
+    {
       title: "Daily Rewards",
       href: "/dashboard/daily-rewards",
       icon: Target,

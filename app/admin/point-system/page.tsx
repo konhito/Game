@@ -23,6 +23,7 @@ import {
   Save,
   X
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PointSystemConfig {
   [key: string]: {
@@ -141,6 +142,11 @@ export default function PointSystemAdmin() {
   };
 
   const handleAwardPoints = async () => {
+    if (!awardForm.userId) {
+      alert('Please select a user');
+      return;
+    }
+
     try {
       const response = await fetch('/api/points/award', {
         method: 'POST',
@@ -148,16 +154,26 @@ export default function PointSystemAdmin() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
-        body: JSON.stringify(awardForm)
+        body: JSON.stringify({
+          ...awardForm,
+          userId: parseInt(awardForm.userId), // Convert string to number
+          points: awardForm.points ? parseInt(awardForm.points) : 0,
+          coins: awardForm.coins ? parseFloat(awardForm.coins) : 0
+        })
       });
 
       if (response.ok) {
         setAwardForm({ userId: '', points: '', coins: '', description: '', transactionType: 'bonus' });
         setShowAwardForm(false);
         fetchData();
+        alert('Points awarded successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to award points');
       }
     } catch (error) {
       console.error('Error awarding points:', error);
+      alert('An error occurred while awarding points');
     }
   };
 
@@ -398,19 +414,25 @@ export default function PointSystemAdmin() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="userId">Select User</Label>
-                <select
-                  id="userId"
+                <Select
                   value={awardForm.userId}
-                  onChange={(e) => setAwardForm(prev => ({ ...prev, userId: e.target.value }))}
-                  className="w-full p-2 border rounded-md"
+                  onValueChange={(value) => setAwardForm(prev => ({ ...prev, userId: value }))}
                 >
-                  <option value="">Select a user</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="userId" className="w-full">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.length === 0 ? (
+                      <SelectItem value="" disabled>No users available</SelectItem>
+                    ) : (
+                      users.map(user => (
+                        <SelectItem key={user.id} value={user.id.toString()}>
+                          {user.name} ({user.email})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

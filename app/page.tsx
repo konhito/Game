@@ -143,7 +143,7 @@ export default function HomePage() {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
+      name: "Yakubu Ajayi",
       role: "Social Media Influencer",
       content: "PineCrest has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
       avatar: "👩‍💼",
@@ -151,7 +151,7 @@ export default function HomePage() {
     },
     {
       id: 2,
-      name: "Mike Chen",
+      name: "Nkem Okoye",
       role: "Content Creator",
       content: "The referral system is amazing. I've earned over 500 points just by sharing with friends!",
       avatar: "👨‍💻",
@@ -159,7 +159,7 @@ export default function HomePage() {
     },
     {
       id: 3,
-      name: "Emma Davis",
+      name: "Ibrahim Bakak",
       role: "Student",
       content: "Perfect for students! I earn PineCoins while studying and sharing educational content.",
       avatar: "👩‍🎓",

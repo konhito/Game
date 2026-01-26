@@ -66,6 +66,7 @@ export default function AdminNewsPage() {
     meta_title: "",
     meta_description: ""
   });
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     fetchArticles();
@@ -167,6 +168,7 @@ export default function AdminNewsPage() {
           meta_title: "",
           meta_description: ""
         });
+        setNewTag("");
         clearFile();
         fetchArticles();
       } else {
@@ -225,6 +227,7 @@ export default function AdminNewsPage() {
           meta_title: "",
           meta_description: ""
         });
+        setNewTag("");
         clearFile();
         fetchArticles();
       } else {
@@ -296,7 +299,7 @@ export default function AdminNewsPage() {
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt || "",
-      content: article.content,
+      content: article.content || "",
       featured_image: article.featured_image || "",
       status: article.status,
       featured: article.featured,
@@ -304,6 +307,22 @@ export default function AdminNewsPage() {
       meta_title: article.meta_title || "",
       meta_description: article.meta_description || ""
     });
+    setNewTag("");
+    // Set image preview if there's an existing featured image
+    if (article.featured_image) {
+      // If it's a URL, use it directly; if it's a filename, construct the full URL
+      const imageUrl = article.featured_image.startsWith('http') 
+        ? article.featured_image 
+        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/uploads/news-images/${article.featured_image}`;
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(null);
+    }
+    // Clear any selected file when editing
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -314,6 +333,30 @@ export default function AdminNewsPage() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleAddTag = () => {
+    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, newTag.trim()]
+      });
+      setNewTag("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter(tag => tag !== tagToRemove)
+    });
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
   };
 
   return (
@@ -604,6 +647,77 @@ export default function AdminNewsPage() {
                   </label>
                 </div>
 
+                <div>
+                  <Label htmlFor="tags">Tags</Label>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        id="tags"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        onKeyPress={handleTagKeyPress}
+                        placeholder="Enter a tag and press Enter"
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddTag}
+                        variant="outline"
+                        className="shrink-0"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Tag
+                      </Button>
+                    </div>
+                    {formData.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="flex items-center gap-1 px-3 py-1"
+                          >
+                            <Tag className="w-3 h-3" />
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTag(tag)}
+                              className="ml-1 hover:text-red-600 focus:outline-none"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    {formData.tags.length === 0 && (
+                      <p className="text-sm text-slate-500 italic">No tags added yet. Add tags to categorize your article.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="meta_title">Meta Title</Label>
+                    <Input
+                      id="meta_title"
+                      value={formData.meta_title}
+                      onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                      placeholder="SEO meta title"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="meta_description">Meta Description</Label>
+                    <Textarea
+                      id="meta_description"
+                      value={formData.meta_description}
+                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                      placeholder="SEO meta description"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
                 <div className="flex justify-end space-x-4">
                   <Button
                     type="button"
@@ -623,6 +737,7 @@ export default function AdminNewsPage() {
                         meta_title: "",
                         meta_description: ""
                       });
+                      setNewTag("");
                     }}
                   >
                     Cancel

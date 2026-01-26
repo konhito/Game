@@ -126,6 +126,12 @@ export function Navbar() {
       isActive: pathname === "/dashboard/activities",
     },
     {
+      title: "Prize Pools",
+      href: "/dashboard/prize-pool",
+      icon: Gift,
+      isActive: pathname === "/dashboard/prize-pool",
+    },
+    {
       title: "Rewards",
       href: "/dashboard/rewards",
       icon: Gift,

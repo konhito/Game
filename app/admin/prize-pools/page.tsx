@@ -37,6 +37,19 @@ export default function AdminPrizePoolsPage() {
   const [selectionMethod, setSelectionMethod] = useState<'random' | 'manual'>('random');
   const [manualUserId, setManualUserId] = useState('');
   const [selectingWinner, setSelectingWinner] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [poolForm, setPoolForm] = useState({
+    title: '',
+    description: '',
+    prize_amount: '',
+    entry_fee: '',
+    max_participants: '',
+    start_date: '',
+    end_date: '',
+    status: 'upcoming' as 'active' | 'upcoming' | 'completed',
+    image_url: ''
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -93,6 +106,48 @@ export default function AdminPrizePoolsPage() {
     }
   };
 
+  const handleCreatePool = async () => {
+    try {
+      setCreating(true);
+      
+      const poolData = {
+        title: poolForm.title,
+        description: poolForm.description,
+        prize_amount: parseFloat(poolForm.prize_amount),
+        entry_fee: parseFloat(poolForm.entry_fee),
+        max_participants: parseInt(poolForm.max_participants),
+        start_date: poolForm.start_date || new Date().toISOString(),
+        end_date: poolForm.end_date,
+        status: poolForm.status,
+        ...(poolForm.image_url && { image_url: poolForm.image_url })
+      };
+      
+      const response = await prizePoolService.createPrizePool(poolData);
+      
+      if (response.success) {
+        await fetchPrizePools();
+        setShowCreateDialog(false);
+        setPoolForm({
+          title: '',
+          description: '',
+          prize_amount: '',
+          entry_fee: '',
+          max_participants: '',
+          start_date: '',
+          end_date: '',
+          status: 'upcoming',
+          image_url: ''
+        });
+        alert('Prize pool created successfully!');
+      }
+    } catch (error: any) {
+      console.error("Error creating prize pool:", error);
+      alert(error.message || "Failed to create prize pool. Please try again.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const handleSelectWinner = async () => {
     if (!selectedPool) return;
     
@@ -143,9 +198,163 @@ export default function AdminPrizePoolsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">Prize Pool Management</h1>
-          <p className="text-slate-600">Manage prize pools and select winners</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-800 mb-2">Prize Pool Management</h1>
+            <p className="text-slate-600">Manage prize pools and select winners</p>
+          </div>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+                <Plus className="w-5 h-5 mr-2" />
+                Create Prize Pool
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create New Prize Pool</DialogTitle>
+                <DialogDescription>
+                  Create a new prize pool event. Winners are selected at random by AI.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    value={poolForm.title}
+                    onChange={(e) => setPoolForm({...poolForm, title: e.target.value})}
+                    placeholder="e.g., Weekly Grand Prize"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={poolForm.description}
+                    onChange={(e) => setPoolForm({...poolForm, description: e.target.value})}
+                    placeholder="Describe the prize pool and prizes to be won"
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_amount">Prize Amount (PineCoins) *</Label>
+                    <Input
+                      id="prize_amount"
+                      type="number"
+                      value={poolForm.prize_amount}
+                      onChange={(e) => setPoolForm({...poolForm, prize_amount: e.target.value})}
+                      placeholder="5000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="entry_fee">Entry Fee (PineCoins) *</Label>
+                    <Input
+                      id="entry_fee"
+                      type="number"
+                      value={poolForm.entry_fee}
+                      onChange={(e) => setPoolForm({...poolForm, entry_fee: e.target.value})}
+                      placeholder="10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="max_participants">Max Participants *</Label>
+                  <Input
+                    id="max_participants"
+                    type="number"
+                    value={poolForm.max_participants}
+                    onChange={(e) => setPoolForm({...poolForm, max_participants: e.target.value})}
+                    placeholder="100"
+                  />
+                  <p className="text-xs text-slate-500">Users can enter multiple times (max 10 times per pool)</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start_date">Start Date</Label>
+                    <Input
+                      id="start_date"
+                      type="datetime-local"
+                      value={poolForm.start_date}
+                      onChange={(e) => setPoolForm({...poolForm, start_date: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end_date">End Date *</Label>
+                    <Input
+                      id="end_date"
+                      type="datetime-local"
+                      value={poolForm.end_date}
+                      onChange={(e) => setPoolForm({...poolForm, end_date: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">Image URL (Optional)</Label>
+                  <Input
+                    id="image_url"
+                    type="url"
+                    value={poolForm.image_url}
+                    onChange={(e) => setPoolForm({...poolForm, image_url: e.target.value})}
+                    placeholder="https://example.com/prize-image.jpg"
+                  />
+                  <p className="text-xs text-slate-500">URL to image of the prize (for physical items like phones)</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select value={poolForm.status} onValueChange={(value: 'active' | 'upcoming' | 'completed') => setPoolForm({...poolForm, status: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="upcoming">Upcoming</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                    onClick={handleCreatePool}
+                    disabled={creating || !poolForm.title || !poolForm.prize_amount || !poolForm.entry_fee || !poolForm.max_participants || !poolForm.end_date}
+                  >
+                    {creating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Pool
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateDialog(false);
+                      setPoolForm({
+                        title: '',
+                        description: '',
+                        prize_amount: '',
+                        entry_fee: '',
+                        max_participants: '',
+                        start_date: '',
+                        end_date: '',
+                        status: 'upcoming',
+                        image_url: ''
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Prize Pools Grid */}
@@ -168,6 +377,20 @@ export default function AdminPrizePoolsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
+                {/* Prize Image */}
+                {pool.image_url && (
+                  <div className="mb-4 rounded-xl overflow-hidden border-2 border-slate-200">
+                    <img 
+                      src={pool.image_url} 
+                      alt={pool.title}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 {/* Pool Stats */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200">

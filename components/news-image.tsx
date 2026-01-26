@@ -33,10 +33,18 @@ export function NewsImage({ src, alt, className = "", width = 400, height = 300 
     );
   }
 
-  // Construct full URL if it's a relative path
-  const imageUrl = src.startsWith('http') 
-    ? src 
-    : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}${src}`;
+  // Construct full URL
+  // If it's already a full URL (http/https), use it as-is
+  // If it's a filename (like 'news-1234567890.jpg'), construct the API URL
+  // If it's a path (like 'uploads/news-images/news-1234567890.jpg'), extract filename and construct URL
+  let imageUrl: string;
+  if (src.startsWith('http')) {
+    imageUrl = src;
+  } else {
+    // Extract filename if it's a path
+    const filename = src.includes('/') ? src.split('/').pop() : src;
+    imageUrl = `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${filename}`;
+  }
 
   return (
     <Image

@@ -541,11 +541,12 @@ export default function DashboardPage() {
       setClaimingDailyReward(true);
       setDailyRewardMessage(null);
       
-      const baseReward = 20;
+      const baseReward = 5; // Daily login points: 5 points
       const currentStreak = dashboardData.userStats?.current_streak || 0;
-      const streakBonus = Math.min(currentStreak * 5, 50);
+      // Login streak of 3 straight days gives 2 extra spins on the 3rd day (not points)
+      const streakBonus = 0; // No streak bonus points, only extra spins
       const totalReward = baseReward + streakBonus;
-      const coins = Math.round(totalReward * 0.05);
+      const coins = 0; // Users don't earn PineCoins from daily login - only from weekly pool
       
       console.log('🎁 Claiming daily reward:', {
         baseReward,
@@ -571,7 +572,7 @@ export default function DashboardPage() {
             total_points: prev.userStats.total_points + totalReward,
             weekly_points: (prev.userStats.weekly_points || 0) + totalReward,
             current_streak: currentStreak + 1,
-            total_coins: prev.userStats.total_coins + coins,
+            total_coins: prev.userStats.total_coins, // No coins from daily login
             last_daily_claim_date: now
           } : null;
           
@@ -612,7 +613,10 @@ export default function DashboardPage() {
         setDailyRewardClaimed(true);
         
         // 5. Show success message
-        setDailyRewardMessage(`🎉 Daily reward claimed! +${totalReward} points (${streakBonus} streak bonus) +${coins} PineCoins`);
+        const streakMessage = currentStreak >= 2 && (currentStreak + 1) % 3 === 0 
+          ? ` + 2 extra spins!` 
+          : '';
+        setDailyRewardMessage(`🎉 Daily reward claimed! +${totalReward} points${streakMessage}`);
         
         console.log('✅ All UI updated - no reload needed!');
         

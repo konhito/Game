@@ -604,6 +604,68 @@ class TaskService {
     }
   }
 
+  // Admin: Get user emails as JSON
+  async getUserEmails(params?: {
+    role?: string;
+    status?: string;
+  }): Promise<TaskResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.role) queryParams.append('role', params.role);
+      if (params?.status) queryParams.append('status', params.status);
+
+      const response = await fetch(`${API_BASE}/api/admin/users/emails?${queryParams}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get user emails');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Get user emails error:', error);
+      throw error;
+    }
+  }
+
+  // Admin: Export user emails as CSV
+  async exportUserEmails(params?: {
+    role?: string;
+    status?: string;
+  }): Promise<Blob> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.role) queryParams.append('role', params.role);
+      if (params?.status) queryParams.append('status', params.status);
+
+      const response = await fetch(`${API_BASE}/api/admin/users/export/emails?${queryParams}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        // Try to parse as JSON for error message
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to export user emails');
+        } else {
+          throw new Error(`Failed to export user emails: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      return await response.blob();
+    } catch (error) {
+      console.error('Export user emails error:', error);
+      throw error;
+    }
+  }
+
   // Admin: Update user
   async updateUser(id: number, data: {
     role?: string;

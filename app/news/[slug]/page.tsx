@@ -98,6 +98,63 @@ export default function ArticlePage() {
     });
   };
 
+  // Convert URLs in text to clickable links
+  const convertUrlsToLinks = (text: string): string => {
+    if (!text) return '';
+    
+    // Check if text already contains anchor tags to avoid double-processing
+    if (/<a\s+[^>]*href/i.test(text)) {
+      // Already has links, return as is
+      return text;
+    }
+    
+    // URL regex pattern - matches http, https, www, and email addresses
+    // This pattern avoids matching URLs that are already inside HTML tags
+    const urlPattern = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
+    
+    // Replace URLs with anchor tags
+    return text.replace(urlPattern, (url, offset, string) => {
+      // Check if this URL is inside an HTML tag (between < and >)
+      const beforeMatch = string.substring(0, offset);
+      const afterMatch = string.substring(offset + url.length);
+      const lastOpenTag = beforeMatch.lastIndexOf('<');
+      const nextCloseTag = afterMatch.indexOf('>');
+      
+      // If we're inside an HTML tag, don't convert
+      if (lastOpenTag !== -1 && (nextCloseTag === -1 || beforeMatch.substring(lastOpenTag).indexOf('>') === -1)) {
+        return url;
+      }
+      
+      let href = url;
+      
+      // Add protocol if missing
+      if (url.startsWith('www.')) {
+        href = 'https://' + url;
+      } else if (!url.startsWith('http://') && !url.startsWith('https://') && url.includes('@')) {
+        // Email address
+        href = 'mailto:' + url;
+      } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        href = 'https://' + url;
+      }
+      
+      // Escape HTML in URL to prevent XSS
+      const escapedUrl = url.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const escapedHref = href.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      
+      return `<a href="${escapedHref}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedUrl}</a>`;
+    });
+  };
+
+  // Process content: convert URLs to links and newlines to breaks
+  const processContent = (content: string): string => {
+    if (!content) return '';
+    // First convert URLs to links
+    let processed = convertUrlsToLinks(content);
+    // Then convert newlines to breaks
+    processed = processed.replace(/\n/g, '<br />');
+    return processed;
+  };
+
   const getCategoryColor = (tag: string) => {
     const colors: { [key: string]: string } = {
       challenge: "from-emerald-500 to-emerald-600",
@@ -190,7 +247,7 @@ export default function ArticlePage() {
                     <img
                       src={article.featured_image.startsWith('http') 
                         ? article.featured_image 
-                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${article.featured_image.split('/').pop()}`
+                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${article.featured_image.includes('/') ? article.featured_image.split('/').pop() : article.featured_image}`
                       }
                       alt={article.title}
                       className="w-full h-full object-cover"
@@ -295,7 +352,7 @@ export default function ArticlePage() {
                         lineHeight: '1.8'
                       }}
                       dangerouslySetInnerHTML={{ 
-                        __html: article.content.replace(/\n/g, '<br />') 
+                        __html: processContent(article.content)
                       }}
                     />
                   </div>
@@ -447,7 +504,7 @@ export default function ArticlePage() {
                         <img
                           src={relatedArticle.featured_image.startsWith('http') 
                             ? relatedArticle.featured_image 
-                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${relatedArticle.featured_image.split('/').pop()}`
+                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${relatedArticle.featured_image.includes('/') ? relatedArticle.featured_image.split('/').pop() : relatedArticle.featured_image}`
                           }
                           alt={relatedArticle.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

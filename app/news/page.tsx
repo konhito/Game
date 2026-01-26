@@ -287,7 +287,7 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"
@@ -423,7 +423,7 @@ export default function NewsPage() {
                       <img
                         src={news.featured_image.startsWith('http') 
                           ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.split('/').pop()}`
+                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
                         }
                         alt={news.title}
                         className="w-full h-full object-cover"

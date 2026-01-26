@@ -171,6 +171,20 @@ export default function PrizePoolPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
+                  {/* Prize Image */}
+                  {pool.image_url && (
+                    <div className="mb-4 rounded-xl overflow-hidden border-2 border-slate-200">
+                      <img 
+                        src={pool.image_url} 
+                        alt={pool.title}
+                        className="w-full h-48 object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   {/* Prize Amount */}
                   <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300">
                     <div className="flex items-center justify-between">

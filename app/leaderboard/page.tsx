@@ -168,8 +168,15 @@ export default function LeaderboardPage() {
                       <div className="text-sm text-slate-600 mt-1">Naira</div>
                     </div>
                   </div>
-                  <div className="mt-3 text-xs text-slate-500">
-                    Exchange Rate: 1 PineCoin = 1 USDT = ₦{weeklyPool.exchange_rate.toLocaleString()}
+                  <div className="mt-3 space-y-1">
+                    <div className="text-xs text-slate-500">
+                      Exchange Rate: 1 PineCoin = 1 USDT = ₦{weeklyPool.exchange_rate.toLocaleString()}
+                    </div>
+                    {weeklyPool.last_updated && (
+                      <div className="text-xs text-slate-400 italic">
+                        Rate updated: {new Date(weeklyPool.last_updated).toLocaleTimeString()}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -200,7 +207,7 @@ export default function LeaderboardPage() {
                       <Trophy className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-slate-800 text-xl">Top Players</CardTitle>
+                      <CardTitle className="text-slate-800 text-xl">Top Users</CardTitle>
                       <CardDescription className="text-slate-600">
                         Weekly rankings based on points earned this week
                       </CardDescription>
@@ -340,7 +347,7 @@ export default function LeaderboardPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
                     <span className="text-2xl">🎯</span>
-                    <span className="font-medium text-slate-700">Daily Login: <span className="text-green-600 font-bold">+20 points</span></span>
+                    <span className="font-medium text-slate-700">Daily Login: <span className="text-green-600 font-bold">+5 points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <span className="text-2xl">🎮</span>
