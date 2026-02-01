@@ -2,7 +2,6 @@ import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { ThemeProvider } from "../components/provider";
 import "./globals.css";
-import "./scroll-fix.css";
 import { Analytics } from "@vercel/analytics/next";
 import SharedHeader from "@/components/shared-header";
 import SharedFooter from "@/components/shared-footer";
@@ -99,8 +98,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="!overflow-x-hidden !overflow-y-auto w-full min-h-full">
-      <body className="font-sans antialiased !overflow-x-hidden !overflow-y-auto w-full min-h-screen">
+    <html lang="en" suppressHydrationWarning className="h-full">
+      <body className="font-sans antialiased h-full m-0 p-0">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -108,11 +107,13 @@ export default function RootLayout({
           forcedTheme="light"
           disableTransitionOnChange
         >
-          <SharedHeader />
-          <main>
-            {children}
-          </main>
-          <SharedFooter />
+          <div className="flex flex-col min-h-screen">
+            <SharedHeader />
+            <main className="flex-1">
+              {children}
+            </main>
+            <SharedFooter />
+          </div>
           <Toaster />
           <Analytics />
         </ThemeProvider>

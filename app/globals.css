@@ -101,32 +101,26 @@
 @layer base {
     * {
         @apply border-border outline-ring/50;
+        box-sizing: border-box;
     }
+    
     html {
-        /* Enforce vertical scrolling works site-wide */
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        width: 100%;
-        height: auto !important;
-        min-height: 100%;
-        -webkit-overflow-scrolling: touch;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: visible;
     }
-    body {
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        width: 100%;
-        max-width: 100%;
-        height: auto !important;
-        min-height: 100vh;
-        -webkit-overflow-scrolling: touch;
-    }
+    
     body {
         @apply bg-background text-foreground font-sans;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        margin: 0;
+        padding: 0;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        /* Prevent text size adjustment on iOS */
         -webkit-text-size-adjust: 100%;
-        /* Disable pull-to-refresh on mobile */
+        -webkit-overflow-scrolling: touch;
         overscroll-behavior-y: contain;
     }
     button,
