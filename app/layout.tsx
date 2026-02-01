@@ -98,8 +98,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="overflow-x-hidden w-full">
-      <body className={`font-[-apple-system,BlinkMacSystemFont]antialiased overflow-x-hidden w-full`}>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden overflow-y-auto w-full min-h-full">
+      <body className="font-sans antialiased overflow-x-hidden overflow-y-auto w-full min-h-screen">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
