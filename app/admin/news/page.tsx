@@ -40,6 +40,8 @@ interface NewsArticle {
   views: number;
   featured: boolean;
   tags: string[];
+  meta_title?: string | null;
+  meta_description?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +69,8 @@ export default function AdminNewsPage() {
     meta_description: ""
   });
   const [newTag, setNewTag] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchArticles();
@@ -111,12 +115,14 @@ export default function AdminNewsPage() {
 
       if (response.ok) {
         const result = await response.json();
-        setArticles(result.data.articles);
+        setArticles(result?.data?.articles ?? []);
       } else {
         console.error('Failed to fetch articles');
+        setArticles([]);
       }
     } catch (error) {
       console.error('Error fetching articles:', error);
+      setArticles([]);
     } finally {
       setLoading(false);
     }
@@ -124,10 +130,16 @@ export default function AdminNewsPage() {
 
   const handleCreateArticle = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitting(true);
     try {
       const token = localStorage.getItem('auth_token');
-      
-      // Create FormData for file upload
+      if (!token) {
+        setSubmitError('You must be logged in to create articles.');
+        setSubmitting(false);
+        return;
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('slug', formData.slug);
@@ -138,8 +150,7 @@ export default function AdminNewsPage() {
       formDataToSend.append('tags', JSON.stringify(formData.tags));
       formDataToSend.append('meta_title', formData.meta_title);
       formDataToSend.append('meta_description', formData.meta_description);
-      
-      // Add file if selected, otherwise add featured_image URL
+
       if (selectedFile) {
         formDataToSend.append('featured_image', selectedFile);
       } else if (formData.featured_image) {
@@ -154,6 +165,7 @@ export default function AdminNewsPage() {
         body: formDataToSend,
       });
 
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
         setShowCreateForm(false);
         setFormData({
@@ -170,23 +182,32 @@ export default function AdminNewsPage() {
         });
         setNewTag("");
         clearFile();
+        setSubmitError(null);
         fetchArticles();
       } else {
-        console.error('Failed to create article');
+        setSubmitError(result?.error || 'Failed to create article. Please try again.');
       }
     } catch (error) {
       console.error('Error creating article:', error);
+      setSubmitError('Network error. Please check your connection and try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleUpdateArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingArticle) return;
-
+    setSubmitError(null);
+    setSubmitting(true);
     try {
       const token = localStorage.getItem('auth_token');
-      
-      // Create FormData for file upload
+      if (!token) {
+        setSubmitError('You must be logged in to update articles.');
+        setSubmitting(false);
+        return;
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('slug', formData.slug);
@@ -197,8 +218,7 @@ export default function AdminNewsPage() {
       formDataToSend.append('tags', JSON.stringify(formData.tags));
       formDataToSend.append('meta_title', formData.meta_title);
       formDataToSend.append('meta_description', formData.meta_description);
-      
-      // Add file if selected, otherwise add featured_image URL
+
       if (selectedFile) {
         formDataToSend.append('featured_image', selectedFile);
       } else if (formData.featured_image) {
@@ -213,6 +233,7 @@ export default function AdminNewsPage() {
         body: formDataToSend,
       });
 
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
         setEditingArticle(null);
         setFormData({
@@ -229,12 +250,16 @@ export default function AdminNewsPage() {
         });
         setNewTag("");
         clearFile();
+        setSubmitError(null);
         fetchArticles();
       } else {
-        console.error('Failed to update article');
+        setSubmitError(result?.error || 'Failed to update article. Please try again.');
       }
     } catch (error) {
       console.error('Error updating article:', error);
+      setSubmitError('Network error. Please check your connection and try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -277,7 +302,7 @@ export default function AdminNewsPage() {
         },
         body: JSON.stringify({
           status: newStatus,
-          published_at: newStatus === 'published' ? new Date().toISOString() : null
+          published_at: newStatus === 'published' ? new Date().toISOString() : null,
         }),
       });
 
@@ -294,6 +319,7 @@ export default function AdminNewsPage() {
   };
 
   const startEdit = (article: NewsArticle) => {
+    setSubmitError(null);
     setEditingArticle(article);
     setFormData({
       title: article.title,
@@ -304,8 +330,8 @@ export default function AdminNewsPage() {
       status: article.status,
       featured: article.featured,
       tags: article.tags || [],
-      meta_title: article.meta_title || "",
-      meta_description: article.meta_description || ""
+      meta_title: article.meta_title ?? "",
+      meta_description: article.meta_description ?? ""
     });
     setNewTag("");
     // Set image preview if there's an existing featured image
@@ -518,6 +544,9 @@ export default function AdminNewsPage() {
                 <h2 className="text-2xl font-bold text-slate-800">
                   {editingArticle ? 'Edit Article' : 'Create New Article'}
                 </h2>
+                {submitError && (
+                  <p className="mt-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{submitError}</p>
+                )}
               </div>
               <form onSubmit={editingArticle ? handleUpdateArticle : handleCreateArticle} className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -725,6 +754,7 @@ export default function AdminNewsPage() {
                     onClick={() => {
                       setShowCreateForm(false);
                       setEditingArticle(null);
+                      setSubmitError(null);
                       setFormData({
                         title: "",
                         slug: "",
@@ -738,12 +768,17 @@ export default function AdminNewsPage() {
                         meta_description: ""
                       });
                       setNewTag("");
+                      clearFile();
                     }}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white">
-                    {editingArticle ? 'Update Article' : 'Create Article'}
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white"
+                  >
+                    {submitting ? 'Saving...' : (editingArticle ? 'Update Article' : 'Create Article')}
                   </Button>
                 </div>
               </form>

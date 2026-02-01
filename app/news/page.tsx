@@ -51,12 +51,8 @@ export default function NewsPage() {
       
       if (response.ok) {
         const result = await response.json();
-        if (result.data && result.data.articles && result.data.articles.length > 0) {
-          setNewsItems(result.data.articles);
-        } else {
-          // Empty response - no articles found
-          setNewsItems([]);
-        }
+        const articles = result?.data?.articles;
+        setNewsItems(Array.isArray(articles) ? articles : []);
       } else {
         // API error - will use fallback
         setError(true);
@@ -81,8 +77,9 @@ export default function NewsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?featured=true&limit=1`);
       if (response.ok) {
         const result = await response.json();
-        if (result.data.articles.length > 0) {
-          setFeaturedArticle(result.data.articles[0]);
+        const articles = result?.data?.articles;
+        if (Array.isArray(articles) && articles.length > 0) {
+          setFeaturedArticle(articles[0]);
         }
       }
     } catch (error) {
@@ -90,80 +87,14 @@ export default function NewsPage() {
     }
   };
 
-  // Sample news data - fallback if API fails
-  const fallbackNewsItems = [
-    {
-      id: 1,
-      title: "New Social Media Challenge: Share Your Success Story",
-      excerpt: "Share your PineCoin journey and earn up to 50 points! Complete the challenge by posting about your earnings and tagging friends.",
-      content: "We're excited to announce our latest social media challenge! Share your PineCoin success story on any social media platform and earn up to 50 points. Simply post about how you've earned PineCoins, what you've learned, and tag 3 friends to participate. The best stories will be featured on our official channels and earn bonus rewards.",
-      date: "2 hours ago",
-      category: "Challenge",
-      author: "PineCoin Team",
-      readTime: "3 min read",
-      featured: true,
-      tags: ["challenge", "social media", "rewards"]
-    },
-    {
-      id: 2,
-      title: "Weekly Leaderboard Winners Announced",
-      excerpt: "Congratulations to this week's top performers! See who made it to the top and claimed the biggest rewards.",
-      content: "Another exciting week has come to an end, and we're thrilled to announce our weekly leaderboard winners! This week's competition was fierce, with users earning points through various activities including social sharing, video watching, and daily logins. The top 3 winners have been awarded their PineCoins, and we're already looking forward to next week's competition.",
-      date: "1 day ago",
-      category: "Leaderboard",
-      author: "PineCoin Team",
-      readTime: "2 min read",
-      featured: false,
-      tags: ["leaderboard", "winners", "rewards"]
-    },
-    {
-      id: 3,
-      title: "New Video Content Available for Rewards",
-      excerpt: "Watch our latest videos and earn points instantly. New content added daily with engaging topics.",
-      content: "We've just added a fresh batch of video content to our platform! From educational videos about social media strategies to entertaining content about earning rewards, there's something for everyone. Each video watched earns you 5 points, and we're adding new content daily to keep you engaged and earning.",
-      date: "3 days ago",
-      category: "Content",
-      author: "Content Team",
-      readTime: "1 min read",
-      featured: false,
-      tags: ["videos", "content", "points"]
-    },
-    {
-      id: 4,
-      title: "Platform Update: Enhanced Security Features",
-      excerpt: "We've implemented new security measures to protect your account and ensure fair play for all users.",
-      content: "Your security is our top priority. We've recently implemented enhanced security features including two-factor authentication, improved fraud detection, and better account protection. These updates ensure that all users can enjoy a safe and fair experience while earning PineCoins through legitimate activities.",
-      date: "5 days ago",
-      category: "Platform",
-      author: "Security Team",
-      readTime: "4 min read",
-      featured: true,
-      tags: ["security", "platform", "updates"]
-    },
-    {
-      id: 5,
-      title: "Referral Program Success Stories",
-      excerpt: "Discover how our top referrers are earning hundreds of points by inviting friends to join PineCoin.",
-      content: "Our referral program continues to be a huge success! We've collected inspiring stories from users who have earned hundreds of points by simply inviting their friends to join PineCoin. From students building passive income to professionals expanding their networks, the referral program is helping users achieve their financial goals.",
-      date: "1 week ago",
-      category: "Referrals",
-      author: "Community Team",
-      readTime: "3 min read",
-      featured: false,
-      tags: ["referrals", "success stories", "community"]
-    },
-    {
-      id: 6,
-      title: "Monthly Community Spotlight: Meet Our Top Users",
-      excerpt: "Get to know the PineCoin community's most active and successful users this month.",
-      content: "Every month, we shine a spotlight on our most active and successful users. This month, we're featuring users who have not only earned significant PineCoins but have also contributed to building our community through helpful posts, engagement, and support for new users. Their stories inspire us all to stay active and engaged.",
-      date: "2 weeks ago",
-      category: "Community",
-      author: "Community Team",
-      readTime: "5 min read",
-      featured: true,
-      tags: ["community", "spotlight", "users"]
-    }
+  // Sample news data - fallback if API fails (shaped as NewsArticle)
+  const fallbackNewsItems: NewsArticle[] = [
+    { id: 1, title: "New Social Media Challenge: Share Your Success Story", slug: "social-media-challenge", excerpt: "Share your PineCoin journey and earn up to 50 points!", content: "", featured_image: null, author_name: "PineCoin Team", published_at: new Date().toISOString(), views: 0, featured: true, tags: ["challenge", "social media", "rewards"] },
+    { id: 2, title: "Weekly Leaderboard Winners Announced", slug: "weekly-leaderboard", excerpt: "Congratulations to this week's top performers!", content: "", featured_image: null, author_name: "PineCoin Team", published_at: new Date().toISOString(), views: 0, featured: false, tags: ["leaderboard", "winners", "rewards"] },
+    { id: 3, title: "New Video Content Available for Rewards", slug: "video-content-rewards", excerpt: "Watch our latest videos and earn points instantly.", content: "", featured_image: null, author_name: "Content Team", published_at: new Date().toISOString(), views: 0, featured: false, tags: ["videos", "content", "points"] },
+    { id: 4, title: "Platform Update: Enhanced Security Features", slug: "security-features", excerpt: "We've implemented new security measures to protect your account.", content: "", featured_image: null, author_name: "Security Team", published_at: new Date().toISOString(), views: 0, featured: true, tags: ["security", "platform", "updates"] },
+    { id: 5, title: "Referral Program Success Stories", slug: "referral-success", excerpt: "Discover how our top referrers are earning hundreds of points.", content: "", featured_image: null, author_name: "Community Team", published_at: new Date().toISOString(), views: 0, featured: false, tags: ["referrals", "success stories", "community"] },
+    { id: 6, title: "Monthly Community Spotlight: Meet Our Top Users", slug: "community-spotlight", excerpt: "Get to know the PineCoin community's most active users.", content: "", featured_image: null, author_name: "Community Team", published_at: new Date().toISOString(), views: 0, featured: true, tags: ["community", "spotlight", "users"] }
   ];
 
   const categories = ["All", "Challenge", "Leaderboard", "Content", "Platform", "Referrals", "Community"];
@@ -177,9 +108,7 @@ export default function NewsPage() {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
-    const matchesCategory = selectedCategory === "All" || 
-                           (item.tags && item.tags.includes(selectedCategory)) ||
-                           (item as any).category === selectedCategory;
+    const matchesCategory = selectedCategory === "All" || (item.tags && item.tags.includes(selectedCategory));
     return matchesSearch && matchesCategory;
   });
 
@@ -296,8 +225,8 @@ export default function NewsPage() {
                         }}
                       />
                       <div className="absolute top-4 left-4">
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news.tags && news.tags[0]) || 'News'}
                         </Badge>
                       </div>
                     </div>
@@ -306,13 +235,13 @@ export default function NewsPage() {
                   <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
                       {!news.featured_image && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news.tags && news.tags[0]) || 'News'}
                         </Badge>
                       )}
                       <div className="flex items-center text-sm text-slate-500">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : (news as any).date}
+                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
                       </div>
                     </div>
                     <CardTitle className="text-xl text-slate-800 line-clamp-2">
@@ -320,7 +249,7 @@ export default function NewsPage() {
                     </CardTitle>
                     <div className="flex items-center text-sm text-slate-500">
                       <User className="w-4 h-4 mr-1" />
-                      {news.author_name || (news as any).author} • {(news as any).readTime || '2 min read'}
+                      {news.author_name} • 2 min read
                       {news.views && (
                         <>
                           <Eye className="w-4 h-4 ml-2 mr-1" />
@@ -338,7 +267,7 @@ export default function NewsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <Link href={`/news/${news.slug || (news as any).id}`}>
+                    <Link href={`/news/${news.slug || news.id}`}>
                       <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700">
                         Read Full Article
                       </Button>
@@ -432,8 +361,8 @@ export default function NewsPage() {
                         }}
                       />
                       <div className="absolute top-2 left-2">
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news.tags && news.tags[0]) || 'News'}
                         </Badge>
                       </div>
                     </div>
@@ -442,13 +371,13 @@ export default function NewsPage() {
                   <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
                       {!news.featured_image && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news as any).category || (news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news as any).category || (news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                          {(news.tags && news.tags[0]) || 'News'}
                         </Badge>
                       )}
                       <div className="flex items-center text-sm text-slate-500">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : (news as any).date}
+                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
                       </div>
                     </div>
                     <CardTitle className="text-lg text-slate-800 line-clamp-2">
@@ -456,7 +385,7 @@ export default function NewsPage() {
                     </CardTitle>
                     <div className="flex items-center text-sm text-slate-500">
                       <User className="w-4 h-4 mr-1" />
-                      {news.author_name || (news as any).author} • {(news as any).readTime || '2 min read'}
+                      {news.author_name} • 2 min read
                       {news.views && (
                         <>
                           <Eye className="w-4 h-4 ml-2 mr-1" />
@@ -474,7 +403,7 @@ export default function NewsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <Link href={`/news/${news.slug || (news as any).id}`}>
+                    <Link href={`/news/${news.slug || news.id}`}>
                       <Button variant="outline" className="w-full border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50">
                         Read More
                       </Button>
