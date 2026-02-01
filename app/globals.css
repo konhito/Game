@@ -107,11 +107,12 @@
     html {
         height: 100%;
         overflow-x: hidden;
-        overflow-y: visible;
+        overflow-y: hidden; /* only body scrolls - prevents double scrollbar */
     }
     
     body {
         @apply bg-background text-foreground font-sans;
+        height: 100%;
         min-height: 100vh;
         overflow-x: hidden;
         overflow-y: auto;

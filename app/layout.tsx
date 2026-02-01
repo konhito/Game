@@ -98,8 +98,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
-      <body className="font-sans antialiased h-full m-0 p-0">
+    <html lang="en" suppressHydrationWarning className="h-full overflow-x-hidden overflow-y-hidden">
+      <body className="font-sans antialiased h-full min-h-screen m-0 p-0 overflow-x-hidden overflow-y-auto">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -107,7 +107,7 @@ export default function RootLayout({
           forcedTheme="light"
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-full">
             <SharedHeader />
             <main className="flex-1">
               {children}
