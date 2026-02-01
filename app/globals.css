@@ -103,18 +103,20 @@
         @apply border-border outline-ring/50;
     }
     html {
-        /* Ensure vertical scrolling works site-wide */
-        overflow-x: hidden;
-        overflow-y: auto;
+        /* Enforce vertical scrolling works site-wide */
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
         width: 100%;
+        height: auto !important;
         min-height: 100%;
         -webkit-overflow-scrolling: touch;
     }
     body {
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
         width: 100%;
         max-width: 100%;
+        height: auto !important;
         min-height: 100vh;
         -webkit-overflow-scrolling: touch;
     }

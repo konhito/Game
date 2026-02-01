@@ -373,7 +373,7 @@ export function Navbar() {
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="w-4 h-4 text-blue-600 flex items-center justify-center flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200">🎯</div>
+                <Target className="w-4 h-4 text-blue-600 flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-blue-800 whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
                   {user.points === 0 && loading ? '...' : `${user.points} pts`}
                 </span>
@@ -389,7 +389,7 @@ export function Navbar() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div className="w-3.5 h-3.5 text-blue-600 flex items-center justify-center flex-shrink-0 text-xs hover:text-blue-700 hover:scale-110 transition-all duration-200">🎯</div>
+                <Target className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-blue-800 text-xs whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
                   {user.points === 0 && loading ? '...' : `${user.points} pts`}
                 </span>

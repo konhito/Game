@@ -1,0 +1,26 @@
+/* Force scroll to work - this overrides everything */
+html {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100% !important;
+}
+
+body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+}
+
+/* Remove any potential blockers */
+html, body {
+    position: relative !important;
+    max-height: none !important;
+}
+
+/* Ensure main content can scroll */
+main {
+    display: block !important;
+    position: relative !important;
+}
