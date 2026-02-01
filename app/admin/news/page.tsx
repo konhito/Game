@@ -26,6 +26,7 @@ import {
   X
 } from "lucide-react";
 import Link from "next/link";
+import config from "@/lib/config";
 
 interface NewsArticle {
   id: number;
@@ -106,7 +107,7 @@ export default function AdminNewsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter !== 'all') params.append('status', statusFilter);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/all?${params}`, {
+      const response = await fetch(`${config.API_BASE}/api/news/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -157,7 +158,7 @@ export default function AdminNewsPage() {
         formDataToSend.append('featured_image', formData.featured_image);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/create`, {
+      const response = await fetch(`${config.API_BASE}/api/news/admin/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -225,7 +226,7 @@ export default function AdminNewsPage() {
         formDataToSend.append('featured_image', formData.featured_image);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${editingArticle.id}`, {
+      const response = await fetch(`${config.API_BASE}/api/news/admin/${editingArticle.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -268,7 +269,7 @@ export default function AdminNewsPage() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${id}`, {
+      const response = await fetch(`${config.API_BASE}/api/news/admin/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -294,7 +295,7 @@ export default function AdminNewsPage() {
     
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/admin/${article.id}`, {
+      const response = await fetch(`${config.API_BASE}/api/news/admin/${article.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -339,7 +340,7 @@ export default function AdminNewsPage() {
       // If it's a URL, use it directly; if it's a filename, construct the full URL
       const imageUrl = article.featured_image.startsWith('http') 
         ? article.featured_image 
-        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/uploads/news-images/${article.featured_image}`;
+        : `${config.API_BASE}/uploads/news-images/${article.featured_image}`;
       setImagePreview(imageUrl);
     } else {
       setImagePreview(null);

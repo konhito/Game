@@ -17,9 +17,9 @@ import {
   Copy,
   ExternalLink
 } from 'lucide-react';
-import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import config from '@/lib/config';
 
 interface DuplicateImage {
   hash: string;
@@ -62,8 +62,9 @@ export default function DuplicateImagesPage() {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('/api/admin/duplicate-images', {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const response = await fetch(`${config.API_BASE}/api/admin/duplicate-images`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include'
       });
       

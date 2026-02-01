@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import config from "@/lib/config";
 
 interface Setting {
   id: number;
@@ -73,9 +74,7 @@ export default function AdminSettingsPage() {
     try {
       setLoading(true);
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      
-      const response = await fetch(`${API_BASE}/api/settings/admin`, {
+      const response = await fetch(`${config.API_BASE}/api/settings/admin`, {
         headers: {
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
@@ -91,8 +90,9 @@ export default function AdminSettingsPage() {
       
       // Initialize edited values
       const initial: { [key: string]: any } = {};
-      Object.values(data.data.settings).flat().forEach((setting: Setting) => {
-        initial[setting.setting_key] = setting.parsed_value;
+      Object.values(data.data.settings).flat().forEach((setting: unknown) => {
+        const s = setting as Setting;
+        initial[s.setting_key] = s.parsed_value;
       });
       setEditedValues(initial);
       
@@ -132,8 +132,7 @@ export default function AdminSettingsPage() {
         value
       }));
 
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      const response = await fetch(`${API_BASE}/api/settings/batch`, {
+      const response = await fetch(`${config.API_BASE}/api/settings/batch`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -168,8 +167,7 @@ export default function AdminSettingsPage() {
     try {
       const authToken = localStorage.getItem("auth_token");
       
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      const response = await fetch(`${API_BASE}/api/settings/${key}`, {
+      const response = await fetch(`${config.API_BASE}/api/settings/${key}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -198,8 +196,7 @@ export default function AdminSettingsPage() {
       }
 
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      const response = await fetch(`${API_BASE}/api/settings`, {
+      const response = await fetch(`${config.API_BASE}/api/settings`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -237,8 +234,7 @@ export default function AdminSettingsPage() {
 
     try {
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      const response = await fetch(`${API_BASE}/api/settings/${key}`, {
+      const response = await fetch(`${config.API_BASE}/api/settings/${key}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -262,8 +258,6 @@ export default function AdminSettingsPage() {
     try {
       setSavingRewards(true);
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      
       // Validate rewards
       const rank1 = parseFloat(leaderboardRewards.rank_1_reward);
       const rank2 = parseFloat(leaderboardRewards.rank_2_reward);
@@ -280,7 +274,7 @@ export default function AdminSettingsPage() {
         { key: 'weekly_leaderboard_rank_3_reward', value: rank3.toString() }
       ];
 
-      const response = await fetch(`${API_BASE}/api/settings/batch`, {
+      const response = await fetch(`${config.API_BASE}/api/settings/batch`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
@@ -311,8 +305,6 @@ export default function AdminSettingsPage() {
     try {
       setDistributingRewards(true);
       const authToken = localStorage.getItem("auth_token");
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://pinecrest.konhito.me';
-      
       // Calculate current week dates
       const now = new Date();
       const weekStart = new Date(now);
@@ -323,7 +315,7 @@ export default function AdminSettingsPage() {
       weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
       weekEnd.setHours(23, 59, 59, 999);
 
-      const response = await fetch(`${API_BASE}/api/admin/leaderboard-rewards/distribute`, {
+      const response = await fetch(`${config.API_BASE}/api/admin/leaderboard-rewards/distribute`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${authToken}`,

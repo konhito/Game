@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Settings, 
   Coins, 
@@ -24,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import config from '@/lib/config';
 
 interface PointSystemConfig {
   [key: string]: {
@@ -75,16 +75,13 @@ export default function PointSystemAdmin() {
 
   const fetchData = async () => {
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const [configRes, transactionsRes, usersRes] = await Promise.all([
-        fetch('/api/points/config', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-        }),
-        fetch('/api/points/transactions/all?limit=50', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-        }),
-        fetch('/api/admin/users', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-        })
+        fetch(`${config.API_BASE}/api/points/config`, { headers }),
+        fetch(`${config.API_BASE}/api/points/transactions/all?limit=50`, { headers }),
+        fetch(`${config.API_BASE}/api/admin/users`, { headers })
       ]);
 
       if (configRes.ok) {
@@ -115,11 +112,12 @@ export default function PointSystemAdmin() {
 
   const handleConfigSave = async (configKey: string) => {
     try {
-      const response = await fetch('/api/points/config', {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const response = await fetch(`${config.API_BASE}/api/points/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           configKey,
@@ -148,15 +146,16 @@ export default function PointSystemAdmin() {
     }
 
     try {
-      const response = await fetch('/api/points/award', {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const response = await fetch(`${config.API_BASE}/api/points/award`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           ...awardForm,
-          userId: parseInt(awardForm.userId), // Convert string to number
+          userId: parseInt(awardForm.userId),
           points: awardForm.points ? parseInt(awardForm.points) : 0,
           coins: awardForm.coins ? parseFloat(awardForm.coins) : 0
         })
@@ -197,7 +196,7 @@ export default function PointSystemAdmin() {
         return (
           <Switch
             checked={tempConfig.enabled || false}
-            onCheckedChange={(checked) => setTempConfig(prev => ({ ...prev, enabled: checked }))}
+            onCheckedChange={(checked) => setTempConfig((prev: Record<string, unknown>) => ({ ...prev, enabled: checked }))}
           />
         );
       } else if (typeof value === 'number') {
@@ -208,7 +207,7 @@ export default function PointSystemAdmin() {
             onChange={(e) => {
               const key = configKey.includes('points') ? 'points' : 
                          configKey.includes('coins') ? 'coins' : 'daily_spins';
-              setTempConfig(prev => ({ ...prev, [key]: parseInt(e.target.value) || 0 }));
+              setTempConfig((prev: Record<string, unknown>) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }));
             }}
           />
         );
@@ -383,7 +382,7 @@ export default function PointSystemAdmin() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  ${transactions.reduce((sum, t) => sum + (t.coins_change > 0 ? parseFloat(t.coins_change) : 0), 0).toFixed(2)}
+                  ${transactions.reduce((sum, t) => sum + (t.coins_change > 0 ? Number(t.coins_change) : 0), 0).toFixed(2)}
                 </div>
               </CardContent>
             </Card>
