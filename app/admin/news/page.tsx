@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Search, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Search,
   Filter,
   Calendar,
   User,
@@ -41,6 +41,7 @@ interface NewsArticle {
   views: number;
   featured: boolean;
   tags: string[];
+  category?: string;
   meta_title?: string | null;
   meta_description?: string | null;
   created_at: string;
@@ -66,6 +67,7 @@ export default function AdminNewsPage() {
     status: "draft" as "draft" | "published",
     featured: false,
     tags: [] as string[],
+    category: "general",
     meta_title: "",
     meta_description: ""
   });
@@ -178,6 +180,7 @@ export default function AdminNewsPage() {
           status: "draft",
           featured: false,
           tags: [],
+          category: "general",
           meta_title: "",
           meta_description: ""
         });
@@ -246,6 +249,7 @@ export default function AdminNewsPage() {
           status: "draft",
           featured: false,
           tags: [],
+          category: "general",
           meta_title: "",
           meta_description: ""
         });
@@ -290,9 +294,9 @@ export default function AdminNewsPage() {
   const handleTogglePublish = async (article: NewsArticle) => {
     const newStatus = article.status === 'published' ? 'draft' : 'published';
     const action = newStatus === 'published' ? 'publish' : 'unpublish';
-    
+
     if (!confirm(`Are you sure you want to ${action} this article?`)) return;
-    
+
     try {
       const token = localStorage.getItem('auth_token');
       const response = await fetch(`${config.API_BASE}/api/news/admin/${article.id}`, {
@@ -331,6 +335,7 @@ export default function AdminNewsPage() {
       status: article.status,
       featured: article.featured,
       tags: article.tags || [],
+      category: article.category || "general",
       meta_title: article.meta_title ?? "",
       meta_description: article.meta_description ?? ""
     });
@@ -338,8 +343,8 @@ export default function AdminNewsPage() {
     // Set image preview if there's an existing featured image
     if (article.featured_image) {
       // If it's a URL, use it directly; if it's a filename, construct the full URL
-      const imageUrl = article.featured_image.startsWith('http') 
-        ? article.featured_image 
+      const imageUrl = article.featured_image.startsWith('http')
+        ? article.featured_image
         : `${config.API_BASE}/uploads/news-images/${article.featured_image}`;
       setImagePreview(imageUrl);
     } else {
@@ -493,8 +498,8 @@ export default function AdminNewsPage() {
                         variant={article.status === 'published' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => handleTogglePublish(article)}
-                        className={article.status === 'published' 
-                          ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        className={article.status === 'published'
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
                           : 'text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300'
                         }
                       >
@@ -619,7 +624,7 @@ export default function AdminNewsPage() {
                           </p>
                         </label>
                       </div>
-                      
+
                       {/* Image Preview */}
                       {imagePreview && (
                         <div className="relative">
@@ -637,7 +642,7 @@ export default function AdminNewsPage() {
                           </button>
                         </div>
                       )}
-                      
+
                       {/* Or URL Input */}
                       <div className="text-center text-sm text-gray-500">OR</div>
                       <Input
@@ -675,6 +680,25 @@ export default function AdminNewsPage() {
                     />
                     <span className="text-sm text-slate-700">Featured Article</span>
                   </label>
+                </div>
+
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="crypto">Crypto</SelectItem>
+                      <SelectItem value="rewards">Rewards</SelectItem>
+                      <SelectItem value="updates">Updates</SelectItem>
+                      <SelectItem value="announcements">Announcements</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -765,6 +789,7 @@ export default function AdminNewsPage() {
                         status: "draft",
                         featured: false,
                         tags: [],
+                        category: "general",
                         meta_title: "",
                         meta_description: ""
                       });

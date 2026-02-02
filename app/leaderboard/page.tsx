@@ -22,6 +22,9 @@ interface WeeklyPool {
   pinecoins: number;
   naira: number;
   exchange_rate: number;
+  buy_rate?: number;
+  sell_rate?: number;
+  last_updated?: string;
 }
 
 export default function LeaderboardPage() {
@@ -64,6 +67,14 @@ export default function LeaderboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const poolDisplay = weeklyPool || {
+    pinecoins: 0,
+    naira: 0,
+    exchange_rate: 0,
+    buy_rate: 0,
+    sell_rate: 0
   };
 
   // Calculate weekly rewards based on actual pool price
@@ -150,37 +161,38 @@ export default function LeaderboardPage() {
             <p className="text-slate-600 text-lg">Compete for weekly rewards and climb to the top! 🚀</p>
             
             {/* Weekly Pool Display */}
-            {weeklyPool && (
-              <div className="mt-6 mb-4 p-6 bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 rounded-2xl border-2 border-yellow-300 shadow-lg">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Crown className="w-6 h-6 text-yellow-600" />
-                    <span className="text-sm font-semibold text-slate-700">Weekly Prize Pool</span>
+            <div className="mt-6 mb-4 p-6 bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 rounded-2xl border-2 border-yellow-300 shadow-lg">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown className="w-6 h-6 text-yellow-600" />
+                  <span className="text-sm font-semibold text-slate-700">Available Reward for the Week</span>
+                </div>
+                <div className="flex items-center justify-center gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-slate-800">₽{poolDisplay.pinecoins.toLocaleString()}</div>
+                    <div className="text-sm text-slate-600 mt-1">PineCoins</div>
                   </div>
-                  <div className="flex items-center justify-center gap-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-slate-800">₽{weeklyPool.pinecoins.toLocaleString()}</div>
-                      <div className="text-sm text-slate-600 mt-1">PineCoins</div>
-                    </div>
-                    <div className="w-px h-12 bg-slate-400"></div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-emerald-700">₦{weeklyPool.naira.toLocaleString()}</div>
-                      <div className="text-sm text-slate-600 mt-1">Naira</div>
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-1">
-                    <div className="text-xs text-slate-500">
-                      Exchange Rate: 1 PineCoin = 1 USDT = ₦{weeklyPool.exchange_rate.toLocaleString()}
-                    </div>
-                    {weeklyPool.last_updated && (
-                      <div className="text-xs text-slate-400 italic">
-                        Rate updated: {new Date(weeklyPool.last_updated).toLocaleTimeString()}
-                      </div>
-                    )}
+                  <div className="w-px h-12 bg-slate-400"></div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-emerald-700">₦{poolDisplay.naira.toLocaleString()}</div>
+                    <div className="text-sm text-slate-600 mt-1">Naira</div>
                   </div>
                 </div>
+                <div className="mt-3 space-y-1">
+                  <div className="text-xs text-slate-500">
+                    Payout (buy) rate: 1 PineCoin = ₦{(poolDisplay.buy_rate || poolDisplay.exchange_rate).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Market rate: ₦{poolDisplay.exchange_rate.toLocaleString()} · Sell rate: ₦{(poolDisplay.sell_rate || poolDisplay.exchange_rate).toLocaleString()}
+                  </div>
+                  {poolDisplay.last_updated && (
+                    <div className="text-xs text-slate-400 italic">
+                      Rate updated: {new Date(poolDisplay.last_updated).toLocaleTimeString()}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
             
             <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
               <div className="flex items-center gap-2">
@@ -345,21 +357,37 @@ export default function LeaderboardPage() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-2xl">🎯</span>
-                    <span className="font-medium text-slate-700">Daily Login: <span className="text-green-600 font-bold">+5 points</span></span>
-                  </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <span className="text-2xl">🎮</span>
-                    <span className="font-medium text-slate-700">Spin Wheel: <span className="text-blue-600 font-bold">10-500 pts</span></span>
+                    <span className="text-2xl">🆕</span>
+                    <span className="font-medium text-slate-700">Sign up: <span className="text-blue-600 font-bold">+50 points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
-                    <span className="text-2xl">✅</span>
-                    <span className="font-medium text-slate-700">Complete Tasks: <span className="text-purple-600 font-bold">+50 pts</span></span>
+                    <span className="text-2xl">🤝</span>
+                    <span className="font-medium text-slate-700">Referral: <span className="text-purple-600 font-bold">+30 points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
-                    <span className="text-2xl">📱</span>
-                    <span className="font-medium text-slate-700">Share Posts: <span className="text-orange-600 font-bold">+20 pts</span></span>
+                    <span className="text-2xl">📣</span>
+                    <span className="font-medium text-slate-700">Share our social post: <span className="text-orange-600 font-bold">+20 points</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-sky-50 border border-sky-200">
+                    <span className="text-2xl">📰</span>
+                    <span className="font-medium text-slate-700">Share a news post: <span className="text-sky-600 font-bold">+10 points</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <span className="text-2xl">💬</span>
+                    <span className="font-medium text-slate-700">Comment on a social post: <span className="text-green-600 font-bold">+5 points</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <span className="text-2xl">👍</span>
+                    <span className="font-medium text-slate-700">Like a social post: <span className="text-amber-600 font-bold">+5 points</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <span className="text-2xl">📅</span>
+                    <span className="font-medium text-slate-700">Daily login: <span className="text-emerald-600 font-bold">+5 points</span></span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
+                    <span className="text-2xl">🔥</span>
+                    <span className="font-medium text-slate-700">3-day login streak: <span className="text-rose-600 font-bold">+2 extra spins</span></span>
                   </div>
                 </div>
               </CardContent>
@@ -390,12 +418,12 @@ export default function LeaderboardPage() {
                     <span>1 random player gets 5% bonus</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-green-500">💰</span>
-                    <span>Rewards paid in PineCoins</span>
+                    <span className="text-green-500">📊</span>
+                    <span>Points rank you up; PineCoins are paid weekly</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-emerald-500">📊</span>
-                    <span>Weekly points reset, total preserved</span>
+                    <span className="text-emerald-500">🏦</span>
+                    <span>PineCoins can be converted and paid to your bank</span>
                   </div>
                 </div>
               </CardContent>

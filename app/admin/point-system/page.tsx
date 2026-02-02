@@ -9,18 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Settings, 
-  Coins, 
-  Target, 
-  Gift, 
-  Users, 
-  TrendingUp, 
+import {
+  Settings,
+  Coins,
+  Target,
+  Gift,
+  Users,
+  TrendingUp,
   Award,
   Plus,
   Edit,
   Save,
-  X
+  X,
+  Minus,
+  RotateCcw
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import config from '@/lib/config';
@@ -68,6 +70,21 @@ export default function PointSystemAdmin() {
     transactionType: 'bonus'
   });
   const [showAwardForm, setShowAwardForm] = useState(false);
+  const [showDeductForm, setShowDeductForm] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [deductForm, setDeductForm] = useState({
+    userId: '',
+    points: '',
+    coins: '',
+    description: ''
+  });
+  const [resetForm, setResetForm] = useState({
+    userId: '',
+    resetPoints: false,
+    resetCoins: false,
+    resetWeeklyPoints: false,
+    description: ''
+  });
 
   useEffect(() => {
     fetchData();
@@ -176,6 +193,95 @@ export default function PointSystemAdmin() {
     }
   };
 
+  const handleDeductPoints = async () => {
+    if (!deductForm.userId) {
+      alert('Please select a user');
+      return;
+    }
+
+    if (!deductForm.points && !deductForm.coins) {
+      alert('Please enter points or coins to deduct');
+      return;
+    }
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const response = await fetch(`${config.API_BASE}/api/point-system/deduct`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          userId: parseInt(deductForm.userId),
+          points: deductForm.points ? parseInt(deductForm.points) : 0,
+          coins: deductForm.coins ? parseFloat(deductForm.coins) : 0,
+          description: deductForm.description || 'Admin penalty deduction'
+        })
+      });
+
+      if (response.ok) {
+        setDeductForm({ userId: '', points: '', coins: '', description: '' });
+        setShowDeductForm(false);
+        fetchData();
+        alert('Points/coins deducted successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to deduct points');
+      }
+    } catch (error) {
+      console.error('Error deducting points:', error);
+      alert('An error occurred while deducting points');
+    }
+  };
+
+  const handleResetPoints = async () => {
+    if (!resetForm.userId) {
+      alert('Please select a user');
+      return;
+    }
+
+    if (!resetForm.resetPoints && !resetForm.resetCoins && !resetForm.resetWeeklyPoints) {
+      alert('Please select at least one option to reset');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reset this user\'s stats? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const response = await fetch(`${config.API_BASE}/api/point-system/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          userId: parseInt(resetForm.userId),
+          resetPoints: resetForm.resetPoints,
+          resetCoins: resetForm.resetCoins,
+          resetWeeklyPoints: resetForm.resetWeeklyPoints,
+          description: resetForm.description || 'Admin reset penalty'
+        })
+      });
+
+      if (response.ok) {
+        setResetForm({ userId: '', resetPoints: false, resetCoins: false, resetWeeklyPoints: false, description: '' });
+        setShowResetForm(false);
+        fetchData();
+        alert('User stats reset successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to reset user stats');
+      }
+    } catch (error) {
+      console.error('Error resetting user stats:', error);
+      alert('An error occurred while resetting user stats');
+    }
+  };
+
   const renderConfigValue = (configKey: string, value: any) => {
     if (editingConfig === configKey) {
       if (configKey.includes('rewards') || configKey.includes('levels')) {
@@ -205,8 +311,8 @@ export default function PointSystemAdmin() {
             type="number"
             value={tempConfig.points || tempConfig.coins || tempConfig.daily_spins || 0}
             onChange={(e) => {
-              const key = configKey.includes('points') ? 'points' : 
-                         configKey.includes('coins') ? 'coins' : 'daily_spins';
+              const key = configKey.includes('points') ? 'points' :
+                configKey.includes('coins') ? 'coins' : 'daily_spins';
               setTempConfig((prev: Record<string, unknown>) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }));
             }}
           />
@@ -241,10 +347,20 @@ export default function PointSystemAdmin() {
           <h1 className="text-3xl font-bold">Point System Management</h1>
           <p className="text-gray-600">Configure rewards, bonuses, and user progression</p>
         </div>
-        <Button onClick={() => setShowAwardForm(true)} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Award Points
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowAwardForm(true)} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Award Points
+          </Button>
+          <Button onClick={() => setShowDeductForm(true)} variant="destructive" className="flex items-center gap-2">
+            <Minus className="w-4 h-4" />
+            Deduct Points
+          </Button>
+          <Button onClick={() => setShowResetForm(true)} variant="outline" className="flex items-center gap-2">
+            <RotateCcw className="w-4 h-4" />
+            Reset Stats
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="config" className="space-y-6">
@@ -327,8 +443,8 @@ export default function PointSystemAdmin() {
                       <div className="flex items-center gap-2">
                         <Badge variant={
                           transaction.transaction_type === 'earned' ? 'default' :
-                          transaction.transaction_type === 'spent' ? 'destructive' :
-                          transaction.transaction_type === 'bonus' ? 'secondary' : 'outline'
+                            transaction.transaction_type === 'spent' ? 'destructive' :
+                              transaction.transaction_type === 'bonus' ? 'secondary' : 'outline'
                         }>
                           {transaction.transaction_type}
                         </Badge>
@@ -472,6 +588,165 @@ export default function PointSystemAdmin() {
                   Award Points
                 </Button>
                 <Button variant="outline" onClick={() => setShowAwardForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Deduct Points Modal */}
+      {showDeductForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Deduct Points & Coins (Penalty)</CardTitle>
+              <CardDescription>Remove points/coins from a user as penalty</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="deductUserId">Select User</Label>
+                <Select
+                  value={deductForm.userId}
+                  onValueChange={(value) => setDeductForm(prev => ({ ...prev, userId: value }))}
+                >
+                  <SelectTrigger id="deductUserId">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id.toString()}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="deductPoints">Points to Deduct</Label>
+                <Input
+                  id="deductPoints"
+                  type="number"
+                  value={deductForm.points}
+                  onChange={(e) => setDeductForm(prev => ({ ...prev, points: e.target.value }))}
+                  placeholder="Enter points to deduct"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="deductCoins">Coins to Deduct</Label>
+                <Input
+                  id="deductCoins"
+                  type="number"
+                  step="0.01"
+                  value={deductForm.coins}
+                  onChange={(e) => setDeductForm(prev => ({ ...prev, coins: e.target.value }))}
+                  placeholder="Enter coins to deduct"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="deductDescription">Reason</Label>
+                <Textarea
+                  id="deductDescription"
+                  value={deductForm.description}
+                  onChange={(e) => setDeductForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Reason for penalty"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleDeductPoints} variant="destructive" className="flex-1">
+                  Deduct
+                </Button>
+                <Button variant="outline" onClick={() => setShowDeductForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Reset Stats Modal */}
+      {showResetForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Reset User Stats</CardTitle>
+              <CardDescription>Completely reset user points/coins (irreversible)</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="resetUserId">Select User</Label>
+                <Select
+                  value={resetForm.userId}
+                  onValueChange={(value) => setResetForm(prev => ({ ...prev, userId: value }))}
+                >
+                  <SelectTrigger id="resetUserId">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id.toString()}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>What to Reset:</Label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="resetPoints"
+                    checked={resetForm.resetPoints}
+                    onChange={(e) => setResetForm(prev => ({ ...prev, resetPoints: e.target.checked }))}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="resetPoints">Total Points</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="resetCoins"
+                    checked={resetForm.resetCoins}
+                    onChange={(e) => setResetForm(prev => ({ ...prev, resetCoins: e.target.checked }))}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="resetCoins">Total Coins</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="resetWeeklyPoints"
+                    checked={resetForm.resetWeeklyPoints}
+                    onChange={(e) => setResetForm(prev => ({ ...prev, resetWeeklyPoints: e.target.checked }))}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="resetWeeklyPoints">Weekly Points</Label>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="resetDescription">Reason</Label>
+                <Textarea
+                  id="resetDescription"
+                  value={resetForm.description}
+                  onChange={(e) => setResetForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Reason for reset"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleResetPoints} variant="destructive" className="flex-1">
+                  Reset Stats
+                </Button>
+                <Button variant="outline" onClick={() => setShowResetForm(false)}>
                   Cancel
                 </Button>
               </div>

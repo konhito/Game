@@ -51,6 +51,15 @@ export interface LeaderboardEntry {
   rank?: number;
 }
 
+export interface WeeklyPool {
+  pinecoins: number;
+  naira: number;
+  exchange_rate: number;
+  buy_rate?: number;
+  sell_rate?: number;
+  last_updated?: string;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -346,7 +355,7 @@ class DashboardService {
   }
 
   // Get leaderboard
-  async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[] }>> {
+  async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[]; weekly_pool?: WeeklyPool }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/leaderboard?limit=${limit}`, {
         headers: this.getAuthHeaders(),
@@ -369,7 +378,7 @@ class DashboardService {
       if (result.success && result.data && result.data.users) {
         return {
           success: true,
-          data: { users: result.data.users }
+          data: { users: result.data.users, weekly_pool: result.data.weekly_pool }
         };
       } else {
         throw new Error('Invalid response format from backend');

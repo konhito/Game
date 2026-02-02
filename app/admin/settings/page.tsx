@@ -57,6 +57,15 @@ export default function AdminSettingsPage() {
     is_editable: true
   });
   
+  // Weekly Pool Price
+  const [weeklyPoolPrice, setWeeklyPoolPrice] = useState({
+    pinecoins: '5000.00',
+    naira: '0.00',
+    exchange_rate: 0
+  });
+  const [savingPoolPrice, setSavingPoolPrice] = useState(false);
+  const [loadingPoolPrice, setLoadingPoolPrice] = useState(false);
+
   // Weekly Leaderboard Rewards
   const [leaderboardRewards, setLeaderboardRewards] = useState({
     rank_1_reward: '100.00',
@@ -68,6 +77,7 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetchSettings();
+    fetchWeeklyPoolPrice();
   }, []);
 
   const fetchSettings = async () => {
@@ -111,6 +121,79 @@ export default function AdminSettingsPage() {
       toast.error("Failed to load settings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWeeklyPoolPrice = async () => {
+    try {
+      setLoadingPoolPrice(true);
+      const response = await fetch(`${config.API_BASE}/api/settings/weekly-pool-price`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch weekly pool price");
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        const pinecoins = data.data.pinecoins?.toString() || weeklyPoolPrice.pinecoins || '5000.00';
+        const exchangeRate = data.data.exchange_rate || 0;
+        const naira = exchangeRate > 0 
+          ? (parseFloat(pinecoins) * exchangeRate).toFixed(2)
+          : data.data.naira?.toFixed(2) || '0.00';
+        
+        setWeeklyPoolPrice({
+          pinecoins,
+          naira,
+          exchange_rate: exchangeRate
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching weekly pool price:", error);
+      // Don't show error toast, just use default value
+    } finally {
+      setLoadingPoolPrice(false);
+    }
+  };
+
+  const handleSaveWeeklyPoolPrice = async () => {
+    try {
+      setSavingPoolPrice(true);
+      const authToken = localStorage.getItem("auth_token");
+      const pinecoins = parseFloat(weeklyPoolPrice.pinecoins);
+      
+      if (isNaN(pinecoins) || pinecoins <= 0) {
+        toast.error("Please enter a valid PineCoin amount (must be greater than 0)");
+        return;
+      }
+
+      const response = await fetch(`${config.API_BASE}/api/settings/weekly-pool-price`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pinecoins }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save weekly pool price");
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        setWeeklyPoolPrice({
+          pinecoins: data.data.pinecoins?.toString() || weeklyPoolPrice.pinecoins,
+          naira: data.data.naira?.toFixed(2) || '0.00',
+          exchange_rate: data.data.exchange_rate || 0
+        });
+        toast.success(`Weekly pool price updated successfully! ₽${data.data.pinecoins} (₦${data.data.naira?.toFixed(2)})`);
+      }
+    } catch (error: any) {
+      console.error("Error saving weekly pool price:", error);
+      toast.error(error.message || "Failed to save weekly pool price");
+    } finally {
+      setSavingPoolPrice(false);
     }
   };
 
@@ -572,6 +655,112 @@ export default function AdminSettingsPage() {
           />
         </div>
       </div>
+
+      {/* Weekly Pool Price Section */}
+      <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-6 w-6" />
+            Weekly Pool Price
+          </CardTitle>
+          <CardDescription className="text-blue-100">
+            Set the total weekly prize pool amount in PineCoins. This is the total amount available for distribution to top performers on the leaderboard. The Naira equivalent is calculated automatically based on current exchange rates.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="weekly_pool_pinecoins" className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-2xl">₽</span>
+                Weekly Pool (PineCoins)
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-bold">₽</span>
+                <Input
+                  id="weekly_pool_pinecoins"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={weeklyPoolPrice.pinecoins}
+                  onChange={(e) => {
+                    const pinecoins = e.target.value;
+                    setWeeklyPoolPrice({
+                      ...weeklyPoolPrice,
+                      pinecoins,
+                      naira: weeklyPoolPrice.exchange_rate > 0 
+                        ? (parseFloat(pinecoins) * weeklyPoolPrice.exchange_rate).toFixed(2)
+                        : '0.00'
+                    });
+                  }}
+                  className="pl-8 border-slate-300 focus:border-blue-600"
+                  placeholder="5000.00"
+                  disabled={loadingPoolPrice}
+                />
+              </div>
+              <p className="text-xs text-slate-500">Total prize pool in PineCoins</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weekly_pool_naira" className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-2xl">₦</span>
+                Weekly Pool (Naira) - Auto Calculated
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-bold">₦</span>
+                <Input
+                  id="weekly_pool_naira"
+                  type="text"
+                  value={weeklyPoolPrice.naira}
+                  className="pl-8 border-slate-300 bg-slate-100"
+                  readOnly
+                  disabled
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                {weeklyPoolPrice.exchange_rate > 0 
+                  ? `Exchange Rate: 1 PineCoin = 1 USDT = ₦${weeklyPoolPrice.exchange_rate.toLocaleString()}`
+                  : 'Exchange rate will be calculated when saved'}
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              onClick={fetchWeeklyPoolPrice}
+              disabled={loadingPoolPrice}
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+            >
+              {loadingPoolPrice ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh Exchange Rate
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleSaveWeeklyPoolPrice}
+              disabled={savingPoolPrice || loadingPoolPrice}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              {savingPoolPrice ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Weekly Pool Price
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Weekly Leaderboard Rewards Section */}
       <Card className="mb-8 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50">
