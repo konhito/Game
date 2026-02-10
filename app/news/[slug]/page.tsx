@@ -72,10 +72,15 @@ export default function ArticlePage() {
 
   const fetchRelatedArticles = async (tags: string[]) => {
     try {
-      if (tags.length === 0) return;
+      // Validate tags is an array and has elements
+      if (!tags || !Array.isArray(tags) || tags.length === 0) return;
 
       const tagParam = tags[0]; // Use first tag for related articles
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?tag=${tagParam}&limit=3`);
+
+      // Ensure tagParam is a valid string
+      if (!tagParam || typeof tagParam !== 'string') return;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?tag=${encodeURIComponent(tagParam)}&limit=3`);
 
       if (response.ok) {
         const result = await response.json();
@@ -85,6 +90,7 @@ export default function ArticlePage() {
       }
     } catch (error) {
       console.error('Error fetching related articles:', error);
+      // Silently fail - related articles are optional
     }
   };
 
@@ -100,7 +106,7 @@ export default function ArticlePage() {
 
   // Convert URLs in text to clickable links
   const convertUrlsToLinks = (text: string): string => {
-    if (!text) return '';
+    if (!text || typeof text !== 'string') return '';
 
     // Check if text already contains anchor tags to avoid double-processing
     if (/<a\s+[^>]*href/i.test(text)) {
@@ -109,36 +115,27 @@ export default function ArticlePage() {
     }
 
     // URL regex pattern - matches http, https, www, and email addresses
-    // This pattern avoids matching URLs that are already inside HTML tags
     const urlPattern = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
 
     // Replace URLs with anchor tags
-    return text.replace(urlPattern, (url, offset, string) => {
-      // Check if this URL is inside an HTML tag (between < and >)
-      const beforeMatch = string.substring(0, offset);
-      const afterMatch = string.substring(offset + url.length);
-      const lastOpenTag = beforeMatch.lastIndexOf('<');
-      const nextCloseTag = afterMatch.indexOf('>');
+    return text.replace(urlPattern, (match) => {
+      // Ensure match is a string
+      if (typeof match !== 'string') return match;
 
-      // If we're inside an HTML tag, don't convert
-      if (lastOpenTag !== -1 && (nextCloseTag === -1 || beforeMatch.substring(lastOpenTag).indexOf('>') === -1)) {
-        return url;
-      }
-
-      let href = url;
+      let href = match;
 
       // Add protocol if missing
-      if (url.startsWith('www.')) {
-        href = 'https://' + url;
-      } else if (!url.startsWith('http://') && !url.startsWith('https://') && url.includes('@')) {
+      if (match.startsWith('www.')) {
+        href = 'https://' + match;
+      } else if (!match.startsWith('http://') && !match.startsWith('https://') && match.includes('@')) {
         // Email address
-        href = 'mailto:' + url;
-      } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        href = 'https://' + url;
+        href = 'mailto:' + match;
+      } else if (!match.startsWith('http://') && !match.startsWith('https://')) {
+        href = 'https://' + match;
       }
 
       // Escape HTML in URL to prevent XSS
-      const escapedUrl = url.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const escapedUrl = match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const escapedHref = href.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
       return `<a href="${escapedHref}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedUrl}</a>`;
