@@ -142,13 +142,51 @@ export default function ArticlePage() {
     });
   };
 
-  // Process content: convert URLs to links and newlines to breaks
+  // Process content: convert markdown to HTML
   const processContent = (content: string): string => {
-    if (!content) return '';
-    // First convert URLs to links
-    let processed = convertUrlsToLinks(content);
-    // Then convert newlines to breaks
+    if (!content || typeof content !== 'string') return '';
+
+    let processed = content;
+
+    // Convert markdown links [text](url) to HTML links
+    processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+      const escapedUrl = url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const escapedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedText}</a>`;
+    });
+
+    // Convert **bold** to <strong>
+    processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-slate-800">$1</strong>');
+
+    // Convert *italic* to <em>
+    processed = processed.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+
+    // Convert lists (- item or * item) to HTML lists
+    // First, find all list blocks
+    processed = processed.replace(/((?:^|\n)(?:[-*]\s+.+(?:\n|$))+)/gm, (listBlock) => {
+      // Convert each list item
+      const items = listBlock
+        .trim()
+        .split('\n')
+        .map(line => {
+          const match = line.match(/^[-*]\s+(.+)$/);
+          if (match) {
+            return `<li class="ml-6 mb-2">${match[1]}</li>`;
+          }
+          return '';
+        })
+        .filter(item => item)
+        .join('\n');
+
+      return `<ul class="list-disc my-4 space-y-2">\n${items}\n</ul>`;
+    });
+
+    // Convert remaining plain URLs to links (that aren't already in markdown or HTML)
+    processed = convertUrlsToLinks(processed);
+
+    // Convert newlines to breaks (but not inside HTML tags we just created)
     processed = processed.replace(/\n/g, '<br />');
+
     return processed;
   };
 
