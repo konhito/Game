@@ -46,12 +46,12 @@ export default function ArticlePage() {
       setError(null);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/${slug}`);
-      
+
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data.article) {
           setArticle(result.data.article);
-          
+
           // Fetch related articles
           await fetchRelatedArticles(result.data.article.tags);
         } else {
@@ -73,10 +73,10 @@ export default function ArticlePage() {
   const fetchRelatedArticles = async (tags: string[]) => {
     try {
       if (tags.length === 0) return;
-      
+
       const tagParam = tags[0]; // Use first tag for related articles
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?tag=${tagParam}&limit=3`);
-      
+
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data.articles) {
@@ -101,17 +101,17 @@ export default function ArticlePage() {
   // Convert URLs in text to clickable links
   const convertUrlsToLinks = (text: string): string => {
     if (!text) return '';
-    
+
     // Check if text already contains anchor tags to avoid double-processing
     if (/<a\s+[^>]*href/i.test(text)) {
       // Already has links, return as is
       return text;
     }
-    
+
     // URL regex pattern - matches http, https, www, and email addresses
     // This pattern avoids matching URLs that are already inside HTML tags
     const urlPattern = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
-    
+
     // Replace URLs with anchor tags
     return text.replace(urlPattern, (url, offset, string) => {
       // Check if this URL is inside an HTML tag (between < and >)
@@ -119,14 +119,14 @@ export default function ArticlePage() {
       const afterMatch = string.substring(offset + url.length);
       const lastOpenTag = beforeMatch.lastIndexOf('<');
       const nextCloseTag = afterMatch.indexOf('>');
-      
+
       // If we're inside an HTML tag, don't convert
       if (lastOpenTag !== -1 && (nextCloseTag === -1 || beforeMatch.substring(lastOpenTag).indexOf('>') === -1)) {
         return url;
       }
-      
+
       let href = url;
-      
+
       // Add protocol if missing
       if (url.startsWith('www.')) {
         href = 'https://' + url;
@@ -136,11 +136,11 @@ export default function ArticlePage() {
       } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
         href = 'https://' + url;
       }
-      
+
       // Escape HTML in URL to prevent XSS
       const escapedUrl = url.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const escapedHref = href.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      
+
       return `<a href="${escapedHref}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedUrl}</a>`;
     });
   };
@@ -213,14 +213,14 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => router.push('/news')}
             className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all duration-200"
           >
@@ -234,7 +234,7 @@ export default function ArticlePage() {
           <div className="lg:col-span-3">
 
             {/* Article Header */}
-            <motion.div 
+            <motion.div
               className="mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -245,8 +245,8 @@ export default function ArticlePage() {
                 {article.featured_image && (
                   <div className="relative h-[400px] md:h-[500px] w-full">
                     <img
-                      src={article.featured_image.startsWith('http') 
-                        ? article.featured_image 
+                      src={article.featured_image.startsWith('http')
+                        ? article.featured_image
                         : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${article.featured_image.includes('/') ? article.featured_image.split('/').pop() : article.featured_image}`
                       }
                       alt={article.title}
@@ -276,7 +276,7 @@ export default function ArticlePage() {
                     </div>
                   </div>
                 )}
-                
+
                 <CardHeader className="p-8">
                   {/* Category and Date */}
                   <div className="flex items-center justify-between mb-6">
@@ -336,7 +336,7 @@ export default function ArticlePage() {
             </motion.div>
 
             {/* Article Content */}
-            <motion.div 
+            <motion.div
               className="mb-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -345,13 +345,13 @@ export default function ArticlePage() {
               <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl">
                 <CardContent className="p-8 md:p-12">
                   <div className="prose prose-lg prose-slate max-w-none">
-                    <div 
+                    <div
                       className="text-slate-700 leading-relaxed text-lg"
                       style={{
                         fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
                         lineHeight: '1.8'
                       }}
-                      dangerouslySetInnerHTML={{ 
+                      dangerouslySetInnerHTML={{
                         __html: processContent(article.content)
                       }}
                     />
@@ -362,7 +362,7 @@ export default function ArticlePage() {
 
             {/* Tags */}
             {article.tags && article.tags.length > 0 && (
-              <motion.div 
+              <motion.div
                 className="mb-12"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -378,9 +378,9 @@ export default function ArticlePage() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                       {article.tags.map((tag, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="secondary" 
+                        <Badge
+                          key={index}
+                          variant="secondary"
                           className="text-sm px-4 py-2 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer transition-all duration-200 hover:scale-105 bg-slate-100 text-slate-700"
                         >
                           #{tag}
@@ -474,7 +474,7 @@ export default function ArticlePage() {
 
         {/* Related Articles */}
         {relatedArticles.length > 0 && (
-          <motion.div 
+          <motion.div
             className="mt-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -494,7 +494,7 @@ export default function ArticlePage() {
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Card 
+                  <Card
                     className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden group"
                     onClick={() => router.push(`/news/${relatedArticle.slug}`)}
                   >
@@ -502,8 +502,8 @@ export default function ArticlePage() {
                     {relatedArticle.featured_image && (
                       <div className="relative h-48 w-full overflow-hidden">
                         <img
-                          src={relatedArticle.featured_image.startsWith('http') 
-                            ? relatedArticle.featured_image 
+                          src={relatedArticle.featured_image.startsWith('http')
+                            ? relatedArticle.featured_image
                             : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${relatedArticle.featured_image.includes('/') ? relatedArticle.featured_image.split('/').pop() : relatedArticle.featured_image}`
                           }
                           alt={relatedArticle.title}
@@ -522,7 +522,7 @@ export default function ArticlePage() {
                         </div>
                       </div>
                     )}
-                    
+
                     <CardHeader className="p-6">
                       {!relatedArticle.featured_image && relatedArticle.tags && relatedArticle.tags.length > 0 && (
                         <Badge className={`bg-gradient-to-r ${getCategoryColor(relatedArticle.tags[0])} text-white w-fit mb-3`}>
@@ -562,7 +562,7 @@ export default function ArticlePage() {
         )}
 
         {/* Back to News CTA */}
-        <motion.div 
+        <motion.div
           className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -577,17 +577,17 @@ export default function ArticlePage() {
                   Discover more exciting news, updates, and insights from the PineCoin community!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button 
+                  <Button
                     onClick={() => router.push('/news')}
                     className="bg-white text-emerald-600 hover:bg-emerald-50 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <BookOpen className="w-5 h-5 mr-2" />
                     Read More Articles
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => router.push('/')}
                     variant="outline"
-                    className="border-white/30 text-black hover:bg-white/10 px-8 py-4 text-lg font-semibold"
+                    className="border-2 border-white text-white hover:bg-white hover:text-emerald-600 px-8 py-4 text-lg font-semibold transition-all"
                   >
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Back to Home

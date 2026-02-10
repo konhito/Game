@@ -48,7 +48,7 @@ export default function NewsPage() {
       if (selectedCategory !== 'All') params.append('tag', selectedCategory);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`);
-      
+
       if (response.ok) {
         const result = await response.json();
         const articles = result?.data?.articles;
@@ -102,12 +102,12 @@ export default function NewsPage() {
   // Use dynamic data or fallback (only if not loading and API failed)
   // Don't show fallback while loading - show skeleton instead
   const displayNews = loading ? [] : (newsItems.length > 0 ? newsItems : (error ? fallbackNewsItems : []));
-  
+
   // Filter news based on search and category
   const filteredNews = displayNews.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+      item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesCategory = selectedCategory === "All" || (item.tags && item.tags.includes(selectedCategory));
     return matchesSearch && matchesCategory;
   });
@@ -134,14 +134,14 @@ export default function NewsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="flex items-center justify-center mb-4">
-            <Link href="/" className="text-emerald-600 hover:text-emerald-700 mr-4">
+            <Link href="/" className="inline-flex items-center text-emerald-600 hover:text-emerald-700 transition-colors mr-4">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold text-slate-800">
@@ -154,7 +154,7 @@ export default function NewsPage() {
         </motion.div>
 
         {/* Search and Filter Section */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -180,11 +180,10 @@ export default function NewsPage() {
                   <Button
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
-                    className={`${
-                      selectedCategory === category 
-                        ? "bg-emerald-500 hover:bg-emerald-600 text-white" 
+                    className={`${selectedCategory === category
+                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                         : "border-slate-200 text-slate-600 hover:border-emerald-500 hover:text-emerald-600"
-                    }`}
+                      }`}
                     onClick={() => setSelectedCategory(category)}
                   >
                     {category}
@@ -197,7 +196,7 @@ export default function NewsPage() {
 
         {/* Featured News */}
         {!loading && filteredNews.filter(item => item.featured).length > 0 && (
-          <motion.div 
+          <motion.div
             className="mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,8 +213,8 @@ export default function NewsPage() {
                   {news.featured_image && (
                     <div className="relative h-64 w-full">
                       <img
-                        src={news.featured_image.startsWith('http') 
-                          ? news.featured_image 
+                        src={news.featured_image.startsWith('http')
+                          ? news.featured_image
                           : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
                         }
                         alt={news.title}
@@ -231,7 +230,7 @@ export default function NewsPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
                       {!news.featured_image && (
@@ -268,7 +267,7 @@ export default function NewsPage() {
                       ))}
                     </div>
                     <Link href={`/news/${news.slug || news.id}`}>
-                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700">
+                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-md hover:shadow-lg transition-all">
                         Read Full Article
                       </Button>
                     </Link>
@@ -280,7 +279,7 @@ export default function NewsPage() {
         )}
 
         {/* All News Grid */}
-        <motion.div 
+        <motion.div
           className="mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -290,7 +289,7 @@ export default function NewsPage() {
             <TrendingUp className="w-6 h-6 text-emerald-500 mr-2" />
             Latest News
           </h2>
-          
+
           {loading ? (
             <div className="space-y-6">
               {/* Featured Article Skeleton */}
@@ -339,79 +338,79 @@ export default function NewsPage() {
           ) : paginatedNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedNews.map((news, index) => (
-              <motion.div
-                key={news.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  {/* Featured Image */}
-                  {news.featured_image && (
-                    <div className="relative h-48 w-full">
-                      <img
-                        src={news.featured_image.startsWith('http') 
-                          ? news.featured_image 
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
-                        }
-                        alt={news.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                      <div className="absolute top-2 left-2">
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news.tags && news.tags[0]) || 'News'}
-                        </Badge>
+                <motion.div
+                  key={news.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    {/* Featured Image */}
+                    {news.featured_image && (
+                      <div className="relative h-48 w-full">
+                        <img
+                          src={news.featured_image.startsWith('http')
+                            ? news.featured_image
+                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
+                          }
+                          alt={news.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute top-2 left-2">
+                          <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                            {(news.tags && news.tags[0]) || 'News'}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  <CardHeader className={news.featured_image ? '' : 'pb-2'}>
-                    <div className="flex items-center justify-between mb-2">
-                      {!news.featured_image && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news.tags && news.tags[0]) || 'News'}
-                        </Badge>
-                      )}
+                    )}
+
+                    <CardHeader className={news.featured_image ? '' : 'pb-2'}>
+                      <div className="flex items-center justify-between mb-2">
+                        {!news.featured_image && (
+                          <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
+                            {(news.tags && news.tags[0]) || 'News'}
+                          </Badge>
+                        )}
+                        <div className="flex items-center text-sm text-slate-500">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
+                        </div>
+                      </div>
+                      <CardTitle className="text-lg text-slate-800 line-clamp-2">
+                        {news.title}
+                      </CardTitle>
                       <div className="flex items-center text-sm text-slate-500">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
+                        <User className="w-4 h-4 mr-1" />
+                        {news.author_name} • 2 min read
+                        {news.views && (
+                          <>
+                            <Eye className="w-4 h-4 ml-2 mr-1" />
+                            {news.views} views
+                          </>
+                        )}
                       </div>
-                    </div>
-                    <CardTitle className="text-lg text-slate-800 line-clamp-2">
-                      {news.title}
-                    </CardTitle>
-                    <div className="flex items-center text-sm text-slate-500">
-                      <User className="w-4 h-4 mr-1" />
-                      {news.author_name} • 2 min read
-                      {news.views && (
-                        <>
-                          <Eye className="w-4 h-4 ml-2 mr-1" />
-                          {news.views} views
-                        </>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 mb-4">{news.excerpt}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {(news.tags || []).slice(0, 3).map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Link href={`/news/${news.slug || news.id}`}>
-                      <Button variant="outline" className="w-full border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50">
-                        Read More
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-600 mb-4">{news.excerpt}</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {(news.tags || []).slice(0, 3).map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Link href={`/news/${news.slug || news.id}`}>
+                        <Button variant="outline" className="w-full border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold transition-all">
+                          Read More
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -424,7 +423,7 @@ export default function NewsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <motion.div 
+          <motion.div
             className="flex justify-center items-center space-x-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -439,24 +438,23 @@ export default function NewsPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Previous
             </Button>
-            
+
             <div className="flex items-center space-x-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <Button
                   key={page}
                   variant={currentPage === page ? "default" : "outline"}
                   onClick={() => setCurrentPage(page)}
-                  className={`${
-                    currentPage === page 
-                      ? "bg-emerald-500 hover:bg-emerald-600 text-white" 
+                  className={`${currentPage === page
+                      ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                       : "border-slate-200 text-slate-600 hover:border-emerald-500 hover:text-emerald-600"
-                  } w-10 h-10 p-0`}
+                    } w-10 h-10 p-0`}
                 >
                   {page}
                 </Button>
               ))}
             </div>
-            
+
             <Button
               variant="outline"
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
@@ -470,7 +468,7 @@ export default function NewsPage() {
         )}
 
         {/* Newsletter Signup */}
-        <motion.div 
+        <motion.div
           className="mt-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -481,16 +479,16 @@ export default function NewsPage() {
               <Zap className="w-12 h-12 mx-auto mb-4 text-emerald-100" />
               <h3 className="text-2xl font-bold mb-2">Stay Updated!</h3>
               <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">
-                Get the latest PineCoin news, challenges, and updates delivered directly to your inbox. 
+                Get the latest PineCoin news, challenges, and updates delivered directly to your inbox.
                 Never miss an opportunity to earn more points!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <Input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 border-0 text-slate-800 placeholder-slate-500"
+                  className="flex-1 bg-white border-2 border-white text-slate-800 placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/50"
                 />
-                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 px-6">
+                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-8 shadow-md hover:shadow-lg transition-all">
                   Subscribe
                 </Button>
               </div>
