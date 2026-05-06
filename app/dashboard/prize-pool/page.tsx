@@ -85,8 +85,8 @@ export default function PrizePoolPage() {
     }
   };
 
-  const isUserJoined = (poolId: number) => {
-    return userParticipations.some(p => p.pool_id === poolId);
+  const getUserEntriesForPool = (poolId: number) => {
+    return userParticipations.filter(p => p.pool_id === poolId).length;
   };
 
   const getStatusBadge = (status: string) => {
@@ -225,25 +225,27 @@ export default function PrizePoolPage() {
                   </div>
 
                   {/* Join Button */}
-                  {isUserJoined(pool.id) ? (
+                  {getUserEntriesForPool(pool.id) >= 10 ? (
                     <Button 
                       className="w-full bg-green-500 hover:bg-green-600 text-white font-bold transition-all duration-300 cursor-not-allowed"
                       disabled
                     >
                       <Check className="w-5 h-5 mr-2" />
-                      Already Joined
+                      Max 10 Entries Reached
                     </Button>
                   ) : (
                     <Button 
                       className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 relative overflow-hidden group"
                       onClick={() => handleJoinPool(pool.id, pool.entry_fee)}
-                      disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants}
+                      disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants || getUserEntriesForPool(pool.id) >= 10}
                     >
                       {joiningPool === pool.id ? (
                         <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           Joining...
                         </>
+                      ) : getUserEntriesForPool(pool.id) >= 10 ? (
+                        'Max Entries Reached'
                       ) : pool.current_participants >= pool.max_participants ? (
                         'Pool Full'
                       ) : (
@@ -338,7 +340,7 @@ export default function PrizePoolPage() {
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="font-bold">3</span>
                     </div>
-                    <p>Winners are selected by admin (random or by performance)</p>
+                    <p>Winners are selected at random by AI</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -379,4 +381,6 @@ export default function PrizePoolPage() {
     </div>
   );
 }
+
+
 

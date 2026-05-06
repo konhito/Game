@@ -81,14 +81,13 @@ export const metadata: Metadata = {
     canonical: 'https://pinecrest.com',
   },
   icons: {
-    // Next.js 13+ automatically handles icon.png in app directory
-    // These are fallbacks for older browsers
+    // Use the Pinecrest brand logo consistently across favicon targets.
     icon: [
-      { url: '/Icon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/Icon.png', sizes: '16x16', type: 'image/png' },
+      { url: '/Logo1.png', sizes: '32x32', type: 'image/png' },
+      { url: '/Logo1.png', sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: '/Icon.png',
-    apple: '/Icon.png',
+    shortcut: '/Logo1.png',
+    apple: '/Logo1.png',
   },
 };
 

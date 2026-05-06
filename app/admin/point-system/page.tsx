@@ -98,7 +98,7 @@ export default function PointSystemAdmin() {
       const [configRes, transactionsRes, usersRes] = await Promise.all([
         fetch(`${config.API_BASE}/api/points/config`, { headers }),
         fetch(`${config.API_BASE}/api/points/transactions/all?limit=50`, { headers }),
-        fetch(`${config.API_BASE}/api/admin/users`, { headers })
+        fetch(`${config.API_BASE}/api/admin/users?limit=500`, { headers })
       ]);
 
       if (configRes.ok) {
@@ -114,6 +114,8 @@ export default function PointSystemAdmin() {
       if (usersRes.ok) {
         const userData = await usersRes.json();
         setUsers(userData.data.users || []);
+      } else {
+        setUsers([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -532,22 +534,22 @@ export default function PointSystemAdmin() {
                 <Select
                   value={awardForm.userId}
                   onValueChange={(value) => setAwardForm(prev => ({ ...prev, userId: value }))}
+                  disabled={users.length === 0}
                 >
                   <SelectTrigger id="userId" className="w-full">
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users available</SelectItem>
-                    ) : (
-                      users.map(user => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
-                          {user.name} ({user.email})
-                        </SelectItem>
-                      ))
-                    )}
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id.toString()}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {users.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
               </div>
 
               <div>
@@ -610,6 +612,7 @@ export default function PointSystemAdmin() {
                 <Select
                   value={deductForm.userId}
                   onValueChange={(value) => setDeductForm(prev => ({ ...prev, userId: value }))}
+                  disabled={users.length === 0}
                 >
                   <SelectTrigger id="deductUserId">
                     <SelectValue placeholder="Select a user" />
@@ -622,6 +625,9 @@ export default function PointSystemAdmin() {
                     ))}
                   </SelectContent>
                 </Select>
+                {users.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
               </div>
 
               <div>
@@ -684,6 +690,7 @@ export default function PointSystemAdmin() {
                 <Select
                   value={resetForm.userId}
                   onValueChange={(value) => setResetForm(prev => ({ ...prev, userId: value }))}
+                  disabled={users.length === 0}
                 >
                   <SelectTrigger id="resetUserId">
                     <SelectValue placeholder="Select a user" />
@@ -696,6 +703,9 @@ export default function PointSystemAdmin() {
                     ))}
                   </SelectContent>
                 </Select>
+                {users.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
               </div>
 
               <div className="space-y-2">

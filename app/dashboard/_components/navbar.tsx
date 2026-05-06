@@ -328,7 +328,7 @@ export function Navbar() {
           </Link>
 
           {/* Clean Navigation - Only Essential Items */}
-          <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 flex-1 justify-center max-w-2xl mx-auto">
+          <nav className="hidden xl:flex items-center space-x-3 lg:space-x-6 flex-1 justify-center max-w-2xl mx-auto">
             {allNavigation.map((item) => (
               <Link
                 key={item.href}
@@ -365,7 +365,7 @@ export function Navbar() {
           {/* Right Side - Clean and Simple */}
           <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             {/* Quick Stats - Only Money and Points - Desktop */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden xl:flex items-center space-x-3">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Coins className="w-4 h-4 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-yellow-800 whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
@@ -381,7 +381,7 @@ export function Navbar() {
             </div>
 
             {/* Quick Stats - Mobile - Compact */}
-            <div className="md:hidden flex items-center space-x-2">
+            <div className="xl:hidden flex items-center space-x-2">
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Coins className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-yellow-800 text-xs whitespace-nowrap hover:text-yellow-900 transition-colors duration-200">
@@ -398,7 +398,7 @@ export function Navbar() {
 
             {/* Mobile Menu Button */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild className="md:hidden">
+              <DropdownMenuTrigger asChild className="xl:hidden">
                 <Button variant="ghost" size="icon" className="hover:bg-slate-100 hover:text-slate-900 rounded-xl hover:scale-110 active:scale-95 transition-all duration-200">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>

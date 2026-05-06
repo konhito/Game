@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, User, Eye, Clock, Share2, BookOpen, Tag } from "lucide-react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { resolveNewsImageUrl } from "@/lib/news-image";
 
 interface NewsArticle {
   id: number;
@@ -27,6 +28,7 @@ interface NewsArticle {
 }
 
 export default function ArticlePage() {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
   const params = useParams();
   const router = useRouter();
   const [article, setArticle] = useState<NewsArticle | null>(null);
@@ -280,10 +282,7 @@ export default function ArticlePage() {
                 {article.featured_image && (
                   <div className="relative h-[400px] md:h-[500px] w-full">
                     <img
-                      src={article.featured_image.startsWith('http')
-                        ? article.featured_image
-                        : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${article.featured_image.includes('/') ? article.featured_image.split('/').pop() : article.featured_image}`
-                      }
+                      src={resolveNewsImageUrl(article.featured_image, apiBase) || undefined}
                       alt={article.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -537,10 +536,7 @@ export default function ArticlePage() {
                     {relatedArticle.featured_image && (
                       <div className="relative h-48 w-full overflow-hidden">
                         <img
-                          src={relatedArticle.featured_image.startsWith('http')
-                            ? relatedArticle.featured_image
-                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${relatedArticle.featured_image.includes('/') ? relatedArticle.featured_image.split('/').pop() : relatedArticle.featured_image}`
-                          }
+                          src={resolveNewsImageUrl(relatedArticle.featured_image, apiBase) || undefined}
                           alt={relatedArticle.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -564,7 +560,7 @@ export default function ArticlePage() {
                           {relatedArticle.tags[0]}
                         </Badge>
                       )}
-                      <CardTitle className="text-xl text-slate-800 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                      <CardTitle className="text-xl text-slate-800 break-words whitespace-normal group-hover:text-emerald-600 transition-colors">
                         {relatedArticle.title}
                       </CardTitle>
                       <CardDescription className="text-slate-600 line-clamp-3 mt-2">

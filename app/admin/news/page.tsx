@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import config from "@/lib/config";
+import { resolveNewsImageUrl } from "@/lib/news-image";
 
 interface NewsArticle {
   id: number;
@@ -58,6 +59,38 @@ interface NewsArticle {
   meta_description?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+function parseTags(tags: unknown): string[] {
+  if (Array.isArray(tags)) {
+    return tags.map((tag) => String(tag).trim()).filter(Boolean);
+  }
+  if (tags === null || tags === undefined) return [];
+
+  const raw = String(tags).trim();
+  if (!raw || raw === "{}" || raw === "()" || raw === "[]") return [];
+
+  if (raw.startsWith("{") && raw.endsWith("}")) {
+    return raw
+      .slice(1, -1)
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  }
+
+  if (raw.startsWith("[") && raw.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((tag) => String(tag).trim()).filter(Boolean);
+      }
+    } catch (_) {}
+  }
+
+  return raw
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 export default function AdminNewsPage() {
@@ -95,6 +128,7 @@ export default function AdminNewsPage() {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
+  const [selectedLinkText, setSelectedLinkText] = useState("");
 
   useEffect(() => {
     fetchArticles();
@@ -154,22 +188,24 @@ export default function AdminNewsPage() {
 
   // Insert link at cursor position
   const insertLink = () => {
-    if (!linkUrl || !linkText) return;
+    if (!linkUrl) return;
 
     const textarea = contentRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = formData.content.substring(start, end);
-
-    const linkMarkdown = `[${linkText || selectedText || 'link'}](${linkUrl})`;
+    const selectedText = formData.content.substring(start, end).trim();
+    const anchorText = (linkText || selectedText || selectedLinkText || "link").trim();
+    const normalizedUrl = /^(https?:\/\/|mailto:)/i.test(linkUrl) ? linkUrl : `https://${linkUrl}`;
+    const linkMarkdown = `[${anchorText}](${normalizedUrl})`;
     const newContent = formData.content.substring(0, start) + linkMarkdown + formData.content.substring(end);
 
     setFormData({ ...formData, content: newContent });
     setShowLinkDialog(false);
     setLinkUrl("");
     setLinkText("");
+    setSelectedLinkText("");
   };
 
   // Insert formatting
@@ -221,7 +257,11 @@ export default function AdminNewsPage() {
 
       if (response.ok) {
         const result = await response.json();
-        setArticles(result?.data?.articles ?? []);
+        const normalizedArticles = (result?.data?.articles ?? []).map((article: NewsArticle) => ({
+          ...article,
+          tags: parseTags(article.tags),
+        }));
+        setArticles(normalizedArticles);
       } else {
         console.error('Failed to fetch articles');
         setArticles([]);
@@ -420,7 +460,7 @@ export default function AdminNewsPage() {
     }
   };
 
-  const startEdit = (article: NewsArticle) => {
+  const applyArticleToForm = (article: NewsArticle) => {
     setSubmitError(null);
     setEditingArticle(article);
     setFormData({
@@ -431,7 +471,7 @@ export default function AdminNewsPage() {
       featured_image: article.featured_image || "",
       status: article.status,
       featured: article.featured,
-      tags: article.tags || [],
+      tags: parseTags(article.tags),
       category: article.category || "general",
       meta_title: article.meta_title ?? "",
       meta_description: article.meta_description ?? "",
@@ -439,16 +479,48 @@ export default function AdminNewsPage() {
     });
     setNewTag("");
     if (article.featured_image) {
-      const imageUrl = article.featured_image.startsWith('http')
-        ? article.featured_image
-        : `${config.API_BASE}/uploads/news-images/${article.featured_image}`;
-      setImagePreview(imageUrl);
+      setImagePreview(resolveNewsImageUrl(article.featured_image, config.API_BASE));
     } else {
       setImagePreview(null);
     }
     setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const startEdit = async (article: NewsArticle) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        applyArticleToForm(article);
+        return;
+      }
+
+      const response = await fetch(`${config.API_BASE}/api/news/admin/${article.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const fullArticle = result?.data?.article;
+        if (fullArticle) {
+          applyArticleToForm({
+            ...article,
+            ...fullArticle,
+            tags: parseTags(fullArticle.tags),
+          });
+          return;
+        }
+      }
+
+      applyArticleToForm(article);
+    } catch (error) {
+      console.error("Error fetching full article for edit:", error);
+      applyArticleToForm(article);
     }
   };
 
@@ -601,6 +673,16 @@ export default function AdminNewsPage() {
                         className="mt-1 w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                       />
                       <div className="flex-1">
+                        {article.featured_image && (
+                          <img
+                            src={resolveNewsImageUrl(article.featured_image, config.API_BASE) || undefined}
+                            alt={article.title}
+                            className="w-full max-w-md h-36 object-cover rounded-lg mb-3 border border-slate-200"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        )}
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-xl font-semibold text-slate-800">{article.title}</h3>
                           <Badge variant={article.status === 'published' ? 'default' : 'secondary'} className="font-semibold">
@@ -833,7 +915,15 @@ export default function AdminNewsPage() {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setShowLinkDialog(true)}
+                                onClick={() => {
+                                  const textarea = contentRef.current;
+                                  const selected = textarea
+                                    ? formData.content.substring(textarea.selectionStart, textarea.selectionEnd).trim()
+                                    : "";
+                                  setSelectedLinkText(selected);
+                                  setLinkText(selected);
+                                  setShowLinkDialog(true);
+                                }}
                                 title="Insert Link"
                                 className="text-emerald-600 hover:text-emerald-700"
                               >
@@ -1151,6 +1241,7 @@ export default function AdminNewsPage() {
                       setShowLinkDialog(false);
                       setLinkUrl("");
                       setLinkText("");
+                      setSelectedLinkText("");
                     }}
                   >
                     Cancel

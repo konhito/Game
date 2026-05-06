@@ -39,6 +39,7 @@ export default function AdminPrizePoolsPage() {
   const [selectingWinner, setSelectingWinner] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [poolForm, setPoolForm] = useState({
     title: '',
     description: '',
@@ -145,6 +146,31 @@ export default function AdminPrizePoolsPage() {
       alert(error.message || "Failed to create prize pool. Please try again.");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handlePrizeImageUpload = async (file: File) => {
+    try {
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to upload image");
+      }
+
+      setPoolForm((prev) => ({ ...prev, image_url: result.url || "" }));
+    } catch (error: any) {
+      console.error("Error uploading prize image:", error);
+      alert(error.message || "Failed to upload image. Please try again.");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -293,13 +319,28 @@ export default function AdminPrizePoolsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="image_url">Image URL (Optional)</Label>
                   <Input
+                    id="image_file"
+                    type="file"
+                    accept="image/*"
+                    disabled={uploadingImage}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handlePrizeImageUpload(file);
+                      }
+                    }}
+                  />
+                  {uploadingImage && (
+                    <p className="text-xs text-slate-500">Uploading image...</p>
+                  )}
+                  <Input
                     id="image_url"
                     type="url"
                     value={poolForm.image_url}
                     onChange={(e) => setPoolForm({...poolForm, image_url: e.target.value})}
                     placeholder="https://example.com/prize-image.jpg"
                   />
-                  <p className="text-xs text-slate-500">URL to image of the prize (for physical items like phones)</p>
+                  <p className="text-xs text-slate-500">Upload an image or paste a URL for the prize.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>

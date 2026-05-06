@@ -56,6 +56,10 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const isModerator = user?.role === 'moderator';
+  const allowedPages = isModerator
+    ? adminPages.filter((page) => page.href === '/admin/news')
+    : adminPages;
 
   useEffect(() => {
     console.log('🔍 Admin layout: Checking authentication...');
@@ -68,9 +72,14 @@ export default function AdminLayout({
       return;
     }
     
-    if (currentUser.role !== 'admin') {
-      console.log('❌ User is not admin, redirecting to dashboard');
+    if (currentUser.role !== 'admin' && currentUser.role !== 'moderator') {
+      console.log('❌ User is not admin/moderator, redirecting to dashboard');
       router.push('/dashboard');
+      return;
+    }
+
+    if (currentUser.role === 'moderator' && pathname !== '/admin/news') {
+      router.push('/admin/news');
       return;
     }
     
@@ -101,7 +110,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
     return null;
   }
 
@@ -128,7 +137,7 @@ export default function AdminLayout({
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4">
             <div className="space-y-1">
-              {adminPages.map((page) => {
+              {allowedPages.map((page) => {
                 const Icon = page.icon;
                 const isActive = pathname === page.href || (page.href !== '/admin' && pathname?.startsWith(page.href));
                 return (
@@ -160,7 +169,7 @@ export default function AdminLayout({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                <p className="text-xs text-gray-500">Administrator</p>
+                <p className="text-xs text-gray-500">{isModerator ? 'Moderator' : 'Administrator'}</p>
               </div>
             </div>
             <Button 
@@ -200,7 +209,7 @@ export default function AdminLayout({
                   <Menu className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  {adminPages.find(p => pathname === p.href || (p.href !== '/admin' && pathname?.startsWith(p.href)))?.name || 'Admin Panel'}
+                  {allowedPages.find(p => pathname === p.href || (p.href !== '/admin' && pathname?.startsWith(p.href)))?.name || 'Admin Panel'}
                 </h1>
               </div>
               <div className="hidden lg:flex items-center space-x-4">

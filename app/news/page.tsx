@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Filter, Calendar, User, ArrowLeft, ArrowRight, TrendingUp, Star, Zap, Eye } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { resolveNewsImageUrl } from "@/lib/news-image";
 
 interface NewsArticle {
   id: number;
@@ -21,9 +22,11 @@ interface NewsArticle {
   views: number;
   featured: boolean;
   tags: string[];
+  category?: string;
 }
 
 export default function NewsPage() {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,17 +38,20 @@ export default function NewsPage() {
   // Fetch news articles from CMS
   useEffect(() => {
     fetchNewsArticles();
-  }, [searchTerm, selectedCategory, currentPage]);
+  }, [searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
 
   const fetchNewsArticles = async () => {
     try {
       setLoading(true);
       setError(false);
       const params = new URLSearchParams();
-      params.append('page', currentPage.toString());
-      params.append('limit', '10');
+      params.append('limit', '100');
       if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory !== 'All') params.append('tag', selectedCategory);
+      if (selectedCategory !== 'All') params.append('category', selectedCategory.toLowerCase());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`);
 
@@ -97,7 +103,7 @@ export default function NewsPage() {
     { id: 6, title: "Monthly Community Spotlight: Meet Our Top Users", slug: "community-spotlight", excerpt: "Get to know the PineCoin community's most active users.", content: "", featured_image: null, author_name: "Community Team", published_at: new Date().toISOString(), views: 0, featured: true, tags: ["community", "spotlight", "users"] }
   ];
 
-  const categories = ["All", "Challenge", "Leaderboard", "Content", "Platform", "Referrals", "Community"];
+  const categories = ["All", "General", "Crypto", "Rewards", "Updates", "Announcements"];
 
   // Use dynamic data or fallback (only if not loading and API failed)
   // Don't show fallback while loading - show skeleton instead
@@ -108,7 +114,9 @@ export default function NewsPage() {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
-    const matchesCategory = selectedCategory === "All" || (item.tags && item.tags.includes(selectedCategory));
+    const matchesCategory =
+      selectedCategory === "All" ||
+      (item.category && item.category.toLowerCase() === selectedCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
@@ -120,14 +128,13 @@ export default function NewsPage() {
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      Challenge: "from-emerald-500 to-emerald-600",
-      Leaderboard: "from-blue-500 to-blue-600",
-      Content: "from-purple-500 to-purple-600",
-      Platform: "from-orange-500 to-orange-600",
-      Referrals: "from-pink-500 to-pink-600",
-      Community: "from-indigo-500 to-indigo-600"
+      general: "from-slate-500 to-slate-600",
+      crypto: "from-amber-500 to-amber-600",
+      rewards: "from-emerald-500 to-emerald-600",
+      updates: "from-blue-500 to-blue-600",
+      announcements: "from-purple-500 to-purple-600"
     };
-    return colors[category] || "from-slate-500 to-slate-600";
+    return colors[category.toLowerCase()] || "from-slate-500 to-slate-600";
   };
 
   return (
@@ -213,10 +220,7 @@ export default function NewsPage() {
                   {news.featured_image && (
                     <div className="relative h-64 w-full">
                       <img
-                        src={news.featured_image.startsWith('http')
-                          ? news.featured_image
-                          : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
-                        }
+                        src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined}
                         alt={news.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -224,8 +228,8 @@ export default function NewsPage() {
                         }}
                       />
                       <div className="absolute top-4 left-4">
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category || 'general')} text-white`}>
+                          {news.category || 'general'}
                         </Badge>
                       </div>
                     </div>
@@ -234,8 +238,8 @@ export default function NewsPage() {
                   <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                     <div className="flex items-center justify-between mb-2">
                       {!news.featured_image && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                          {(news.tags && news.tags[0]) || 'News'}
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category || 'general')} text-white`}>
+                          {news.category || 'general'}
                         </Badge>
                       )}
                       <div className="flex items-center text-sm text-slate-500">
@@ -243,7 +247,7 @@ export default function NewsPage() {
                         {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
                       </div>
                     </div>
-                    <CardTitle className="text-xl text-slate-800 line-clamp-2">
+                    <CardTitle className="text-xl text-slate-800 break-words whitespace-normal">
                       {news.title}
                     </CardTitle>
                     <div className="flex items-center text-sm text-slate-500">
@@ -349,10 +353,7 @@ export default function NewsPage() {
                     {news.featured_image && (
                       <div className="relative h-48 w-full">
                         <img
-                          src={news.featured_image.startsWith('http')
-                            ? news.featured_image
-                            : `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${news.featured_image.includes('/') ? news.featured_image.split('/').pop() : news.featured_image}`
-                          }
+                          src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined}
                           alt={news.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -360,8 +361,8 @@ export default function NewsPage() {
                           }}
                         />
                         <div className="absolute top-2 left-2">
-                          <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                            {(news.tags && news.tags[0]) || 'News'}
+                          <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category || 'general')} text-white`}>
+                            {news.category || 'general'}
                           </Badge>
                         </div>
                       </div>
@@ -370,8 +371,8 @@ export default function NewsPage() {
                     <CardHeader className={news.featured_image ? '' : 'pb-2'}>
                       <div className="flex items-center justify-between mb-2">
                         {!news.featured_image && (
-                          <Badge className={`bg-gradient-to-r ${getCategoryColor((news.tags && news.tags[0]) || 'News')} text-white`}>
-                            {(news.tags && news.tags[0]) || 'News'}
+                          <Badge className={`bg-gradient-to-r ${getCategoryColor(news.category || 'general')} text-white`}>
+                            {news.category || 'general'}
                           </Badge>
                         )}
                         <div className="flex items-center text-sm text-slate-500">
@@ -379,7 +380,7 @@ export default function NewsPage() {
                           {news.published_at ? new Date(news.published_at).toLocaleDateString() : '—'}
                         </div>
                       </div>
-                      <CardTitle className="text-lg text-slate-800 line-clamp-2">
+                      <CardTitle className="text-lg text-slate-800 break-words whitespace-normal">
                         {news.title}
                       </CardTitle>
                       <div className="flex items-center text-sm text-slate-500">
