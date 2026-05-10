@@ -328,25 +328,31 @@ export default function PrizePoolPage() {
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="font-bold">1</span>
                     </div>
-                    <p>Choose a prize pool and pay the entry fee using your PineCoins</p>
+                    <p>Choose a prize pool.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="font-bold">2</span>
                     </div>
-                    <p>Compete with other players by earning points and completing tasks</p>
+                    <p>Pay the entry fee using your pinecoins.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="font-bold">3</span>
                     </div>
-                    <p>Winners are selected at random by AI</p>
+                    <p>Wait for the prize pool to end, and the winner will be automatically selected at random by the system AI.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="font-bold">4</span>
                     </div>
-                    <p>Win amazing prizes in PineCoins!</p>
+                    <p>Win amazing prizes in either physical items or pinecoins.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="font-bold">5</span>
+                    </div>
+                    <p>You can only enter a prize pool multiple times, but not more than ten time.</p>
                   </div>
                 </div>
               </div>

@@ -59,6 +59,8 @@ export default function PointSystemAdmin() {
   const [configs, setConfigs] = useState<PointSystemConfig>({});
   const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersLoadError, setUsersLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingConfig, setEditingConfig] = useState<string | null>(null);
   const [tempConfig, setTempConfig] = useState<any>({});
@@ -90,38 +92,105 @@ export default function PointSystemAdmin() {
     fetchData();
   }, []);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const normalizeUsers = (rawUsers: any[]): User[] => {
+    const seenIds = new Set<number>();
+    return rawUsers
+      .filter((user) => user && user.id !== undefined && user.id !== null)
+      .map((user) => ({
+        id: Number(user.id),
+        name: String(user.name || `User #${user.id}`),
+        email: String(user.email || ''),
+        total_points: Number(user.total_points || 0),
+        total_coins: Number(user.total_coins || 0)
+      }))
+      .filter((user) => {
+        if (!Number.isFinite(user.id) || user.id <= 0) return false;
+        if (seenIds.has(user.id)) return false;
+        seenIds.add(user.id);
+        return true;
+      });
+  };
+
+  const fetchUsersForSelectors = async () => {
+    try {
+      setUsersLoading(true);
+      setUsersLoadError(null);
+      const response = await fetch(`${config.API_BASE}/api/admin/users?limit=500`, {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        let errorMessage = `Failed to load users (${response.status})`;
+        try {
+          const errorData = await response.json();
+          if (errorData?.error) errorMessage = errorData.error;
+        } catch (_) {}
+        setUsers([]);
+        setUsersLoadError(errorMessage);
+        return;
+      }
+
+      const userData = await response.json();
+      const rawUsers = Array.isArray(userData?.data?.users) ? userData.data.users : [];
+      setUsers(normalizeUsers(rawUsers));
+    } catch (error) {
+      console.error('Error fetching users for selectors:', error);
+      setUsers([]);
+      setUsersLoadError('Failed to load users.');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
   const fetchData = async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const [configRes, transactionsRes, usersRes] = await Promise.all([
-        fetch(`${config.API_BASE}/api/points/config`, { headers }),
-        fetch(`${config.API_BASE}/api/points/transactions/all?limit=50`, { headers }),
-        fetch(`${config.API_BASE}/api/admin/users?limit=500`, { headers })
+      const headers = getAuthHeaders();
+      const [configResult, transactionsResult] = await Promise.allSettled([
+        fetch(`${config.API_BASE}/api/points/config`, { headers, credentials: 'include' }),
+        fetch(`${config.API_BASE}/api/points/transactions/all?limit=50`, { headers, credentials: 'include' })
       ]);
 
-      if (configRes.ok) {
-        const configData = await configRes.json();
-        setConfigs(configData.data.configs);
-      }
-
-      if (transactionsRes.ok) {
-        const transactionData = await transactionsRes.json();
-        setTransactions(transactionData.data.transactions);
-      }
-
-      if (usersRes.ok) {
-        const userData = await usersRes.json();
-        setUsers(userData.data.users || []);
+      if (configResult.status === 'fulfilled' && configResult.value.ok) {
+        const configData = await configResult.value.json();
+        setConfigs(configData?.data?.configs || {});
       } else {
-        setUsers([]);
+        setConfigs({});
       }
+
+      if (transactionsResult.status === 'fulfilled' && transactionsResult.value.ok) {
+        const transactionData = await transactionsResult.value.json();
+        setTransactions(transactionData?.data?.transactions || []);
+      } else {
+        setTransactions([]);
+      }
+
+      await fetchUsersForSelectors();
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const openAwardModal = async () => {
+    setShowAwardForm(true);
+    await fetchUsersForSelectors();
+  };
+
+  const openDeductModal = async () => {
+    setShowDeductForm(true);
+    await fetchUsersForSelectors();
+  };
+
+  const openResetModal = async () => {
+    setShowResetForm(true);
+    await fetchUsersForSelectors();
   };
 
   const handleConfigEdit = (configKey: string) => {
@@ -350,15 +419,15 @@ export default function PointSystemAdmin() {
           <p className="text-gray-600">Configure rewards, bonuses, and user progression</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAwardForm(true)} className="flex items-center gap-2">
+          <Button onClick={openAwardModal} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Award Points
           </Button>
-          <Button onClick={() => setShowDeductForm(true)} variant="destructive" className="flex items-center gap-2">
+          <Button onClick={openDeductModal} variant="destructive" className="flex items-center gap-2">
             <Minus className="w-4 h-4" />
             Deduct Points
           </Button>
-          <Button onClick={() => setShowResetForm(true)} variant="outline" className="flex items-center gap-2">
+          <Button onClick={openResetModal} variant="outline" className="flex items-center gap-2">
             <RotateCcw className="w-4 h-4" />
             Reset Stats
           </Button>
@@ -534,7 +603,7 @@ export default function PointSystemAdmin() {
                 <Select
                   value={awardForm.userId}
                   onValueChange={(value) => setAwardForm(prev => ({ ...prev, userId: value }))}
-                  disabled={users.length === 0}
+                  disabled={usersLoading || users.length === 0}
                 >
                   <SelectTrigger id="userId" className="w-full">
                     <SelectValue placeholder="Select a user" />
@@ -547,8 +616,14 @@ export default function PointSystemAdmin() {
                     ))}
                   </SelectContent>
                 </Select>
-                {users.length === 0 && (
+                {usersLoading && (
+                  <p className="text-xs text-slate-600 mt-1">Loading users...</p>
+                )}
+                {!usersLoading && users.length === 0 && (
                   <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
+                {usersLoadError && (
+                  <p className="text-xs text-red-600 mt-1">{usersLoadError}</p>
                 )}
               </div>
 
@@ -612,7 +687,7 @@ export default function PointSystemAdmin() {
                 <Select
                   value={deductForm.userId}
                   onValueChange={(value) => setDeductForm(prev => ({ ...prev, userId: value }))}
-                  disabled={users.length === 0}
+                  disabled={usersLoading || users.length === 0}
                 >
                   <SelectTrigger id="deductUserId">
                     <SelectValue placeholder="Select a user" />
@@ -625,8 +700,14 @@ export default function PointSystemAdmin() {
                     ))}
                   </SelectContent>
                 </Select>
-                {users.length === 0 && (
+                {usersLoading && (
+                  <p className="text-xs text-slate-600 mt-1">Loading users...</p>
+                )}
+                {!usersLoading && users.length === 0 && (
                   <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
+                {usersLoadError && (
+                  <p className="text-xs text-red-600 mt-1">{usersLoadError}</p>
                 )}
               </div>
 
@@ -690,7 +771,7 @@ export default function PointSystemAdmin() {
                 <Select
                   value={resetForm.userId}
                   onValueChange={(value) => setResetForm(prev => ({ ...prev, userId: value }))}
-                  disabled={users.length === 0}
+                  disabled={usersLoading || users.length === 0}
                 >
                   <SelectTrigger id="resetUserId">
                     <SelectValue placeholder="Select a user" />
@@ -703,8 +784,14 @@ export default function PointSystemAdmin() {
                     ))}
                   </SelectContent>
                 </Select>
-                {users.length === 0 && (
+                {usersLoading && (
+                  <p className="text-xs text-slate-600 mt-1">Loading users...</p>
+                )}
+                {!usersLoading && users.length === 0 && (
                   <p className="text-xs text-red-600 mt-1">No users available to select.</p>
+                )}
+                {usersLoadError && (
+                  <p className="text-xs text-red-600 mt-1">{usersLoadError}</p>
                 )}
               </div>
 

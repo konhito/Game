@@ -13,6 +13,7 @@ interface LeaderboardEntry {
   id: number;
   user_id: number;
   name: string;
+  rank?: number;
   total_points: number;
   weekly_points: number;
   total_coins: number;
@@ -29,6 +30,35 @@ interface WeeklyPool {
   last_updated?: string;
 }
 
+interface WeeklyRewardConfig {
+  rank: number | string;
+  pinecoins: number;
+  naira: number;
+  percentage: number;
+}
+interface TaskPointRules {
+  signup_points: number;
+  referral_points: number;
+  share_social_points: number;
+  share_news_points: number;
+  comment_points: number;
+  like_points: number;
+  daily_login_points: number;
+  login_streak_bonus_days: number;
+  login_streak_bonus_spins: number;
+}
+const defaultTaskPointRules: TaskPointRules = {
+  signup_points: 50,
+  referral_points: 30,
+  share_social_points: 20,
+  share_news_points: 10,
+  comment_points: 5,
+  like_points: 5,
+  daily_login_points: 5,
+  login_streak_bonus_days: 3,
+  login_streak_bonus_spins: 2
+};
+
 export default function LeaderboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -36,6 +66,8 @@ export default function LeaderboardPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [weeklyPool, setWeeklyPool] = useState<WeeklyPool | null>(null);
+  const [weeklyRewardConfig, setWeeklyRewardConfig] = useState<WeeklyRewardConfig[]>([]);
+  const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
 
   const poolDisplay = weeklyPool || {
     pinecoins: 0,
@@ -45,16 +77,28 @@ export default function LeaderboardPage() {
     sell_rate: 0
   };
 
-  const weeklyRewards = weeklyPool ? [
-    { rank: 1, reward: "50%", amount: `₽${(weeklyPool.pinecoins * 0.5).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.5).toLocaleString()}`, color: "bg-yellow-500" },
-    { rank: 2, reward: "30%", amount: `₽${(weeklyPool.pinecoins * 0.3).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.3).toLocaleString()}`, color: "bg-gray-400" },
-    { rank: 3, reward: "15%", amount: `₽${(weeklyPool.pinecoins * 0.15).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.15).toLocaleString()}`, color: "bg-orange-500" },
-    { rank: "Random", reward: "5%", amount: `₽${(weeklyPool.pinecoins * 0.05).toLocaleString()}`, naira: `₦${(weeklyPool.naira * 0.05).toLocaleString()}`, color: "bg-purple-500" },
-  ] : [
-    { rank: 1, reward: "50%", amount: "₽2,500", naira: "₦0", color: "bg-yellow-500" },
-    { rank: 2, reward: "30%", amount: "₽1,500", naira: "₦0", color: "bg-gray-400" },
-    { rank: 3, reward: "15%", amount: "₽750", naira: "₦0", color: "bg-orange-500" },
-    { rank: "Random", reward: "5%", amount: "₽250", naira: "₦0", color: "bg-purple-500" },
+  const weeklyRewards = weeklyRewardConfig.length > 0 ? weeklyRewardConfig.map((reward) => {
+    const rank = reward.rank;
+    const color =
+      rank === 1
+        ? "bg-yellow-500"
+        : rank === 2
+          ? "bg-gray-400"
+          : rank === 3
+            ? "bg-orange-500"
+            : "bg-purple-500";
+    return {
+      rank,
+      reward: `${Number(reward.percentage || 0).toFixed(2).replace(/\.00$/, "")}%`,
+      amount: `PC ${Number(reward.pinecoins || 0).toLocaleString()}`,
+      naira: `NGN ${Number(reward.naira || 0).toLocaleString()}`,
+      color
+    };
+  }) : [
+    { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", color: "bg-yellow-500" },
+    { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", color: "bg-gray-400" },
+    { rank: 3, reward: "15%", amount: "PC 750", naira: "NGN 0", color: "bg-orange-500" },
+    { rank: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", color: "bg-purple-500" },
   ];
 
   useEffect(() => {
@@ -88,6 +132,15 @@ export default function LeaderboardPage() {
         setLeaderboardData(rankedData);
         if (response.data.weekly_pool) {
           setWeeklyPool(response.data.weekly_pool);
+        }
+        if (Array.isArray(response.data.weekly_rewards)) {
+          setWeeklyRewardConfig(response.data.weekly_rewards);
+        }
+        if (response.data.task_point_rules) {
+          setTaskPointRules({
+            ...defaultTaskPointRules,
+            ...response.data.task_point_rules
+          });
         }
       }
     } catch (error) {
@@ -412,7 +465,7 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-lg text-slate-800">{reward.amount}</p>
-                        {reward.naira && reward.naira !== "₦0" && (
+                        {reward.naira && (
                           <p className="text-sm text-emerald-600 font-medium">{reward.naira}</p>
                         )}
                       </div>
@@ -441,35 +494,35 @@ export default function LeaderboardPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <span className="text-2xl">🆕</span>
-                    <span className="font-medium text-slate-700">Sign up: <span className="text-blue-600 font-bold">+50 points</span></span>
+                    <span className="font-medium text-slate-700">Sign up: <span className="text-blue-600 font-bold">+{taskPointRules.signup_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
                     <span className="text-2xl">🤝</span>
-                    <span className="font-medium text-slate-700">Referral: <span className="text-purple-600 font-bold">+30 points</span></span>
+                    <span className="font-medium text-slate-700">Referral: <span className="text-purple-600 font-bold">+{taskPointRules.referral_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
                     <span className="text-2xl">📣</span>
-                    <span className="font-medium text-slate-700">Share our social post: <span className="text-orange-600 font-bold">+20 points</span></span>
+                    <span className="font-medium text-slate-700">Share our social post: <span className="text-orange-600 font-bold">+{taskPointRules.share_social_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-sky-50 border border-sky-200">
                     <span className="text-2xl">📰</span>
-                    <span className="font-medium text-slate-700">Share a news post: <span className="text-sky-600 font-bold">+10 points</span></span>
+                    <span className="font-medium text-slate-700">Share a news post: <span className="text-sky-600 font-bold">+{taskPointRules.share_news_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
                     <span className="text-2xl">💬</span>
-                    <span className="font-medium text-slate-700">Comment on a social post: <span className="text-green-600 font-bold">+5 points</span></span>
+                    <span className="font-medium text-slate-700">Comment on a social post: <span className="text-green-600 font-bold">+{taskPointRules.comment_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
                     <span className="text-2xl">👍</span>
-                    <span className="font-medium text-slate-700">Like a social post: <span className="text-amber-600 font-bold">+5 points</span></span>
+                    <span className="font-medium text-slate-700">Like a social post: <span className="text-amber-600 font-bold">+{taskPointRules.like_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
                     <span className="text-2xl">📅</span>
-                    <span className="font-medium text-slate-700">Daily login: <span className="text-emerald-600 font-bold">+5 points</span></span>
+                    <span className="font-medium text-slate-700">Daily login: <span className="text-emerald-600 font-bold">+{taskPointRules.daily_login_points} points</span></span>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
                     <span className="text-2xl">🔥</span>
-                    <span className="font-medium text-slate-700">3-day login streak: <span className="text-rose-600 font-bold">+2 extra spins</span></span>
+                    <span className="font-medium text-slate-700">{taskPointRules.login_streak_bonus_days}-day login streak: <span className="text-rose-600 font-bold">+{taskPointRules.login_streak_bonus_spins} extra spins</span></span>
                   </div>
                 </div>
               </CardContent>
@@ -497,7 +550,7 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
                     <span className="text-purple-500">🎲</span>
-                    <span>1 random player gets 5% bonus</span>
+                    <span>1 random player gets {weeklyRewards.find((r) => r.rank === "Random")?.reward || "5%"} bonus</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
                     <span className="text-green-500">📊</span>
@@ -549,3 +602,4 @@ export default function LeaderboardPage() {
     </div>
   );
 }
+

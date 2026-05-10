@@ -16,13 +16,15 @@ import { Bell, Coins, LogOut, Settings, User, Wallet, Menu, Home, Trophy, Gamepa
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import config from "@/lib/config";
 
 interface User {
   name: string;
   email: string;
   avatar: string | null;
   pineCoins: number;
-  points: number;
+  weeklyPoints: number;
+  totalPoints: number;
   role?: string;
 }
 
@@ -43,7 +45,7 @@ export function Navbar() {
         return;
       }
 
-      const response = await fetch(`https://pinecrest.konhito.me/api/users/stats`, {
+      const response = await fetch(`${config.API_BASE}/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -64,7 +66,8 @@ export function Navbar() {
             avatar: prevUser?.avatar || null,
             role: prevUser?.role || "user",
             pineCoins: parseFloat(userStats.total_coins) || 0,
-            points: userStats.total_points || 0,
+            weeklyPoints: userStats.weekly_points || 0,
+            totalPoints: userStats.total_points || 0,
           }));
           console.log('Navbar: Updated user with real stats:', userStats);
         }
@@ -78,7 +81,8 @@ export function Navbar() {
           avatar: prevUser?.avatar || null,
           role: prevUser?.role || "user",
           pineCoins: 0,
-          points: 0,
+          weeklyPoints: 0,
+          totalPoints: 0,
         }));
       }
     } catch (error) {
@@ -91,7 +95,8 @@ export function Navbar() {
         avatar: prevUser?.avatar || null,
         role: prevUser?.role || "user",
         pineCoins: 0,
-        points: 0,
+        weeklyPoints: 0,
+        totalPoints: 0,
       }));
     } finally {
       // Set loading to false after stats are fetched
@@ -181,7 +186,8 @@ export function Navbar() {
               email: userData.email || "player@example.com",
               avatar: userData.image || null,
               pineCoins: 0, // Will be updated from real data
-              points: 0, // Will be updated from real data
+              weeklyPoints: 0, // Will be updated from real data
+              totalPoints: 0, // Will be updated from real data
               role: userData.role || "user",
             });
             
@@ -215,7 +221,8 @@ export function Navbar() {
               email: userData.email || "player@example.com",
               avatar: userData.image || null,
               pineCoins: 0, // Will be updated from real data
-              points: 0, // Will be updated from real data
+              weeklyPoints: 0, // Will be updated from real data
+              totalPoints: 0, // Will be updated from real data
               role: userData.role || "user",
             });
             
@@ -364,7 +371,7 @@ export function Navbar() {
 
           {/* Right Side - Clean and Simple */}
           <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-            {/* Quick Stats - Only Money and Points - Desktop */}
+            {/* Quick Stats - PineCoins and Weekly Points - Desktop */}
             <div className="hidden xl:flex items-center space-x-3">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 shadow-sm hover:bg-yellow-100 hover:border-yellow-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Coins className="w-4 h-4 text-yellow-600 flex-shrink-0 hover:text-yellow-700 hover:scale-110 transition-all duration-200" />
@@ -375,7 +382,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Target className="w-4 h-4 text-blue-600 flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-blue-800 whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
-                  {user.points === 0 && loading ? '...' : `${user.points} pts`}
+                  {user.weeklyPoints === 0 && loading ? '...' : `${user.weeklyPoints} wk`}
                 </span>
               </div>
             </div>
@@ -391,7 +398,7 @@ export function Navbar() {
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer">
                 <Target className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 hover:text-blue-700 hover:scale-110 transition-all duration-200" />
                 <span className="font-semibold text-blue-800 text-xs whitespace-nowrap hover:text-blue-900 transition-colors duration-200">
-                  {user.points === 0 && loading ? '...' : `${user.points} pts`}
+                  {user.weeklyPoints === 0 && loading ? '...' : `${user.weeklyPoints} wk`}
                 </span>
               </div>
             </div>
@@ -462,8 +469,8 @@ export function Navbar() {
                     {/* Quick Stats */}
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
                       <div className="text-center">
-                        <div className="text-sm font-bold text-emerald-600">{user.points || 0}</div>
-                        <div className="text-xs text-slate-500">Points</div>
+                        <div className="text-sm font-bold text-emerald-600">{user.weeklyPoints || 0}</div>
+                        <div className="text-xs text-slate-500">Weekly Pts</div>
                       </div>
                       <div className="text-center">
                         <div className="text-sm font-bold text-blue-600">{user.pineCoins || 0}</div>
@@ -486,9 +493,15 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/daily-rewards" className="flex items-center gap-3 w-full">
+                  <Link href="/dashboard/rewards" className="flex items-center gap-3 w-full">
                     <Target className="h-4 w-4 text-purple-600" />
-                    <span>Daily Rewards</span>
+                    <span>Rewards</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                  <Link href="/dashboard/prize-pool" className="flex items-center gap-3 w-full">
+                    <Gift className="h-4 w-4 text-pink-600" />
+                    <span>Prize Pools</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">

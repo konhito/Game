@@ -23,6 +23,7 @@ interface NewsArticle {
   views: number;
   featured: boolean;
   tags: string[];
+  category?: string;
   meta_title?: string;
   meta_description?: string;
 }
@@ -37,8 +38,10 @@ export default function ArticlePage() {
   const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
 
   useEffect(() => {
-    if (params.slug) {
-      fetchArticle(params.slug as string);
+    const rawSlug = params.slug;
+    const slugValue = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+    if (slugValue) {
+      fetchArticle(slugValue);
     }
   }, [params.slug]);
 
@@ -47,7 +50,8 @@ export default function ArticlePage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/${slug}`);
+      const encodedSlug = encodeURIComponent(slug);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/${encodedSlug}`);
 
       if (response.ok) {
         const result = await response.json();
@@ -106,42 +110,55 @@ export default function ArticlePage() {
     });
   };
 
+  const normalizeHref = (rawValue: string): string => {
+    const value = rawValue.trim();
+    if (!value) return value;
+    if (/^(https?:\/\/|mailto:)/i.test(value)) return value;
+    if (value.includes('@') && !value.includes('/')) return `mailto:${value}`;
+    return `https://${value}`;
+  };
+
+  const escapeHtml = (value: string): string =>
+    value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const escapeAttribute = (value: string): string =>
+    value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
   // Convert URLs in text to clickable links
   const convertUrlsToLinks = (text: string): string => {
     if (!text || typeof text !== 'string') return '';
 
-    // Check if text already contains anchor tags to avoid double-processing
-    if (/<a\s+[^>]*href/i.test(text)) {
-      // Already has links, return as is
-      return text;
-    }
-
     // URL regex pattern - matches http, https, www, and email addresses
     const urlPattern = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
+    const anchorPattern = /(<a\b[^>]*>[\s\S]*?<\/a>)/gi;
 
-    // Replace URLs with anchor tags
-    return text.replace(urlPattern, (match) => {
-      // Ensure match is a string
-      if (typeof match !== 'string') return match;
+    return text
+      .split(anchorPattern)
+      .map((segment) => {
+        if (/^<a\b[^>]*>[\s\S]*<\/a>$/i.test(segment)) {
+          return segment;
+        }
 
-      let href = match;
+        return segment.replace(urlPattern, (rawMatch) => {
+          let match = rawMatch;
+          let trailing = "";
 
-      // Add protocol if missing
-      if (match.startsWith('www.')) {
-        href = 'https://' + match;
-      } else if (!match.startsWith('http://') && !match.startsWith('https://') && match.includes('@')) {
-        // Email address
-        href = 'mailto:' + match;
-      } else if (!match.startsWith('http://') && !match.startsWith('https://')) {
-        href = 'https://' + match;
-      }
+          // Keep trailing punctuation outside anchor.
+          while (/[),.;!?]$/.test(match)) {
+            trailing = match.slice(-1) + trailing;
+            match = match.slice(0, -1);
+          }
 
-      // Escape HTML in URL to prevent XSS
-      const escapedUrl = match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const escapedHref = href.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          if (!match) return rawMatch;
 
-      return `<a href="${escapedHref}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedUrl}</a>`;
-    });
+          const href = normalizeHref(match);
+          const escapedUrl = escapeHtml(match);
+          const escapedHref = escapeAttribute(href);
+
+          return `<a href="${escapedHref}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedUrl}</a>${trailing}`;
+        });
+      })
+      .join("");
   };
 
   // Process content: convert markdown to HTML
@@ -152,8 +169,9 @@ export default function ArticlePage() {
 
     // Convert markdown links [text](url) to HTML links
     processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-      const escapedUrl = url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      const escapedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const normalizedHref = normalizeHref(url);
+      const escapedUrl = escapeAttribute(normalizedHref);
+      const escapedText = escapeHtml(text);
       return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-medium transition-colors cursor-pointer">${escapedText}</a>`;
     });
 
@@ -192,17 +210,15 @@ export default function ArticlePage() {
     return processed;
   };
 
-  const getCategoryColor = (tag: string) => {
+  const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      challenge: "from-emerald-500 to-emerald-600",
-      leaderboard: "from-blue-500 to-blue-600",
-      content: "from-purple-500 to-purple-600",
-      platform: "from-orange-500 to-orange-600",
-      referrals: "from-pink-500 to-pink-600",
-      community: "from-indigo-500 to-indigo-600",
-      news: "from-slate-500 to-slate-600"
+      general: "from-slate-500 to-slate-600",
+      crypto: "from-amber-500 to-amber-600",
+      rewards: "from-emerald-500 to-emerald-600",
+      updates: "from-blue-500 to-blue-600",
+      announcements: "from-purple-500 to-purple-600"
     };
-    return colors[tag.toLowerCase()] || "from-slate-500 to-slate-600";
+    return colors[category.toLowerCase()] || "from-slate-500 to-slate-600";
   };
 
   const shareArticle = () => {
@@ -291,9 +307,9 @@ export default function ArticlePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                     <div className="absolute top-6 left-6">
-                      {article.tags && article.tags.length > 0 && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor(article.tags[0])} text-white px-4 py-2 text-sm font-medium shadow-lg`}>
-                          {article.tags[0]}
+                      {article.category && (
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor(article.category)} text-white px-4 py-2 text-sm font-medium shadow-lg`}>
+                          {article.category}
                         </Badge>
                       )}
                     </div>
@@ -315,9 +331,9 @@ export default function ArticlePage() {
                   {/* Category and Date */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
-                      {!article.featured_image && article.tags && article.tags.length > 0 && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor(article.tags[0])} text-white px-4 py-2 text-sm font-medium`}>
-                          {article.tags[0]}
+                      {!article.featured_image && article.category && (
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor(article.category)} text-white px-4 py-2 text-sm font-medium`}>
+                          {article.category}
                         </Badge>
                       )}
                       <div className="flex items-center text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
@@ -530,7 +546,7 @@ export default function ArticlePage() {
                 >
                   <Card
                     className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden group"
-                    onClick={() => router.push(`/news/${relatedArticle.slug}`)}
+                    onClick={() => router.push(`/news/${encodeURIComponent(relatedArticle.slug)}`)}
                   >
                     {/* Featured Image */}
                     {relatedArticle.featured_image && (
@@ -545,9 +561,9 @@ export default function ArticlePage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         <div className="absolute top-3 left-3">
-                          {relatedArticle.tags && relatedArticle.tags.length > 0 && (
-                            <Badge className={`bg-gradient-to-r ${getCategoryColor(relatedArticle.tags[0])} text-white px-3 py-1 text-xs font-medium`}>
-                              {relatedArticle.tags[0]}
+                          {relatedArticle.category && (
+                            <Badge className={`bg-gradient-to-r ${getCategoryColor(relatedArticle.category)} text-white px-3 py-1 text-xs font-medium`}>
+                              {relatedArticle.category}
                             </Badge>
                           )}
                         </div>
@@ -555,9 +571,9 @@ export default function ArticlePage() {
                     )}
 
                     <CardHeader className="p-6">
-                      {!relatedArticle.featured_image && relatedArticle.tags && relatedArticle.tags.length > 0 && (
-                        <Badge className={`bg-gradient-to-r ${getCategoryColor(relatedArticle.tags[0])} text-white w-fit mb-3`}>
-                          {relatedArticle.tags[0]}
+                      {!relatedArticle.featured_image && relatedArticle.category && (
+                        <Badge className={`bg-gradient-to-r ${getCategoryColor(relatedArticle.category)} text-white w-fit mb-3`}>
+                          {relatedArticle.category}
                         </Badge>
                       )}
                       <CardTitle className="text-xl text-slate-800 break-words whitespace-normal group-hover:text-emerald-600 transition-colors">

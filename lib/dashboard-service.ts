@@ -60,6 +60,25 @@ export interface WeeklyPool {
   last_updated?: string;
 }
 
+export interface WeeklyReward {
+  rank: number | string;
+  pinecoins: number;
+  naira: number;
+  percentage: number;
+}
+
+export interface TaskPointRules {
+  signup_points: number;
+  referral_points: number;
+  share_social_points: number;
+  share_news_points: number;
+  comment_points: number;
+  like_points: number;
+  daily_login_points: number;
+  login_streak_bonus_days: number;
+  login_streak_bonus_spins: number;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -355,7 +374,7 @@ class DashboardService {
   }
 
   // Get leaderboard
-  async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[]; weekly_pool?: WeeklyPool }>> {
+  async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[]; weekly_pool?: WeeklyPool; weekly_rewards?: WeeklyReward[]; task_point_rules?: TaskPointRules }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/leaderboard?limit=${limit}`, {
         headers: this.getAuthHeaders(),
@@ -378,7 +397,12 @@ class DashboardService {
       if (result.success && result.data && result.data.users) {
         return {
           success: true,
-          data: { users: result.data.users, weekly_pool: result.data.weekly_pool }
+          data: {
+            users: result.data.users,
+            weekly_pool: result.data.weekly_pool,
+            weekly_rewards: result.data.weekly_rewards,
+            task_point_rules: result.data.task_point_rules
+          }
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -823,17 +847,16 @@ class DashboardService {
     }
   }
 
-  // Update user stats after claiming daily reward
-  async updateUserStatsAfterDailyReward(points: number, coins: number): Promise<ApiResponse> {
+  // Update user stats after claiming daily reward.
+  // Backend resolves configured daily points/spins; client should not pass reward values.
+  async updateUserStatsAfterDailyReward(): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         credentials: 'include',
         body: JSON.stringify({
-          action: 'daily_reward',
-          points,
-          coins
+          action: 'daily_reward'
         })
       });
 

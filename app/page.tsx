@@ -9,6 +9,7 @@ import { Trophy, Share2, Gift, Target, TrendingUp, Calendar, BarChart3, Sparkles
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { StructuredData, organizationSchema, websiteSchema, webApplicationSchema } from "@/components/structured-data";
+import { resolveNewsImageUrl } from "@/lib/news-image";
 
 // Animated Counter Component
 function AnimatedCounter({ value, suffix = "", className = "" }: { value: number; suffix?: string; className?: string }) {
@@ -32,14 +33,41 @@ interface NewsArticle {
   published_at: string;
   tags: string[];
   featured_image?: string;
+  category?: string;
 }
 
+interface TaskPointRules {
+  signup_points: number;
+  referral_points: number;
+  share_social_points: number;
+  share_news_points: number;
+  comment_points: number;
+  like_points: number;
+  daily_login_points: number;
+  login_streak_bonus_days: number;
+  login_streak_bonus_spins: number;
+}
+
+const defaultTaskPointRules: TaskPointRules = {
+  signup_points: 50,
+  referral_points: 30,
+  share_social_points: 20,
+  share_news_points: 10,
+  comment_points: 5,
+  like_points: 5,
+  daily_login_points: 5,
+  login_streak_bonus_days: 3,
+  login_streak_bonus_spins: 2
+};
+
 export default function HomePage() {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreNews, setHasMoreNews] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
   const itemsPerPage = 5;
 
   const containerVariants = {
@@ -62,10 +90,26 @@ export default function HomePage() {
     // Wait a bit to ensure all other data is loaded first
     const timer = setTimeout(() => {
       fetchNews(1);
+      (async () => {
+        try {
+          const response = await fetch(`${apiBase}/api/users/leaderboard/public?limit=1`);
+          if (!response.ok) return;
+          const result = await response.json();
+          const rules = result?.data?.task_point_rules;
+          if (rules) {
+            setTaskPointRules({
+              ...defaultTaskPointRules,
+              ...rules
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching task point rules:", error);
+        }
+      })();
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [apiBase]);
 
   const fetchNews = async (page: number, append: boolean = false) => {
     try {
@@ -294,12 +338,7 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <motion.h1
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-6 bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-600 bg-clip-text text-transparent px-2 leading-tight"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-                }}
-                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                style={{ backgroundSize: "200% 200%" }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-6 text-slate-900 px-2 leading-tight tracking-tight"
               >
                 PineCrest
               </motion.h1>
@@ -360,7 +399,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/sign-in" className="w-full sm:w-auto relative z-10">
-                <Button variant="outline" className="w-full sm:w-auto border-2 border-slate-300 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 active:border-emerald-600 active:text-emerald-700 hover:bg-emerald-50/50 active:bg-emerald-100/50 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-md hover:shadow-lg active:shadow-sm transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select relative z-10 pointer-events-auto">
+                <Button variant="outline" className="w-full sm:w-auto border-2 border-slate-300 text-emerald-900 hover:border-emerald-500 hover:text-emerald-700 active:border-emerald-600 active:text-emerald-800 hover:bg-emerald-50/50 active:bg-emerald-100/50 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-md hover:shadow-lg active:shadow-sm transform hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base touch-target no-select relative z-10 pointer-events-auto">
                   Sign In
                 </Button>
               </Link>
@@ -425,8 +464,8 @@ export default function HomePage() {
                 {
                   icon: Share2,
                   title: "Share Content",
-                  description: "Share posts on social media and earn 20 points per share",
-                  points: "20 pts",
+                  description: `Share posts on social media and earn ${taskPointRules.share_social_points} points per share`,
+                  points: `${taskPointRules.share_social_points} pts`,
                   color: "from-emerald-500 to-emerald-600"
                 },
                 {
@@ -439,22 +478,22 @@ export default function HomePage() {
                 {
                   icon: UserPlus,
                   title: "Refer Friends",
-                  description: "Invite friends and earn 10 points per successful referral",
-                  points: "10 pts",
+                  description: `Invite friends and earn ${taskPointRules.referral_points} points per successful referral`,
+                  points: `${taskPointRules.referral_points} pts`,
                   color: "from-emerald-600 to-emerald-700"
                 },
                 {
                   icon: Calendar,
                   title: "Daily Login",
-                  description: "Log in daily to claim 5 points and maintain your streak",
-                  points: "5 pts",
+                  description: `Log in daily to claim ${taskPointRules.daily_login_points} points and maintain your streak`,
+                  points: `${taskPointRules.daily_login_points} pts`,
                   color: "from-blue-600 to-blue-700"
                 },
                 {
                   icon: MessageCircle,
                   title: "Engage & Comment",
-                  description: "Comment and like posts to earn engagement points",
-                  points: "2 pts",
+                  description: `Comment and like posts to earn ${taskPointRules.comment_points} and ${taskPointRules.like_points} points`,
+                  points: `${taskPointRules.comment_points}/${taskPointRules.like_points} pts`,
                   color: "from-emerald-500 to-blue-500"
                 },
                 {
@@ -544,8 +583,20 @@ export default function HomePage() {
                       whileTap={{ scale: 0.98 }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}
                     >
-                      <Link href={`/news/${news.slug}`} className="block h-full">
+                      <Link href={`/news/${encodeURIComponent(news.slug)}`} className="block h-full">
                         <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 no-select cursor-pointer">
+                          {news.featured_image && (
+                            <div className="relative h-44 w-full overflow-hidden">
+                              <img
+                                src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined}
+                                alt={news.title}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                              />
+                            </div>
+                          )}
                           <CardHeader>
                             <div className="flex items-center justify-between mb-2">
                               {news.tags && news.tags.length > 0 && (
@@ -707,10 +758,10 @@ export default function HomePage() {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-0 shadow-lg">
+                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-0 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-amber-600 rounded-lg flex items-center justify-center">
                         <Trophy className="w-6 h-6 text-white" />
                       </div>
                       <div>

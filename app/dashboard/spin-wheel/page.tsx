@@ -81,6 +81,7 @@ export default function SpinWheelPage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [streakBonus, setStreakBonus] = useState({ days: 3, spins: 2 });
 
   // Fetch reset information and user stats
   useEffect(() => {
@@ -101,6 +102,16 @@ export default function SpinWheelPage() {
           const statsResponse = await dashboardService.getUserStats(user.id);
           if (statsResponse.success) {
             setSpinsRemaining(statsResponse.data.users[0]?.spins_remaining || 0);
+          }
+
+          // Pull streak rule values from backend-configured leaderboard rules
+          const leaderboardResponse = await dashboardService.getLeaderboard(1);
+          if (leaderboardResponse.success && leaderboardResponse.data?.task_point_rules) {
+            const rules = leaderboardResponse.data.task_point_rules;
+            setStreakBonus({
+              days: Number(rules.login_streak_bonus_days || 3),
+              spins: Number(rules.login_streak_bonus_spins || 2)
+            });
           }
         }
         
@@ -582,7 +593,7 @@ export default function SpinWheelPage() {
                     <p className="text-yellow-300 font-semibold">🎯 Come back daily for free spins</p>
                   </div>
                   <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-lg p-3 border border-red-400/30">
-                    <p className="text-red-300 font-semibold">🔥 Maintain 3-day login streak for bonus spins</p>
+                    <p className="text-red-300 font-semibold">🔥 Maintain {streakBonus.days}-day login streak for +{streakBonus.spins} bonus spins</p>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg p-3 border border-purple-400/30">
                     <p className="text-purple-300 font-semibold">⭐ Bigger rewards have equal chances</p>

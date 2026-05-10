@@ -103,11 +103,24 @@ export default function NewsPage() {
     { id: 6, title: "Monthly Community Spotlight: Meet Our Top Users", slug: "community-spotlight", excerpt: "Get to know the PineCoin community's most active users.", content: "", featured_image: null, author_name: "Community Team", published_at: new Date().toISOString(), views: 0, featured: true, tags: ["community", "spotlight", "users"] }
   ];
 
-  const categories = ["All", "General", "Crypto", "Rewards", "Updates", "Announcements"];
-
   // Use dynamic data or fallback (only if not loading and API failed)
   // Don't show fallback while loading - show skeleton instead
   const displayNews = loading ? [] : (newsItems.length > 0 ? newsItems : (error ? fallbackNewsItems : []));
+
+  const categories = Array.from(
+    new Set([
+      "All",
+      "General",
+      "Crypto",
+      "Rewards",
+      "Updates",
+      "Announcements",
+      ...displayNews
+        .map((item) => item.category?.trim())
+        .filter((category): category is string => Boolean(category))
+        .map((category) => category.charAt(0).toUpperCase() + category.slice(1))
+    ])
+  );
 
   // Filter news based on search and category
   const filteredNews = displayNews.filter(item => {
@@ -270,7 +283,7 @@ export default function NewsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <Link href={`/news/${news.slug || news.id}`}>
+                    <Link href={`/news/${encodeURIComponent(news.slug || String(news.id))}`}>
                       <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-md hover:shadow-lg transition-all">
                         Read Full Article
                       </Button>
@@ -403,7 +416,7 @@ export default function NewsPage() {
                           </Badge>
                         ))}
                       </div>
-                      <Link href={`/news/${news.slug || news.id}`}>
+                      <Link href={`/news/${encodeURIComponent(news.slug || String(news.id))}`}>
                         <Button variant="outline" className="w-full border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold transition-all">
                           Read More
                         </Button>

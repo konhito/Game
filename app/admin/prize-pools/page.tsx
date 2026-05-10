@@ -26,6 +26,7 @@ import {
 import { Trophy, Gift, Users, Loader2, Plus, Crown, Dices, Target, Check } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import { prizePoolService, PrizePool, Participant } from "@/lib/prize-pool-service";
+import config from "@/lib/config";
 
 export default function AdminPrizePoolsPage() {
   const router = useRouter();
@@ -40,6 +41,11 @@ export default function AdminPrizePoolsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [weeklyPoolPrice, setWeeklyPoolPrice] = useState("5000.00");
+  const [weeklyPoolNaira, setWeeklyPoolNaira] = useState("0.00");
+  const [weeklyPoolExchangeRate, setWeeklyPoolExchangeRate] = useState(0);
+  const [loadingWeeklyPool, setLoadingWeeklyPool] = useState(false);
+  const [savingWeeklyPool, setSavingWeeklyPool] = useState(false);
   const [poolForm, setPoolForm] = useState({
     title: '',
     description: '',
@@ -68,7 +74,7 @@ export default function AdminPrizePoolsPage() {
       }
       
       setCurrentUser(user);
-      await fetchPrizePools();
+      await Promise.all([fetchPrizePools(), fetchWeeklyPoolPrice()]);
     };
 
     checkAuth();
@@ -146,6 +152,76 @@ export default function AdminPrizePoolsPage() {
       alert(error.message || "Failed to create prize pool. Please try again.");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const fetchWeeklyPoolPrice = async () => {
+    try {
+      setLoadingWeeklyPool(true);
+      const response = await fetch(`${config.API_BASE}/api/settings/weekly-pool-price`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success || !data.data) {
+        throw new Error(data.error || "Failed to fetch weekly pool price");
+      }
+
+      const pinecoins = Number(data.data.pinecoins || 0);
+      const naira = Number(data.data.naira || 0);
+      const exchangeRate = Number(data.data.exchange_rate || 0);
+
+      setWeeklyPoolPrice(pinecoins > 0 ? pinecoins.toFixed(2) : "5000.00");
+      setWeeklyPoolNaira(naira > 0 ? naira.toFixed(2) : "0.00");
+      setWeeklyPoolExchangeRate(exchangeRate);
+    } catch (error) {
+      console.error("Error fetching weekly pool price:", error);
+      alert("Failed to load weekly pool price.");
+    } finally {
+      setLoadingWeeklyPool(false);
+    }
+  };
+
+  const handleSaveWeeklyPoolPrice = async () => {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        router.push("/sign-in");
+        return;
+      }
+
+      const pinecoins = parseFloat(weeklyPoolPrice);
+      if (Number.isNaN(pinecoins) || pinecoins <= 0) {
+        alert("Please enter a valid weekly pool amount greater than 0.");
+        return;
+      }
+
+      setSavingWeeklyPool(true);
+      const response = await fetch(`${config.API_BASE}/api/settings/weekly-pool-price`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pinecoins }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success || !data.data) {
+        throw new Error(data.error || "Failed to save weekly pool price");
+      }
+
+      const updatedPinecoins = Number(data.data.pinecoins || pinecoins);
+      const updatedNaira = Number(data.data.naira || 0);
+      const exchangeRate = Number(data.data.exchange_rate || 0);
+
+      setWeeklyPoolPrice(updatedPinecoins.toFixed(2));
+      setWeeklyPoolNaira(updatedNaira.toFixed(2));
+      setWeeklyPoolExchangeRate(exchangeRate);
+      alert("Weekly pool price updated successfully.");
+    } catch (error: any) {
+      console.error("Error saving weekly pool price:", error);
+      alert(error?.message || "Failed to save weekly pool price.");
+    } finally {
+      setSavingWeeklyPool(false);
     }
   };
 
@@ -397,6 +473,80 @@ export default function AdminPrizePoolsPage() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Weekly Pool Price */}
+        <Card className="mb-8 bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-slate-200/50">
+            <CardTitle className="text-xl text-slate-800">Weekly Pool Price</CardTitle>
+            <CardDescription className="text-slate-600">
+              Set the total weekly prize pool amount used for weekly leaderboard payouts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid md:grid-cols-3 gap-4 items-end">
+              <div className="space-y-2">
+                <Label htmlFor="weekly_pool_price">Weekly Pool (PineCoins)</Label>
+                <Input
+                  id="weekly_pool_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={weeklyPoolPrice}
+                  disabled={loadingWeeklyPool || savingWeeklyPool}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setWeeklyPoolPrice(next);
+                    const parsed = parseFloat(next);
+                    if (!Number.isNaN(parsed) && weeklyPoolExchangeRate > 0) {
+                      setWeeklyPoolNaira((parsed * weeklyPoolExchangeRate).toFixed(2));
+                    } else {
+                      setWeeklyPoolNaira("0.00");
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="weekly_pool_naira">Weekly Pool (Naira)</Label>
+                <Input id="weekly_pool_naira" value={weeklyPoolNaira} readOnly disabled />
+                <p className="text-xs text-slate-500">
+                  {weeklyPoolExchangeRate > 0
+                    ? `Exchange rate: 1 PineCoin = NGN ${weeklyPoolExchangeRate.toLocaleString()}`
+                    : "Exchange rate is unavailable"}
+                </p>
+              </div>
+              <div className="flex gap-2 md:justify-end">
+                <Button
+                  variant="outline"
+                  disabled={loadingWeeklyPool || savingWeeklyPool}
+                  onClick={fetchWeeklyPoolPrice}
+                >
+                  {loadingWeeklyPool ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Refresh"
+                  )}
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white"
+                  disabled={loadingWeeklyPool || savingWeeklyPool}
+                  onClick={handleSaveWeeklyPoolPrice}
+                >
+                  {savingWeeklyPool ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Weekly Pool"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Prize Pools Grid */}
         <div className="grid md:grid-cols-2 gap-6">

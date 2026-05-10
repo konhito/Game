@@ -226,16 +226,57 @@ export default function UsersPage() {
         role: roleFilter === 'all' ? undefined : roleFilter,
         status: statusFilter === 'all' ? undefined : statusFilter
       });
-      
-      if (result.success && result.data?.emailList) {
-        const emails = result.data.emailList.join(', ');
-        await navigator.clipboard.writeText(emails);
-        setCopied(true);
-        toast.success(`Copied ${result.data.count} email(s) to clipboard!`);
-        setTimeout(() => setCopied(false), 2000);
-      } else {
+
+      const emailList = Array.isArray(result.data?.emailList)
+        ? result.data.emailList.filter((email: unknown) => typeof email === 'string' && email.trim() !== '')
+        : [];
+
+      if (!result.success || emailList.length === 0) {
         toast.error('No emails found to copy');
+        return;
       }
+
+      const emails = emailList.join(', ');
+      let copiedSuccessfully = false;
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(emails);
+          copiedSuccessfully = true;
+        } catch (clipboardError) {
+          copiedSuccessfully = false;
+        }
+      }
+
+      if (!copiedSuccessfully && typeof document !== 'undefined') {
+        const textArea = document.createElement('textarea');
+        textArea.value = emails;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        copiedSuccessfully = document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+
+      if (copiedSuccessfully) {
+        setCopied(true);
+        toast.success(`Copied ${emailList.length} email(s) to clipboard!`);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      const blob = new Blob([emails], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `user-emails-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success(`Downloaded ${emailList.length} email(s) as fallback.`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to copy emails');
     } finally {
@@ -424,7 +465,9 @@ export default function UsersPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 line-clamp-1">{user.name}</h3>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-xs text-gray-500">ID: {user.id}</span>
+                          <Badge variant="outline" className="text-xs font-mono border-emerald-300 text-emerald-700">
+                            User ID: {user.id}
+                          </Badge>
                           <Badge className={`${getRoleColor(user.role)} text-xs`}>
                             {user.role}
                           </Badge>
@@ -584,6 +627,13 @@ export default function UsersPage() {
             <DialogDescription>
               Update user role, status, and contact information
             </DialogDescription>
+            {selectedUser && (
+              <div className="pt-1">
+                <Badge variant="outline" className="font-mono border-emerald-300 text-emerald-700">
+                  User ID: {selectedUser.id}
+                </Badge>
+              </div>
+            )}
           </DialogHeader>
           
           <div className="space-y-4">
@@ -661,6 +711,13 @@ export default function UsersPage() {
             <DialogDescription>
               Are you sure you want to permanently delete {selectedUser?.name}'s account? This action cannot be undone.
             </DialogDescription>
+            {selectedUser && (
+              <div className="pt-1">
+                <Badge variant="outline" className="font-mono border-red-300 text-red-700">
+                  User ID: {selectedUser.id}
+                </Badge>
+              </div>
+            )}
           </DialogHeader>
           
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">

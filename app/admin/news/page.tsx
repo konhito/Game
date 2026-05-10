@@ -61,6 +61,10 @@ interface NewsArticle {
   updated_at: string;
 }
 
+const hasMeaningfulText = (value: unknown): value is string => {
+  return typeof value === "string" && value.trim().length > 0;
+};
+
 function parseTags(tags: unknown): string[] {
   if (Array.isArray(tags)) {
     return tags.map((tag) => String(tag).trim()).filter(Boolean);
@@ -129,6 +133,7 @@ export default function AdminNewsPage() {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
   const [selectedLinkText, setSelectedLinkText] = useState("");
+  const [linkSelection, setLinkSelection] = useState<{ start: number; end: number } | null>(null);
 
   useEffect(() => {
     fetchArticles();
@@ -188,16 +193,15 @@ export default function AdminNewsPage() {
 
   // Insert link at cursor position
   const insertLink = () => {
-    if (!linkUrl) return;
+    const rawUrl = linkUrl.trim();
+    if (!rawUrl) return;
 
     const textarea = contentRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const start = linkSelection?.start ?? textarea?.selectionStart ?? formData.content.length;
+    const end = linkSelection?.end ?? textarea?.selectionEnd ?? start;
     const selectedText = formData.content.substring(start, end).trim();
-    const anchorText = (linkText || selectedText || selectedLinkText || "link").trim();
-    const normalizedUrl = /^(https?:\/\/|mailto:)/i.test(linkUrl) ? linkUrl : `https://${linkUrl}`;
+    const anchorText = (linkText.trim() || selectedText || selectedLinkText || rawUrl).trim();
+    const normalizedUrl = /^(https?:\/\/|mailto:)/i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
     const linkMarkdown = `[${anchorText}](${normalizedUrl})`;
     const newContent = formData.content.substring(0, start) + linkMarkdown + formData.content.substring(end);
 
@@ -206,6 +210,27 @@ export default function AdminNewsPage() {
     setLinkUrl("");
     setLinkText("");
     setSelectedLinkText("");
+    setLinkSelection(null);
+
+    if (textarea) {
+      setTimeout(() => {
+        textarea.focus();
+        const cursorPosition = start + linkMarkdown.length;
+        textarea.setSelectionRange(cursorPosition, cursorPosition);
+      }, 0);
+    }
+  };
+
+  const openLinkDialog = () => {
+    const textarea = contentRef.current;
+    const start = textarea?.selectionStart ?? formData.content.length;
+    const end = textarea?.selectionEnd ?? start;
+    const selected = formData.content.substring(start, end).trim();
+
+    setLinkSelection({ start, end });
+    setSelectedLinkText(selected);
+    setLinkText(selected);
+    setShowLinkDialog(true);
   };
 
   // Insert formatting
@@ -294,6 +319,7 @@ export default function AdminNewsPage() {
       formDataToSend.append('status', formData.status);
       formDataToSend.append('featured', formData.featured.toString());
       formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('category', formData.category);
       formDataToSend.append('meta_title', formData.meta_title);
       formDataToSend.append('meta_description', formData.meta_description);
 
@@ -348,6 +374,7 @@ export default function AdminNewsPage() {
       formDataToSend.append('status', formData.status);
       formDataToSend.append('featured', formData.featured.toString());
       formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('category', formData.category);
       formDataToSend.append('meta_title', formData.meta_title);
       formDataToSend.append('meta_description', formData.meta_description);
 
@@ -461,13 +488,19 @@ export default function AdminNewsPage() {
   };
 
   const applyArticleToForm = (article: NewsArticle) => {
+    const safeContent = hasMeaningfulText(article.content)
+      ? article.content
+      : hasMeaningfulText(formData.content)
+        ? formData.content
+        : "";
+
     setSubmitError(null);
     setEditingArticle(article);
     setFormData({
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt || "",
-      content: article.content || "",
+      content: safeContent,
       featured_image: article.featured_image || "",
       status: article.status,
       featured: article.featured,
@@ -489,11 +522,31 @@ export default function AdminNewsPage() {
     }
   };
 
+  const mergeArticleForEdit = (base: NewsArticle, incoming: Partial<NewsArticle>): NewsArticle => {
+    const merged = { ...base, ...incoming } as NewsArticle;
+
+    if (!hasMeaningfulText(incoming.content) && hasMeaningfulText(base.content)) {
+      merged.content = base.content;
+    }
+
+    if (!hasMeaningfulText(incoming.title) && hasMeaningfulText(base.title)) {
+      merged.title = base.title;
+    }
+
+    if (!hasMeaningfulText(incoming.excerpt) && hasMeaningfulText(base.excerpt)) {
+      merged.excerpt = base.excerpt;
+    }
+
+    return merged;
+  };
+
   const startEdit = async (article: NewsArticle) => {
+    // Show current article data immediately so the editor never opens empty.
+    applyArticleToForm(article);
+
     try {
       const token = localStorage.getItem("auth_token");
       if (!token) {
-        applyArticleToForm(article);
         return;
       }
 
@@ -508,19 +561,17 @@ export default function AdminNewsPage() {
         const result = await response.json();
         const fullArticle = result?.data?.article;
         if (fullArticle) {
-          applyArticleToForm({
-            ...article,
-            ...fullArticle,
-            tags: parseTags(fullArticle.tags),
-          });
+          applyArticleToForm(
+            mergeArticleForEdit(article, {
+              ...fullArticle,
+              tags: parseTags(fullArticle.tags),
+            })
+          );
           return;
         }
       }
-
-      applyArticleToForm(article);
     } catch (error) {
       console.error("Error fetching full article for edit:", error);
-      applyArticleToForm(article);
     }
   };
 
@@ -586,6 +637,19 @@ export default function AdminNewsPage() {
   };
 
   const stats = getContentStats();
+  const categorySuggestions = Array.from(
+    new Set([
+      "general",
+      "crypto",
+      "rewards",
+      "updates",
+      "announcements",
+      ...articles
+        .map((article) => article.category?.trim().toLowerCase())
+        .filter((category): category is string => Boolean(category)),
+      formData.category.trim().toLowerCase(),
+    ].filter(Boolean))
+  ).sort();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
@@ -679,7 +743,9 @@ export default function AdminNewsPage() {
                             alt={article.title}
                             className="w-full max-w-md h-36 object-cover rounded-lg mb-3 border border-slate-200"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = "/Icon.png";
                             }}
                           />
                         )}
@@ -915,15 +981,7 @@ export default function AdminNewsPage() {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => {
-                                  const textarea = contentRef.current;
-                                  const selected = textarea
-                                    ? formData.content.substring(textarea.selectionStart, textarea.selectionEnd).trim()
-                                    : "";
-                                  setSelectedLinkText(selected);
-                                  setLinkText(selected);
-                                  setShowLinkDialog(true);
-                                }}
+                                onClick={openLinkDialog}
                                 title="Insert Link"
                                 className="text-emerald-600 hover:text-emerald-700"
                               >
@@ -996,7 +1054,15 @@ export default function AdminNewsPage() {
                               <Input
                                 id="featured_image"
                                 value={formData.featured_image}
-                                onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                                onChange={(e) => {
+                                  const nextValue = e.target.value;
+                                  setFormData({ ...formData, featured_image: nextValue });
+                                  setSelectedFile(null);
+                                  if (fileInputRef.current) {
+                                    fileInputRef.current.value = '';
+                                  }
+                                  setImagePreview(nextValue ? resolveNewsImageUrl(nextValue, config.API_BASE) : null);
+                                }}
                                 placeholder="https://example.com/image.jpg"
                               />
                             </div>
@@ -1019,21 +1085,20 @@ export default function AdminNewsPage() {
                             </div>
                             <div>
                               <Label htmlFor="category" className="text-slate-700 font-semibold">Category</Label>
-                              <Select
+                              <Input
+                                id="category"
+                                list="news-category-options"
                                 value={formData.category}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                              >
-                                <SelectTrigger id="category" className="mt-1">
-                                  <SelectValue placeholder="Select category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="general">General</SelectItem>
-                                  <SelectItem value="crypto">Crypto</SelectItem>
-                                  <SelectItem value="rewards">Rewards</SelectItem>
-                                  <SelectItem value="updates">Updates</SelectItem>
-                                  <SelectItem value="announcements">Announcements</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                                placeholder="general"
+                                className="mt-1"
+                              />
+                              <datalist id="news-category-options">
+                                {categorySuggestions.map((categoryOption) => (
+                                  <option key={categoryOption} value={categoryOption} />
+                                ))}
+                              </datalist>
+                              <p className="text-xs text-slate-500 mt-1">Pick an existing category or type a new one.</p>
                             </div>
                             <div className="flex items-center space-x-2 pt-2">
                               <input
@@ -1242,6 +1307,7 @@ export default function AdminNewsPage() {
                       setLinkUrl("");
                       setLinkText("");
                       setSelectedLinkText("");
+                      setLinkSelection(null);
                     }}
                   >
                     Cancel
