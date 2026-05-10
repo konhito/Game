@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const wheelSegments = [
-  { id: 1, label: "200", points: 200, color: "#475569" }, // slate-600
-  { id: 2, label: "500", points: 500, color: "#1e293b" }, // slate-800
-  { id: 3, label: "10", points: 10, color: "#94a3b8" },  // slate-400
-  { id: 4, label: "25", points: 25, color: "#64748b" },  // slate-500
-  { id: 5, label: "50", points: 50, color: "#334155" },  // slate-700
-  { id: 6, label: "100", points: 100, color: "#0f172a" }, // slate-900
+  { id: 1, label: "200", points: 200, color: "#f59e0b" }, // amber-500
+  { id: 2, label: "500", points: 500, color: "#ef4444" }, // red-500
+  { id: 3, label: "10", points: 10, color: "#3b82f6" },  // blue-500
+  { id: 4, label: "25", points: 25, color: "#10b981" },  // emerald-500
+  { id: 5, label: "50", points: 50, color: "#8b5cf6" },  // violet-500
+  { id: 6, label: "100", points: 100, color: "#ec4899" }, // pink-500
 ];
 
 export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }) {
@@ -107,8 +107,8 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
   };
 
   return (
-    <Card className="border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col h-full">
-      <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+    <Card className="border-slate-200/50 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full">
+      <CardHeader className="bg-white/50 border-b border-slate-100 pb-4">
         <CardTitle className="text-lg font-medium text-slate-900 flex items-center gap-2">
           <CircleDollarSign className="w-5 h-5 text-slate-700" />
           Daily Spin
@@ -194,7 +194,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
           disabled={spinsRemaining <= 0 || isSpinning}
           className={`w-full max-w-[200px] transition-all ${
             spinsRemaining > 0 && !isSpinning
-              ? 'bg-slate-900 hover:bg-slate-800 text-white'
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg'
               : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
           }`}
         >
