@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,17 +11,16 @@ import {
   CheckCircle2,
   Coins,
   Flame,
-  Gift,
   ListTodo,
   Loader2,
   RefreshCw,
-  Sparkles,
-  Target,
   Trophy,
+  Users,
 } from "lucide-react";
 import { dashboardService, LeaderboardEntry, UserActivity, UserStats } from "@/lib/dashboard-service";
 import { authService } from "@/lib/auth-service";
 import { isTokenExpired } from "@/lib/token-utils";
+import { MiniSpinWheel } from "./_components/mini-spin-wheel";
 
 type DashboardData = {
   userStats: UserStats | null;
@@ -47,12 +45,7 @@ function formatActivityTime(value?: string) {
   if (!value) return "just now";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "just now";
-  return date.toLocaleString();
-}
-
-function formatRank(rank?: number) {
-  if (!rank) return "N/A";
-  return `#${rank}`;
+  return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function StatCard({
@@ -60,31 +53,24 @@ function StatCard({
   value,
   hint,
   icon,
-  tone,
 }: {
   title: string;
-  value: string;
+  value: string | number;
   hint: string;
   icon: React.ReactNode;
-  tone: "amber" | "emerald" | "blue" | "slate";
 }) {
-  const styles = {
-    amber: "from-amber-500/20 to-orange-500/20 border-amber-300/60 text-amber-900",
-    emerald: "from-emerald-500/20 to-teal-500/20 border-emerald-300/60 text-emerald-900",
-    blue: "from-blue-500/20 to-sky-500/20 border-blue-300/60 text-blue-900",
-    slate: "from-slate-500/15 to-slate-600/15 border-slate-300/60 text-slate-900",
-  }[tone];
-
   return (
-    <Card className={`border bg-gradient-to-br ${styles} shadow-sm`}>
-      <CardContent className="p-5">
+    <Card className="border-slate-200 bg-white shadow-sm overflow-hidden transition-all hover:shadow-md">
+      <CardContent className="p-6">
         <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.14em] text-slate-600">{title}</p>
-            <p className="mt-2 text-3xl font-semibold leading-none">{value}</p>
-            <p className="mt-2 text-sm text-slate-700">{hint}</p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-slate-500 tracking-tight">{title}</p>
+            <p className="text-3xl font-bold tracking-tight text-slate-900">{value}</p>
+            <p className="text-xs text-slate-500">{hint}</p>
           </div>
-          <div className="rounded-xl bg-white/70 p-2">{icon}</div>
+          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            {icon}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -97,8 +83,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [claimingDaily, setClaimingDaily] = useState(false);
-  const [dailyMessage, setDailyMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [dailyMessage, setDailyMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     userStats: null,
@@ -120,12 +105,11 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!silent) setLoading(true);
-    setError(null);
 
     try {
       const [statsRes, activitiesRes, leaderboardRes, tasksRes] = await Promise.allSettled([
         dashboardService.getUserStats(0),
-        dashboardService.getUserActivities(0, 6),
+        dashboardService.getUserActivities(0, 4),
         dashboardService.getLeaderboard(10),
         dashboardService.getAvailableTasks(),
       ]);
@@ -155,9 +139,8 @@ export default function DashboardPage() {
       };
 
       setDashboardData(nextState);
-    } catch (fetchError: any) {
-      const message = fetchError?.message || "Failed to load dashboard data";
-      setError(message);
+    } catch (error) {
+      console.error("Dashboard fetch error", error);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -190,10 +173,7 @@ export default function DashboardPage() {
   };
 
   const handleClaimDaily = async () => {
-    if (claimingDaily || isDailyClaimedToday) {
-      setDailyMessage("Daily reward already claimed today.");
-      return;
-    }
+    if (claimingDaily || isDailyClaimedToday) return;
 
     try {
       setClaimingDaily(true);
@@ -201,18 +181,21 @@ export default function DashboardPage() {
 
       const response = await dashboardService.updateUserStatsAfterDailyReward();
       if (!response.success) {
-        setDailyMessage(response.error || "Failed to claim daily reward.");
+        setDailyMessage({ type: 'error', text: response.error || "Failed to claim daily reward." });
         return;
       }
 
       await fetchDashboardData({ silent: true });
       const awardedPoints = Number(response?.data?.points_awarded || 0);
       const bonusSpins = Number(response?.data?.bonus_spins_awarded || 0);
-      setDailyMessage(
-        `Daily reward claimed: +${awardedPoints} weekly points${bonusSpins > 0 ? `, +${bonusSpins} bonus spins` : ""}.`
-      );
-    } catch (claimError: any) {
-      setDailyMessage(claimError?.message || "Failed to claim daily reward.");
+      setDailyMessage({
+        type: 'success',
+        text: `Claimed +${awardedPoints} points${bonusSpins > 0 ? `, +${bonusSpins} spins` : ""}.`
+      });
+      
+      setTimeout(() => setDailyMessage(null), 5000);
+    } catch (error: any) {
+      setDailyMessage({ type: 'error', text: "Failed to claim daily reward." });
     } finally {
       setClaimingDaily(false);
     }
@@ -220,10 +203,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[70vh] grid place-items-center">
-        <div className="flex items-center gap-3 text-slate-600">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Loading dashboard...</span>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-slate-500">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="text-sm font-medium">Loading workspace...</span>
         </div>
       </div>
     );
@@ -232,209 +215,221 @@ export default function DashboardPage() {
   const weeklyPoints = dashboardData.userStats?.weekly_points ?? 0;
   const totalCoins = Number(dashboardData.userStats?.total_coins || 0);
   const currentStreak = dashboardData.userStats?.current_streak ?? 0;
-  const spinsRemaining = dashboardData.userStats?.spins_remaining ?? 0;
   const currentRank = currentUserLeaderboardEntry?.rank;
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(14,165,233,0.17),transparent_40%),radial-gradient(circle_at_84%_4%,rgba(245,158,11,0.14),transparent_35%),radial-gradient(circle_at_50%_96%,rgba(16,185,129,0.14),transparent_40%)]" />
-
-      <div className="relative mx-auto max-w-7xl space-y-6 px-2 py-4 sm:px-4">
-        <motion.section
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.32 }}
-          className="rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm backdrop-blur"
-        >
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Operations Console</p>
-              <h1 className="mt-1 text-3xl font-semibold text-slate-900">Dashboard</h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                Weekly points drive leaderboard position. Weekly reset runs at Monday 00:00 UTC and reflected values appear here after refresh.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="border-slate-300 bg-white"
-              >
-                <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
-              <Button
-                onClick={handleClaimDaily}
-                disabled={claimingDaily || isDailyClaimedToday}
-                className="bg-slate-900 text-white hover:bg-slate-800"
-              >
-                {claimingDaily ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                {isDailyClaimedToday ? "Claimed" : "Claim Daily Reward"}
-              </Button>
-            </div>
+    <div className="min-h-screen bg-slate-50/50 pb-12">
+      <div className="mx-auto max-w-7xl px-4 py-8 space-y-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Overview</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Welcome back, monitor your progress and weekly standing.
+            </p>
           </div>
+          <div className="flex items-center gap-3">
+            {dailyMessage && (
+              <span className={`text-sm px-3 py-1.5 rounded-md border ${
+                dailyMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+              }`}>
+                {dailyMessage.text}
+              </span>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleClaimDaily}
+              disabled={claimingDaily || isDailyClaimedToday}
+              className="bg-slate-900 text-white hover:bg-slate-800"
+            >
+              {claimingDaily ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+              {isDailyClaimedToday ? "Reward Claimed" : "Claim Daily"}
+            </Button>
+          </div>
+        </div>
 
-          {dailyMessage && (
-            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-              {dailyMessage}
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {error}
-            </div>
-          )}
-        </motion.section>
-
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-tour="stats-cards">
+        {/* Top Stats Cards */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Weekly Points"
             value={weeklyPoints.toLocaleString()}
-            hint="Resets weekly"
-            icon={<Trophy className="h-5 w-5 text-amber-600" />}
-            tone="amber"
+            hint="Resets every Monday"
+            icon={<Trophy className="h-5 w-5 text-slate-700" />}
           />
           <StatCard
-            title="PineCoins"
-            value={`?${totalCoins.toFixed(2)}`}
-            hint="Wallet balance"
-            icon={<Coins className="h-5 w-5 text-emerald-600" />}
-            tone="emerald"
+            title="Total Balance"
+            value={`${totalCoins.toFixed(2)} PC`}
+            hint="Available PineCoins"
+            icon={<Coins className="h-5 w-5 text-slate-700" />}
           />
           <StatCard
             title="Current Rank"
-            value={formatRank(currentRank)}
-            hint="Weekly leaderboard"
-            icon={<Sparkles className="h-5 w-5 text-blue-600" />}
-            tone="blue"
+            value={currentRank ? `#${currentRank}` : "-"}
+            hint="Global leaderboard"
+            icon={<Users className="h-5 w-5 text-slate-700" />}
           />
           <StatCard
-            title="Streak / Spins"
-            value={`${currentStreak} / ${spinsRemaining}`}
-            hint="Days and free spins"
+            title="Login Streak"
+            value={`${currentStreak} days`}
+            hint="Active daily streak"
             icon={<Flame className="h-5 w-5 text-slate-700" />}
-            tone="slate"
           />
-        </section>
+        </div>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <Card className="border-slate-200/70 bg-white/95 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-slate-900">Top Weekly Leaderboard</CardTitle>
-                    <CardDescription>Ranking based on weekly points.</CardDescription>
-                  </div>
-                  <Button variant="ghost" onClick={() => router.push("/dashboard/leaderboard")}>
-                    Open <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboardData.leaderboard.slice(0, 5).map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-slate-900 text-white">#{entry.rank}</Badge>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">{entry.name}</p>
-                        <p className="text-xs text-slate-600">Streak: {entry.current_streak || 0} days</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-slate-900">{(entry.weekly_points || 0).toLocaleString()} wk</p>
-                      <p className="text-xs text-slate-600">?{Number(entry.total_coins || 0).toFixed(2)}</p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+        {/* Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          
+          {/* Left Column */}
+          <div className="space-y-6 lg:col-span-1 flex flex-col">
+            {/* Mini Spin Wheel */}
+            <div className="flex-1 min-h-[360px]">
+              <MiniSpinWheel onSpinComplete={() => fetchDashboardData({ silent: true })} />
+            </div>
 
-            <Card className="border-slate-200/70 bg-white/95 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-slate-900">Recent Activity</CardTitle>
-                <CardDescription>Most recent account actions.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboardData.recentActivities.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-600">
-                    No activity yet.
-                  </p>
-                )}
-
-                {dashboardData.recentActivities.slice(0, 6).map((item) => (
-                  <div key={item.id} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
-                    <div className="mt-0.5 rounded-lg bg-slate-100 p-2">
-                      <Activity className="h-4 w-4 text-slate-700" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-slate-900">{item.description}</p>
-                      <p className="mt-1 text-xs text-slate-600">{formatActivityTime(item.created_at)}</p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="border-slate-200/70 bg-white/95 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-slate-900">
-                  <ListTodo className="h-4 w-4" />
-                  Available Tasks
+            {/* Available Tasks */}
+            <Card className="border-slate-200 bg-white shadow-sm flex-1">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+                <CardTitle className="text-lg font-medium text-slate-900 flex items-center gap-2">
+                  <ListTodo className="h-5 w-5 text-slate-700" />
+                  Quick Tasks
                 </CardTitle>
-                <CardDescription>Work queue with point rewards.</CardDescription>
+                <CardDescription>Complete tasks to earn points.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboardData.availableTasks.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-600">
-                    No tasks available right now.
-                  </p>
-                )}
-
-                {dashboardData.availableTasks.slice(0, 4).map((task) => (
-                  <div key={task.id} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                    <p className="text-sm font-semibold text-slate-900">{task.title}</p>
-                    <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
-                      <span>{task.platform}</span>
-                      <span className="font-semibold text-emerald-700">+{task.reward_points} pts</span>
-                    </div>
+              <CardContent className="pt-4">
+                {dashboardData.availableTasks.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-slate-500 border border-dashed border-slate-200 rounded-lg">
+                    No pending tasks
                   </div>
-                ))}
-
-                <Button variant="outline" className="w-full" onClick={() => router.push("/dashboard/activities")}> 
-                  Open Activities <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200/70 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-                <CardDescription className="text-slate-300">Move through key flows.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                <Button variant="secondary" className="justify-start" onClick={() => router.push("/dashboard/spin-wheel")}> 
-                  <Target className="mr-2 h-4 w-4" /> Spin Wheel
-                </Button>
-                <Button variant="secondary" className="justify-start" onClick={() => router.push("/dashboard/prize-pool")}> 
-                  <Gift className="mr-2 h-4 w-4" /> Prize Pools
-                </Button>
-                <Button variant="secondary" className="justify-start" onClick={() => router.push("/dashboard/rewards")}> 
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Rewards
-                </Button>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboardData.availableTasks.slice(0, 3).map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                        <div>
+                          <p className="text-sm font-medium text-slate-900 line-clamp-1">{task.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{task.platform}</p>
+                        </div>
+                        <Badge variant="secondary" className="bg-slate-200 text-slate-700 hover:bg-slate-200 border-none">
+                          +{task.reward_points}
+                        </Badge>
+                      </div>
+                    ))}
+                    <Button variant="ghost" className="w-full text-sm text-slate-600 mt-2" onClick={() => router.push("/dashboard/activities")}>
+                      View All Tasks <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
-        </section>
+
+          {/* Right Column (Leaderboard & Activity) */}
+          <div className="space-y-6 lg:col-span-2">
+            
+            {/* Sleek Leaderboard Table */}
+            <Card className="border-slate-200 bg-white shadow-sm overflow-hidden">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-medium text-slate-900 flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-slate-700" />
+                    Global Leaderboard
+                  </CardTitle>
+                  <CardDescription>Top performers this week.</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/leaderboard")} className="hidden sm:flex">
+                  View Full
+                </Button>
+              </CardHeader>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-500 bg-white border-b border-slate-100 uppercase tracking-wider">
+                    <tr>
+                      <th className="px-6 py-4 font-medium">Rank</th>
+                      <th className="px-6 py-4 font-medium">Player</th>
+                      <th className="px-6 py-4 font-medium text-right">Points</th>
+                      <th className="px-6 py-4 font-medium text-right">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {dashboardData.leaderboard.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                          No leaderboard data available.
+                        </td>
+                      </tr>
+                    ) : (
+                      dashboardData.leaderboard.slice(0, 6).map((entry) => (
+                        <tr key={entry.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="px-6 py-3">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-semibold ${
+                              entry.rank === 1 ? 'bg-slate-900 text-white' :
+                              entry.rank === 2 ? 'bg-slate-700 text-white' :
+                              entry.rank === 3 ? 'bg-slate-500 text-white' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {entry.rank}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3">
+                            <div className="font-medium text-slate-900">{entry.name}</div>
+                            <div className="text-xs text-slate-500">{entry.current_streak} day streak</div>
+                          </td>
+                          <td className="px-6 py-3 text-right font-medium text-slate-900">
+                            {(entry.weekly_points || 0).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-3 text-right text-slate-600">
+                            {Number(entry.total_coins || 0).toFixed(2)} PC
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {/* Recent Activity (Compact) */}
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+                <CardTitle className="text-lg font-medium text-slate-900 flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-slate-700" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {dashboardData.recentActivities.length === 0 ? (
+                  <div className="py-4 text-center text-sm text-slate-500">
+                    No recent activity
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {dashboardData.recentActivities.map((item) => (
+                      <div key={item.id} className="flex items-start gap-3">
+                        <div className="mt-0.5 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-slate-50" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-slate-900">{item.description}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{formatActivityTime(item.created_at)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
