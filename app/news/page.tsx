@@ -33,7 +33,6 @@ export default function NewsPage() {
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [featuredArticle, setFeaturedArticle] = useState<NewsArticle | null>(null);
 
   // Fetch news articles from CMS
   useEffect(() => {
@@ -70,26 +69,6 @@ export default function NewsPage() {
       setNewsItems([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Fetch featured article
-  useEffect(() => {
-    fetchFeaturedArticle();
-  }, []);
-
-  const fetchFeaturedArticle = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?featured=true&limit=1`);
-      if (response.ok) {
-        const result = await response.json();
-        const articles = result?.data?.articles;
-        if (Array.isArray(articles) && articles.length > 0) {
-          setFeaturedArticle(articles[0]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching featured article:', error);
     }
   };
 
@@ -133,11 +112,15 @@ export default function NewsPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const featuredNews = filteredNews.filter((item) => item.featured);
+  const featuredIds = new Set(featuredNews.map((item) => item.id));
+  const latestNews = filteredNews.filter((item) => !featuredIds.has(item.id));
+
   // Pagination
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(latestNews.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedNews = latestNews.slice(startIndex, startIndex + itemsPerPage);
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -145,13 +128,13 @@ export default function NewsPage() {
       crypto: "from-amber-500 to-amber-600",
       rewards: "from-emerald-500 to-emerald-600",
       updates: "from-blue-500 to-blue-600",
-      announcements: "from-purple-500 to-purple-600"
+      announcements: "from-cyan-600 to-teal-600"
     };
     return colors[category.toLowerCase()] || "from-slate-500 to-slate-600";
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -165,7 +148,7 @@ export default function NewsPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold text-slate-800">
-              PineCoin News
+              News
             </h1>
           </div>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
@@ -180,7 +163,7 @@ export default function NewsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
             <div className="flex flex-col md:flex-row gap-4">
               {/* Search Bar */}
               <div className="flex-1 relative">
@@ -215,7 +198,7 @@ export default function NewsPage() {
         </motion.div>
 
         {/* Featured News */}
-        {!loading && filteredNews.filter(item => item.featured).length > 0 && (
+        {!loading && featuredNews.length > 0 && (
           <motion.div
             className="mb-12"
             initial={{ opacity: 0, y: 20 }}
@@ -227,8 +210,8 @@ export default function NewsPage() {
               Featured News
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredNews.filter(item => item.featured).map((news) => (
-                <Card key={news.id} className="bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              {featuredNews.map((news) => (
+                <Card key={news.id} className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
                   {/* Featured Image */}
                   {news.featured_image && (
                     <div className="relative h-64 w-full">
@@ -333,7 +316,7 @@ export default function NewsPage() {
 
               {/* News Grid Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, index) => (
+                {[...Array(12)].map((_, index) => (
                   <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
                     <div className="h-48 bg-slate-200 rounded-t-lg animate-pulse"></div>
                     <CardContent className="p-4">
@@ -361,7 +344,7 @@ export default function NewsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <Card className="h-full bg-white/90 backdrop-blur-md border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  <Card className="h-full bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
                     {/* Featured Image */}
                     {news.featured_image && (
                       <div className="relative h-48 w-full">
@@ -407,20 +390,22 @@ export default function NewsPage() {
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-slate-600 mb-4">{news.excerpt}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {(news.tags || []).slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            #{tag}
-                          </Badge>
-                        ))}
+                    <CardContent className="flex h-full flex-col">
+                      <p className="mb-4 min-h-[4.5rem] text-slate-600 line-clamp-3">{news.excerpt}</p>
+                      <div className="mt-auto">
+                        <div className="mb-4 grid min-h-7 grid-cols-3 gap-2">
+                          {(news.tags || []).slice(0, 3).map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="block w-full truncate text-center text-xs">
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <Link href={`/news/${encodeURIComponent(news.slug || String(news.id))}`}>
+                          <Button variant="outline" className="w-full border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold transition-all">
+                            Read More
+                          </Button>
+                        </Link>
                       </div>
-                      <Link href={`/news/${encodeURIComponent(news.slug || String(news.id))}`}>
-                        <Button variant="outline" className="w-full border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-600 hover:text-white font-semibold transition-all">
-                          Read More
-                        </Button>
-                      </Link>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -488,14 +473,14 @@ export default function NewsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 shadow-xl">
-            <CardContent className="p-8 text-center">
-              <Zap className="w-12 h-12 mx-auto mb-4 text-emerald-100" />
-              <h3 className="text-2xl font-bold mb-2">Stay Updated!</h3>
-              <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">
-                Get the latest PineCoin news, challenges, and updates delivered directly to your inbox.
-                Never miss an opportunity to earn more points!
-              </p>
+            <Card className="bg-white border border-slate-200 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <Zap className="w-12 h-12 mx-auto mb-4 text-emerald-600" />
+                <h3 className="text-2xl font-bold mb-2 text-slate-800">Stay Updated</h3>
+                <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
+                  Get the latest PineCoin news, challenges, and updates delivered directly to your inbox.
+                  Never miss an opportunity to earn more points!
+                </p>
               <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <Input
                   type="email"

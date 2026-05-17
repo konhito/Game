@@ -9,9 +9,11 @@ import { Menu, X } from "lucide-react";
 
 export default function SharedHeader() {
   const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHomeHeroVisible, setIsHomeHeroVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -76,14 +78,42 @@ export default function SharedHeader() {
 
   // Handle scroll detection
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       setIsScrolled(scrollTop > 20);
+
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Homepage: transparent only while hero is visible, solid once below hero.
+  useEffect(() => {
+    if (!isHomePage || typeof window === "undefined") {
+      setIsHomeHeroVisible(false);
+      return;
+    }
+
+    const hero = document.getElementById("home-hero");
+    if (!hero) {
+      setIsHomeHeroVisible(window.scrollY < window.innerHeight - 120);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHomeHeroVisible(entry.isIntersecting);
+      },
+      { threshold: 0.12 }
+    );
+
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, [isHomePage, pathname]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -115,11 +145,20 @@ export default function SharedHeader() {
 
   return (
     <motion.header 
-      className={`relative z-50 border-b transition-all duration-300 ${
-        isScrolled 
-          ? 'border-slate-200/80 backdrop-blur-xl bg-white/95 shadow-lg' 
-          : 'border-slate-200/50 backdrop-blur-md bg-white/70'
-      } sticky top-0 safe-top`}
+      className={`z-50 w-full border-b transition-all duration-300 ${
+        isHomePage
+          ? isHomeHeroVisible
+            ? "border-transparent bg-transparent backdrop-blur-0 shadow-none"
+            : "border-slate-200/80 backdrop-blur-xl bg-white/95 shadow-lg"
+          : isScrolled
+            ? "border-slate-200/80 backdrop-blur-xl bg-white/95 shadow-lg"
+            : "border-slate-200/50 backdrop-blur-md bg-white/70"
+      } ${isHomePage ? "" : "sticky top-0"} safe-top`}
+      style={
+        isHomePage
+          ? { position: "fixed", top: 0, left: 0, right: 0 }
+          : undefined
+      }
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}

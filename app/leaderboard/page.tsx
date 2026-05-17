@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,22 +60,45 @@ const defaultTaskPointRules: TaskPointRules = {
 };
 
 export default function LeaderboardPage() {
+  const POLL_INTERVAL_MS = 5000;
   const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [weeklyPool, setWeeklyPool] = useState<WeeklyPool | null>(null);
   const [weeklyRewardConfig, setWeeklyRewardConfig] = useState<WeeklyRewardConfig[]>([]);
   const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
-    fetchLeaderboard();
+    fetchLeaderboard({ showLoader: true });
+
+    const intervalId = setInterval(() => {
+      fetchLeaderboard({ silent: true });
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
   }, []);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = async (options?: { showLoader?: boolean; silent?: boolean }) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
+    const showLoader = Boolean(options?.showLoader);
+    const silent = Boolean(options?.silent);
+
     try {
-      setLoading(true);
+      if (showLoader) {
+        setLoading(true);
+      }
       const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
-      const response = await fetch(`${API_BASE}/api/users/leaderboard/public?limit=50`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4500);
+      const response = await fetch(`${API_BASE}/api/users/leaderboard/public?limit=50`, {
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
       
       if (!response.ok) {
         throw new Error('Failed to fetch leaderboard');
@@ -104,11 +127,18 @@ export default function LeaderboardPage() {
             ...result.data.task_point_rules
           });
         }
+        setErrorMessage(null);
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
+      if (!silent) {
+        setErrorMessage("Leaderboard is temporarily unavailable. Retrying every 5 seconds.");
+      }
     } finally {
-      setLoading(false);
+      if (showLoader) {
+        setLoading(false);
+      }
+      isFetchingRef.current = false;
     }
   };
 
@@ -147,7 +177,7 @@ export default function LeaderboardPage() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchLeaderboard();
+    await fetchLeaderboard({ silent: true });
     setRefreshing(false);
   };
 
@@ -215,6 +245,10 @@ export default function LeaderboardPage() {
             </div>
             <p className="text-slate-600 text-lg">Compete for weekly rewards and climb to the top! 🚀</p>
             
+            {errorMessage && (
+              <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
+            )}
+
             {/* Weekly Pool Display */}
             <div className="mt-6 mb-4 p-6 bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 rounded-2xl border-2 border-yellow-300 shadow-lg">
               <div className="text-center">

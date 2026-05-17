@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, TrendingUp, Crown, Calendar, Loader2, RefreshCw } from "lucide-react";
+import {
+  Trophy,
+  TrendingUp,
+  Crown,
+  Calendar,
+  Loader2,
+  RefreshCw,
+  Coins,
+  Flame,
+  Clock3,
+  CircleHelp,
+  Gift,
+  Target,
+} from "lucide-react";
 import { dashboardService } from "@/lib/dashboard-service";
 import { authService } from "@/lib/auth-service";
 
@@ -36,6 +49,7 @@ interface WeeklyRewardConfig {
   naira: number;
   percentage: number;
 }
+
 interface TaskPointRules {
   signup_points: number;
   referral_points: number;
@@ -47,6 +61,7 @@ interface TaskPointRules {
   login_streak_bonus_days: number;
   login_streak_bonus_spins: number;
 }
+
 const defaultTaskPointRules: TaskPointRules = {
   signup_points: 50,
   referral_points: 30,
@@ -56,80 +71,107 @@ const defaultTaskPointRules: TaskPointRules = {
   like_points: 5,
   daily_login_points: 5,
   login_streak_bonus_days: 3,
-  login_streak_bonus_spins: 2
+  login_streak_bonus_spins: 2,
 };
 
 export default function LeaderboardPage() {
+  const POLL_INTERVAL_MS = 5000;
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [weeklyPool, setWeeklyPool] = useState<WeeklyPool | null>(null);
   const [weeklyRewardConfig, setWeeklyRewardConfig] = useState<WeeklyRewardConfig[]>([]);
   const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
+  const isFetchingRef = useRef(false);
 
   const poolDisplay = weeklyPool || {
     pinecoins: 0,
     naira: 0,
     exchange_rate: 0,
     buy_rate: 0,
-    sell_rate: 0
+    sell_rate: 0,
   };
 
-  const weeklyRewards = weeklyRewardConfig.length > 0 ? weeklyRewardConfig.map((reward) => {
-    const rank = reward.rank;
-    const color =
-      rank === 1
-        ? "bg-yellow-500"
-        : rank === 2
-          ? "bg-gray-400"
-          : rank === 3
-            ? "bg-orange-500"
-            : "bg-purple-500";
-    return {
-      rank,
-      reward: `${Number(reward.percentage || 0).toFixed(2).replace(/\.00$/, "")}%`,
-      amount: `PC ${Number(reward.pinecoins || 0).toLocaleString()}`,
-      naira: `NGN ${Number(reward.naira || 0).toLocaleString()}`,
-      color
-    };
-  }) : [
-    { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", color: "bg-yellow-500" },
-    { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", color: "bg-gray-400" },
-    { rank: 3, reward: "15%", amount: "PC 750", naira: "NGN 0", color: "bg-orange-500" },
-    { rank: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", color: "bg-purple-500" },
-  ];
+  const weeklyRewards =
+    weeklyRewardConfig.length > 0
+      ? weeklyRewardConfig.map((reward) => {
+          const rank = reward.rank;
+          const tone =
+            rank === 1
+              ? "bg-amber-100 text-amber-800 border-amber-200"
+              : rank === 2
+                ? "bg-slate-200 text-slate-700 border-slate-300"
+                : rank === 3
+                  ? "bg-orange-100 text-orange-800 border-orange-200"
+                  : "bg-violet-100 text-violet-800 border-violet-200";
+
+          return {
+            rank,
+            reward: `${Number(reward.percentage || 0).toFixed(2).replace(/\.00$/, "")}%`,
+            amount: `PC ${Number(reward.pinecoins || 0).toLocaleString()}`,
+            naira: `NGN ${Number(reward.naira || 0).toLocaleString()}`,
+            tone,
+          };
+        })
+      : [
+          { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", tone: "bg-amber-100 text-amber-800 border-amber-200" },
+          { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", tone: "bg-slate-200 text-slate-700 border-slate-300" },
+          { rank: 3, reward: "15%", amount: "PC 750", naira: "NGN 0", tone: "bg-orange-100 text-orange-800 border-orange-200" },
+          { rank: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", tone: "bg-violet-100 text-violet-800 border-violet-200" },
+        ];
 
   useEffect(() => {
     const checkAuth = async () => {
       const user = authService.getUser();
       const token = authService.getToken();
-      
+
       if (!user || !token) {
         router.push("/sign-in");
         return;
       }
-      
+
       setCurrentUser(user);
-      await fetchLeaderboard();
+      await fetchLeaderboard({ showLoader: true });
     };
 
     checkAuth();
   }, [router]);
 
-  const fetchLeaderboard = async () => {
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const intervalId = setInterval(() => {
+      fetchLeaderboard({ silent: true });
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [currentUser]);
+
+  const fetchLeaderboard = async (options?: { showLoader?: boolean; silent?: boolean }) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
+    const showLoader = Boolean(options?.showLoader);
+    const silent = Boolean(options?.silent);
+
     try {
-      setLoading(true);
+      if (showLoader) {
+        setLoading(true);
+      }
+
       const response = await dashboardService.getLeaderboard(50);
-      
+
       if (response.success && response.data.users) {
-        // Add rank to each entry
         const rankedData = response.data.users.map((entry: any, index: number) => ({
           ...entry,
-          rank: index + 1
+          rank: index + 1,
         }));
+
         setLeaderboardData(rankedData);
+
         if (response.data.weekly_pool) {
           setWeeklyPool(response.data.weekly_pool);
         }
@@ -139,467 +181,393 @@ export default function LeaderboardPage() {
         if (response.data.task_point_rules) {
           setTaskPointRules({
             ...defaultTaskPointRules,
-            ...response.data.task_point_rules
+            ...response.data.task_point_rules,
           });
         }
+
+        setErrorMessage(null);
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
+      if (!silent) {
+        setErrorMessage("Leaderboard is temporarily unavailable. Retrying every 5 seconds.");
+      }
     } finally {
-      setLoading(false);
+      if (showLoader) {
+        setLoading(false);
+      }
+      isFetchingRef.current = false;
     }
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchLeaderboard();
+    await fetchLeaderboard({ silent: true });
     setRefreshing(false);
   };
 
   const getUserRank = () => {
     if (!currentUser) return null;
-    const userEntry = leaderboardData.find(entry => entry.user_id === currentUser.id);
+    const userEntry = leaderboardData.find((entry) => entry.user_id === currentUser.id);
     return userEntry?.rank || null;
   };
 
   const getUserPoints = () => {
     if (!currentUser) return 0;
-    const userEntry = leaderboardData.find(entry => entry.user_id === currentUser.id);
+    const userEntry = leaderboardData.find((entry) => entry.user_id === currentUser.id);
     return userEntry?.total_points || 0;
   };
 
   const getUserWeeklyPoints = () => {
     if (!currentUser) return 0;
-    const userEntry = leaderboardData.find(entry => entry.user_id === currentUser.id);
+    const userEntry = leaderboardData.find((entry) => entry.user_id === currentUser.id);
     return userEntry?.weekly_points || 0;
   };
 
-  const getAvatar = (rank: number) => {
-    if (rank === 1) return "👑";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    if (rank <= 10) return `${rank}️⃣`;
-    return "🎯";
+  const getUserStreak = () => {
+    if (!currentUser) return 0;
+    const userEntry = leaderboardData.find((entry) => entry.user_id === currentUser.id);
+    return userEntry?.current_streak || 0;
   };
 
   const getNextResetTime = () => {
     const now = new Date();
     const currentDay = now.getUTCDay();
-    const daysToMonday = currentDay === 0 ? 6 : currentDay - 1;
-    
+    const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
     const nextMonday = new Date(now);
-    if (currentDay === 0 || daysToMonday === 0) {
-      nextMonday.setUTCDate(now.getUTCDate() + (7 - daysToMonday));
-    } else {
-      nextMonday.setUTCDate(now.getUTCDate() + (7 - daysToMonday));
-    }
+    nextMonday.setUTCDate(now.getUTCDate() + (7 - daysSinceMonday));
     nextMonday.setUTCHours(0, 0, 0, 0);
-    
+
     const daysUntilReset = Math.ceil((nextMonday.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return daysUntilReset;
   };
 
+  const getRankTone = (rank?: number) => {
+    if (rank === 1) {
+      return "bg-amber-50 border-amber-200";
+    }
+    if (rank === 2) {
+      return "bg-slate-100 border-slate-300";
+    }
+    if (rank === 3) {
+      return "bg-orange-50 border-orange-200";
+    }
+    return "bg-white border-slate-200";
+  };
+
+  const getRankBadgeTone = (rank?: number) => {
+    if (rank === 1) {
+      return "bg-amber-600 text-amber-50";
+    }
+    if (rank === 2) {
+      return "bg-slate-600 text-slate-50";
+    }
+    if (rank === 3) {
+      return "bg-orange-600 text-orange-50";
+    }
+    return "bg-slate-700 text-slate-50";
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-white mx-auto mb-4" />
-          <p className="text-white">Loading leaderboard...</p>
+      <div className="min-h-screen bg-[oklch(0.98_0.01_190)] p-6">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-slate-200 bg-white p-10 shadow-sm">
+          <div className="flex items-center justify-center gap-3 text-slate-700">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <p className="text-base font-medium">Loading leaderboard</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Enhanced Header */}
-        <div className="text-center mb-12 relative">
-          <div className="absolute inset-0 flex items-center justify-center opacity-5">
-            <Trophy className="w-96 h-96" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                <Trophy className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-[oklch(0.98_0.01_190)] p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <Trophy className="h-3.5 w-3.5" />
+                Weekly competition
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 via-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                Weekly Leaderboard
-              </h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Leaderboard</h1>
+              <p className="max-w-[70ch] text-sm text-slate-600">
+                Rankings update continuously, rewards settle every Monday at 00:00 UTC.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-400 hover:shadow-md transition-all duration-300 hover:scale-110 hover:rotate-180 active:scale-95"
+                className="border-slate-300 text-slate-700 hover:bg-slate-100"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                Refresh
               </Button>
             </div>
-            <p className="text-slate-600 text-lg">Compete for weekly rewards and climb to the top! 🚀</p>
-
-            <div className="mt-6 mb-4 p-6 bg-gradient-to-r from-yellow-100 via-orange-100 to-amber-100 rounded-2xl border-2 border-yellow-300 shadow-lg">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Crown className="w-6 h-6 text-yellow-600" />
-                  <span className="text-sm font-semibold text-slate-700">Available Reward for the Week</span>
-                </div>
-                <div className="flex items-center justify-center gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-slate-800">₽{poolDisplay.pinecoins.toLocaleString()}</div>
-                    <div className="text-sm text-slate-600 mt-1">PineCoins</div>
-                  </div>
-                  <div className="w-px h-12 bg-slate-400"></div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-emerald-700">₦{poolDisplay.naira.toLocaleString()}</div>
-                    <div className="text-sm text-slate-600 mt-1">Naira</div>
-                  </div>
-                </div>
-                <div className="mt-3 space-y-1">
-                  <div className="text-xs text-slate-500">
-                    Payout (buy) rate: 1 PineCoin = ₦{(poolDisplay.buy_rate || poolDisplay.exchange_rate).toLocaleString()}
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    Market rate: ₦{poolDisplay.exchange_rate.toLocaleString()} · Sell rate: ₦{(poolDisplay.sell_rate || poolDisplay.exchange_rate).toLocaleString()}
-                  </div>
-                  {poolDisplay.last_updated && (
-                    <div className="text-xs text-slate-400 italic">
-                      Rate updated: {new Date(poolDisplay.last_updated).toLocaleTimeString()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>Resets every Monday at 00:00 UTC</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-600 font-semibold">
-                  {getNextResetTime()} days until reset
-                </span>
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* Enhanced Stats Overview */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-amber-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <CardHeader className="pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium text-amber-100 flex items-center gap-2">
-                <Trophy className="w-4 h-4" />
-                Your Rank
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-4xl font-bold mb-2">
-                {getUserRank() ? `#${getUserRank()}` : 'N/A'}
-              </div>
-              <p className="text-sm text-amber-100">Current position</p>
-            </CardContent>
-          </Card>
+          {errorMessage && <p className="mt-3 text-sm text-red-700">{errorMessage}</p>}
+        </header>
 
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <CardHeader className="pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium text-blue-100 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Your Points
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-4xl font-bold mb-2">{getUserPoints().toLocaleString()}</div>
-              <p className="text-sm text-blue-100">Total points</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-xl hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden relative cursor-pointer">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <CardHeader className="pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium text-emerald-100 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Weekly Points
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-4xl font-bold mb-2">{getUserWeeklyPoints().toLocaleString()}</div>
-              <p className="text-sm text-emerald-100">This week</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Leaderboard */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-2xl">
-              <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-slate-200/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <Trophy className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-slate-800 text-xl">Top Players</CardTitle>
-                      <CardDescription className="text-slate-600">
-                        Weekly rankings based on points earned
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md">
-                    {getNextResetTime()} days left
-                  </Badge>
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <Card className="xl:col-span-2 border-slate-200 bg-white shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <CardTitle className="text-slate-900">Top players</CardTitle>
+                  <CardDescription>Top 10 by total points</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  {leaderboardData.length === 0 ? (
-                    <div className="text-center py-12 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
-                      <div className="text-6xl mb-4">🏆</div>
-                      <p className="text-slate-600 font-medium text-lg">No leaderboard data available yet.</p>
-                      <p className="text-sm text-slate-500 mt-2">Start earning points to appear on the leaderboard!</p>
-                    </div>
-                  ) : (
-                    leaderboardData.slice(0, 10).map((player, index) => (
-                      <div 
-                        key={player.id} 
-                        className={`flex items-center justify-between p-5 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-200/50 cursor-pointer ${
-                          player.rank === 1 
-                            ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 shadow-md' 
-                            : player.rank === 2 
-                            ? 'bg-gradient-to-r from-gray-100 to-slate-100 border-2 border-gray-300 shadow-md' 
-                            : player.rank === 3 
-                            ? 'bg-gradient-to-r from-orange-100 to-amber-100 border-2 border-orange-300 shadow-md' 
-                            : 'bg-gradient-to-r from-white to-slate-50 border border-slate-200'
+                <Badge variant="secondary" className="w-fit rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                  <Clock3 className="mr-1.5 h-3.5 w-3.5" />
+                  {getNextResetTime()} days to reset
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {leaderboardData.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                  <p className="text-base font-medium text-slate-800">No leaderboard data available yet.</p>
+                  <p className="mt-1 text-sm text-slate-600">Complete activities to appear in the rankings.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {leaderboardData.slice(0, 10).map((player) => {
+                    const isCurrentUser = currentUser?.id === player.user_id;
+                    return (
+                      <div
+                        key={player.id}
+                        className={`rounded-xl border p-3 transition-colors sm:p-4 ${getRankTone(player.rank)} ${
+                          isCurrentUser ? "ring-1 ring-emerald-300" : ""
                         }`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl">{getAvatar(player.rank)}</span>
-                            <div className="text-center min-w-[50px]">
-                              <div className={`text-xl font-bold ${
-                                player.rank === 1 ? 'text-yellow-600' :
-                                player.rank === 2 ? 'text-gray-600' :
-                                player.rank === 3 ? 'text-orange-600' : 'text-slate-700'
-                              }`}>
-                                #{player.rank}
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span
+                              className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${getRankBadgeTone(
+                                player.rank
+                              )}`}
+                            >
+                              #{player.rank}
+                            </span>
+
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-900 sm:text-base">{player.name}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                                <span className="inline-flex items-center gap-1">
+                                  <Flame className="h-3.5 w-3.5 text-orange-600" />
+                                  {player.current_streak || 0} day streak
+                                </span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Coins className="h-3.5 w-3.5 text-emerald-700" />PC {Number(player.total_coins || 0).toFixed(0)}
+                                </span>
+                                {isCurrentUser && (
+                                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                                    You
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <div>
-                            <p className="font-bold text-lg text-slate-800">{player.name}</p>
-                            <div className="flex items-center gap-3 text-sm text-slate-600">
-                              <span className="flex items-center gap-1">
-                                <span className="text-orange-500">🔥</span> 
-                                {player.current_streak || 0} day streak
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <span className="text-emerald-500">💰</span> 
-                                ₽{Number(player.total_coins || 0).toFixed(0)}
-                              </span>
-                            </div>
+
+                          <div className="text-left sm:text-right">
+                            <p className="text-lg font-semibold text-slate-900 sm:text-xl">{player.total_points.toLocaleString()}</p>
+                            <p className="text-xs text-slate-600">
+                              Weekly change: <span className="font-medium text-emerald-700">+{player.weekly_points || 0}</span>
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-slate-800">{player.total_points.toLocaleString()}</div>
-                          <p className="text-sm text-slate-600">
-                            <span className="text-green-600 font-medium">+{player.weekly_points || 0}</span> this week
-                          </p>
-                        </div>
                       </div>
-                    ))
-                  )}
+                    );
+                  })}
                 </div>
-                
-                {/* Your Position */}
-                {getUserRank() && (
-                  <div className="mt-6 p-6 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-3xl">
-                          🎯
-                        </div>
-                        <div>
-                          <p className="font-bold text-xl">Your Position</p>
-                          <p className="text-sm text-blue-100">Keep playing to climb higher!</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold">#{getUserRank()}</div>
-                        <p className="text-sm text-blue-100">{getUserPoints().toLocaleString()} points</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Weekly Rewards */}
-            <Card className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-slate-200/50">
-                <CardTitle className="flex items-center gap-2 text-slate-800">
-                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
-                    <Crown className="w-5 h-5 text-white" />
-                  </div>
-                  <span>Weekly Rewards</span>
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-slate-900">
+                  <Crown className="h-5 w-5 text-amber-700" />
+                  Reward distribution
                 </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Prize pool distribution
-                </CardDescription>
+                <CardDescription>How the weekly pool is shared</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  {weeklyRewards.map((reward, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-lg hover:shadow-slate-200/50 hover:scale-[1.02] hover:border-slate-300 hover:bg-gradient-to-r hover:from-slate-100 hover:to-white transition-all duration-300 cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <Badge className={`${reward.color} text-white shadow-sm`}>
-                          {reward.rank === "Random" ? "🎲" : `#${reward.rank}`}
-                        </Badge>
-                        <span className="font-semibold text-slate-700">{reward.reward}</span>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-lg text-slate-800">{reward.amount}</p>
-                        {reward.naira && (
-                          <p className="text-sm text-emerald-600 font-medium">{reward.naira}</p>
-                        )}
-                      </div>
+              <CardContent className="space-y-2">
+                {weeklyRewards.map((reward, index) => (
+                  <div key={index} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${reward.tone}`}>
+                        {reward.rank === "Random" ? "Random" : `#${reward.rank}`}
+                      </span>
+                      <span className="text-sm font-medium text-slate-700">{reward.reward}</span>
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-slate-900">{reward.amount}</p>
+                      <p className="text-xs text-emerald-700">{reward.naira}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-slate-900">
+                  <TrendingUp className="h-5 w-5 text-blue-700" />
+                  Earning actions
+                </CardTitle>
+                <CardDescription>Configured point values</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Sign up</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.signup_points}</span>
                 </div>
-                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-300 shadow-sm">
-                  <p className="text-sm text-center text-yellow-800 font-bold">
-                    💰 Total Prize Pool: ₽{poolDisplay.pinecoins.toLocaleString()} / ₦{poolDisplay.naira.toLocaleString()}
-                  </p>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Referral</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.referral_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Share social post</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.share_social_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Share news post</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.share_news_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Comment on social post</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.comment_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Like social post</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.like_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>Daily login</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.daily_login_points}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span>{taskPointRules.login_streak_bonus_days}-day streak bonus</span>
+                  <span className="font-medium text-slate-800">+{taskPointRules.login_streak_bonus_spins} spins</span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* How to Climb */}
-            <Card className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-slate-200/50">
-                <CardTitle className="flex items-center gap-2 text-slate-800">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <span>How to Climb</span>
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-slate-900">
+                  <CircleHelp className="h-5 w-5 text-indigo-700" />
+                  Rules
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <span className="text-2xl">🆕</span>
-                    <span className="font-medium text-slate-700">Sign up: <span className="text-blue-600 font-bold">+{taskPointRules.signup_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
-                    <span className="text-2xl">🤝</span>
-                    <span className="font-medium text-slate-700">Referral: <span className="text-purple-600 font-bold">+{taskPointRules.referral_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
-                    <span className="text-2xl">📣</span>
-                    <span className="font-medium text-slate-700">Share our social post: <span className="text-orange-600 font-bold">+{taskPointRules.share_social_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-sky-50 border border-sky-200">
-                    <span className="text-2xl">📰</span>
-                    <span className="font-medium text-slate-700">Share a news post: <span className="text-sky-600 font-bold">+{taskPointRules.share_news_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-2xl">💬</span>
-                    <span className="font-medium text-slate-700">Comment on a social post: <span className="text-green-600 font-bold">+{taskPointRules.comment_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                    <span className="text-2xl">👍</span>
-                    <span className="font-medium text-slate-700">Like a social post: <span className="text-amber-600 font-bold">+{taskPointRules.like_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-                    <span className="text-2xl">📅</span>
-                    <span className="font-medium text-slate-700">Daily login: <span className="text-emerald-600 font-bold">+{taskPointRules.daily_login_points} points</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <span className="text-2xl">🔥</span>
-                    <span className="font-medium text-slate-700">{taskPointRules.login_streak_bonus_days}-day login streak: <span className="text-rose-600 font-bold">+{taskPointRules.login_streak_bonus_spins} extra spins</span></span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Leaderboard Info */}
-            <Card className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50">
-                <CardTitle className="flex items-center gap-2 text-slate-800">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-white" />
-                  </div>
-                  <span>Leaderboard Info</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-blue-500">🔄</span>
-                    <span>Resets every Monday at 00:00 UTC</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-yellow-500">🏆</span>
-                    <span>Top 3 players get weekly rewards</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-purple-500">🎲</span>
-                    <span>1 random player gets {weeklyRewards.find((r) => r.rank === "Random")?.reward || "5%"} bonus</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-green-500">📊</span>
-                    <span>Points rank you up; PineCoins are paid weekly</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-emerald-500">🏦</span>
-                    <span>PineCoins can be converted and paid to your bank</span>
-                  </div>
-                </div>
+              <CardContent className="space-y-2 text-sm text-slate-700">
+                <p>Leaderboard resets every Monday at 00:00 UTC.</p>
+                <p>Top 3 ranks receive fixed reward shares.</p>
+                <p>One random eligible player receives the random bonus share.</p>
+                <p>Points drive rank placement, PineCoin rewards settle weekly.</p>
               </CardContent>
             </Card>
           </div>
-        </div>
+        </section>
 
-        {/* Bottom CTA */}
-        <div className="mt-12">
-          <Card className="bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 text-white border-0 shadow-2xl overflow-hidden relative">
-            <div className="absolute inset-0 bg-grid-white/10"></div>
-            <CardContent className="pt-12 pb-12 relative z-10">
-              <div className="text-center max-w-2xl mx-auto">
-                <div className="text-6xl mb-6">🚀</div>
-                <h3 className="text-4xl font-bold mb-4">Ready to Reach the Top?</h3>
-                <p className="text-white/90 mb-8 text-lg">
-                  Start earning points now and compete for weekly rewards!
+        <section className="grid grid-cols-1 gap-6">
+          <Card className="border-slate-200 bg-white shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-slate-900">
+                <Target className="h-5 w-5 text-emerald-700" />
+                Your snapshot
+              </CardTitle>
+              <CardDescription>Live stats for your account</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Current rank</p>
+                <p className="text-xl font-semibold text-slate-900">{getUserRank() ? `#${getUserRank()}` : "Unranked"}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Total points</p>
+                <p className="text-xl font-semibold text-slate-900">{getUserPoints().toLocaleString()}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">This week</p>
+                <p className="text-xl font-semibold text-slate-900">{getUserWeeklyPoints().toLocaleString()}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Current streak</p>
+                <p className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+                  <Flame className="h-4 w-4 text-orange-600" />
+                  {getUserStreak()} days
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    className="bg-white text-emerald-600 hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
-                    onClick={() => router.push('/dashboard')}
-                  >
-                    <Trophy className="w-5 h-5 mr-2" />
-                    Start Playing
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm font-bold text-lg px-8 py-6 rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
-                    onClick={() => router.push('/dashboard/activities')}
-                  >
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    View All Activities
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
+
+        <section>
+          <Card className="border-slate-200 bg-white shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-slate-900">
+                <Gift className="h-5 w-5 text-emerald-700" />
+                Weekly prize pool
+              </CardTitle>
+              <CardDescription>Current payout and conversion rates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total PineCoins</p>
+                  <p className="mt-1 text-2xl font-semibold text-slate-900">PC {poolDisplay.pinecoins.toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Estimated Naira value</p>
+                  <p className="mt-1 text-2xl font-semibold text-slate-900">NGN {poolDisplay.naira.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-600 sm:grid-cols-3">
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  Payout rate: NGN {(poolDisplay.buy_rate || poolDisplay.exchange_rate).toLocaleString()} / PC
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  Market rate: NGN {poolDisplay.exchange_rate.toLocaleString()} / PC
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  Sell rate: NGN {(poolDisplay.sell_rate || poolDisplay.exchange_rate).toLocaleString()} / PC
+                </div>
+              </div>
+              {poolDisplay.last_updated && (
+                <p className="mt-2 text-xs text-slate-500">Last updated: {new Date(poolDisplay.last_updated).toLocaleString()}</p>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Continue earning points</h2>
+              <p className="mt-1 text-sm text-slate-600">Complete activities now to improve your next weekly position.</p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button onClick={() => router.push("/dashboard")} className="bg-emerald-600 hover:bg-emerald-700">
+                <Trophy className="mr-2 h-4 w-4" />
+                Go to dashboard
+              </Button>
+              <Button variant="outline" onClick={() => router.push("/dashboard/activities")}>
+                <Calendar className="mr-2 h-4 w-4" />
+                View activities
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
-

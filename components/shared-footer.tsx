@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 export default function SharedFooter() {
   const pathname = usePathname();
 
-  // Hide footer on dashboard pages - moved after all hooks
-  if (pathname && pathname.startsWith('/dashboard')) {
+  // Hide footer on dashboard pages and homepage (homepage uses cinematic footer)
+  if (pathname && (pathname.startsWith('/dashboard') || pathname === '/')) {
     return null;
   }
 

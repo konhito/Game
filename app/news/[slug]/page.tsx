@@ -36,6 +36,7 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const rawSlug = params.slug;
@@ -216,22 +217,36 @@ export default function ArticlePage() {
       crypto: "from-amber-500 to-amber-600",
       rewards: "from-emerald-500 to-emerald-600",
       updates: "from-blue-500 to-blue-600",
-      announcements: "from-purple-500 to-purple-600"
+      announcements: "from-cyan-600 to-teal-600"
     };
     return colors[category.toLowerCase()] || "from-slate-500 to-slate-600";
   };
 
-  const shareArticle = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: article?.title,
-        text: article?.excerpt,
-        url: window.location.href
-      });
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert('Article link copied to clipboard!');
+  const getReadTime = (content: string) => {
+    const plainText = content.replace(/<[^>]+>/g, " ").trim();
+    const wordCount = plainText ? plainText.split(/\s+/).length : 0;
+    return Math.max(1, Math.ceil(wordCount / 220));
+  };
+
+  const shareArticle = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: article?.title,
+          text: article?.excerpt,
+          url: window.location.href
+        });
+        setShareStatus("Shared successfully.");
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+        setShareStatus("Link copied to clipboard.");
+      } else {
+        setShareStatus("Sharing is not supported on this device.");
+      }
+    } catch (shareError) {
+      setShareStatus("Unable to share right now. Please try again.");
+    } finally {
+      setTimeout(() => setShareStatus(null), 2500);
     }
   };
 
@@ -263,7 +278,7 @@ export default function ArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <motion.div
@@ -288,12 +303,12 @@ export default function ArticlePage() {
 
             {/* Article Header */}
             <motion.div
-              className="mb-8"
+              className="mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl overflow-hidden">
+              <Card className="bg-white border-slate-200 shadow-lg overflow-hidden">
                 {/* Featured Image */}
                 {article.featured_image && (
                   <div className="relative h-[400px] md:h-[500px] w-full">
@@ -372,7 +387,7 @@ export default function ArticlePage() {
                     </div>
                     <div className="flex items-center text-slate-600 bg-slate-50 px-4 py-2 rounded-full">
                       <Clock className="w-5 h-5 mr-3" />
-                      <span className="font-medium">5 min read</span>
+                      <span className="font-medium">{getReadTime(article.content)} min read</span>
                     </div>
                     {article.views && (
                       <div className="flex items-center text-slate-600 bg-slate-50 px-4 py-2 rounded-full">
@@ -385,6 +400,12 @@ export default function ArticlePage() {
               </Card>
             </motion.div>
 
+            {shareStatus && (
+              <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                {shareStatus}
+              </div>
+            )}
+
             {/* Article Content */}
             <motion.div
               className="mb-12"
@@ -392,7 +413,7 @@ export default function ArticlePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl">
+              <Card className="bg-white border-slate-200 shadow-lg">
                 <CardContent className="p-8 md:p-12">
                   <div className="prose prose-lg prose-slate max-w-none">
                     <div
@@ -418,7 +439,7 @@ export default function ArticlePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl">
+                <Card className="bg-white border-slate-200 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="p-2 bg-emerald-100 rounded-lg">
@@ -431,7 +452,7 @@ export default function ArticlePage() {
                         <Badge
                           key={index}
                           variant="secondary"
-                          className="text-sm px-4 py-2 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer transition-all duration-200 hover:scale-105 bg-slate-100 text-slate-700"
+                          className="text-sm px-4 py-2 border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:text-emerald-900 cursor-pointer transition-all duration-200"
                         >
                           #{tag}
                         </Badge>
@@ -446,61 +467,13 @@ export default function ArticlePage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              {/* Table of Contents */}
+              {/* Share Article */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-emerald-500" />
-                      Quick Info
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <User className="w-5 h-5 text-slate-500" />
-                      <div>
-                        <p className="text-sm text-slate-500">Author</p>
-                        <p className="font-semibold text-slate-800">{article.author_name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <Calendar className="w-5 h-5 text-slate-500" />
-                      <div>
-                        <p className="text-sm text-slate-500">Published</p>
-                        <p className="font-semibold text-slate-800">{formatDate(article.published_at)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <Clock className="w-5 h-5 text-slate-500" />
-                      <div>
-                        <p className="text-sm text-slate-500">Read Time</p>
-                        <p className="font-semibold text-slate-800">5 min read</p>
-                      </div>
-                    </div>
-                    {article.views && (
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                        <Eye className="w-5 h-5 text-slate-500" />
-                        <div>
-                          <p className="text-sm text-slate-500">Views</p>
-                          <p className="font-semibold text-slate-800">{article.views}</p>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Share Article */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <Card className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl">
+                <Card className="bg-white border-slate-200 shadow-lg">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
                       <Share2 className="w-5 h-5 text-emerald-500" />
@@ -544,10 +517,8 @@ export default function ArticlePage() {
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Card
-                    className="bg-white/95 backdrop-blur-md border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden group"
-                    onClick={() => router.push(`/news/${encodeURIComponent(relatedArticle.slug)}`)}
-                  >
+                  <Link href={`/news/${encodeURIComponent(relatedArticle.slug)}`} className="block">
+                    <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
                     {/* Featured Image */}
                     {relatedArticle.featured_image && (
                       <div className="relative h-48 w-full overflow-hidden">
@@ -601,7 +572,8 @@ export default function ArticlePage() {
                         </div>
                       )}
                     </CardContent>
-                  </Card>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -633,8 +605,7 @@ export default function ArticlePage() {
                   </Button>
                   <Button
                     onClick={() => router.push('/')}
-                    variant="outline"
-                    className="border-2 border-white text-white hover:bg-white hover:text-emerald-600 px-8 py-4 text-lg font-semibold transition-all"
+                    className="bg-white text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 border border-white px-8 py-4 text-lg font-semibold transition-all"
                   >
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Back to Home
