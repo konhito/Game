@@ -17,12 +17,19 @@ export function resolveNewsImageUrl(
 
   const normalized = value.replace(/\\/g, "/");
   const pathOnly = normalized.split(/[?#]/)[0];
-  const base = apiBase.replace(/\/$/, "");
+  const rawBase = apiBase.replace(/\/$/, "");
+  const base = rawBase.endsWith("/api") ? rawBase.slice(0, -4) : rawBase;
   const apiNewsImagesMarker = "/api/news/images/";
   const uploadsMarker = "/uploads/news-images/";
 
-  if (pathOnly.startsWith(apiNewsImagesMarker) || pathOnly.startsWith(uploadsMarker)) {
+  if (pathOnly.startsWith(apiNewsImagesMarker)) {
     return `${base}${pathOnly}`;
+  }
+
+  if (pathOnly.startsWith(uploadsMarker)) {
+    const fileNameFromUploads = pathOnly.split("/").pop();
+    if (!fileNameFromUploads) return null;
+    return `${base}${apiNewsImagesMarker}${encodeURIComponent(fileNameFromUploads)}`;
   }
 
   const apiPathIndex = pathOnly.indexOf(apiNewsImagesMarker);
@@ -32,7 +39,10 @@ export function resolveNewsImageUrl(
 
   const uploadsPathIndex = pathOnly.indexOf(uploadsMarker);
   if (uploadsPathIndex >= 0) {
-    return `${base}${pathOnly.substring(uploadsPathIndex)}`;
+    const uploadsPath = pathOnly.substring(uploadsPathIndex);
+    const fileNameFromUploads = uploadsPath.split("/").pop();
+    if (!fileNameFromUploads) return null;
+    return `${base}${apiNewsImagesMarker}${encodeURIComponent(fileNameFromUploads)}`;
   }
 
   const fileName = pathOnly.includes("/")
