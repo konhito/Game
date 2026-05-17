@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { coinEventEmitter } from '@/lib/coin-event-emitter';
 
 interface Reward {
   id: number;
@@ -209,10 +210,42 @@ export default function RewardsPage() {
   };
 
   const claimReward = async (rewardId: number) => {
-    // Mock claim functionality - in a real app, this would call an API
+    // Update local state
     setRewards(prev => prev.map(reward => 
       reward.id === rewardId ? { ...reward, claimed: true } : reward
     ));
+    
+    // Refetch user stats to get updated coins/points
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/api/users/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const statsResult = await response.json();
+          if (statsResult.success && statsResult.data?.user) {
+            const userStats = statsResult.data.user;
+            // Emit coin update event to refresh navbar
+            coinEventEmitter.emitCoinUpdate({
+              pineCoins: parseFloat(userStats.total_coins) || 0,
+              weeklyPoints: userStats.weekly_points || 0,
+              totalPoints: userStats.total_points || 0,
+            });
+            console.log('Rewards: Emitted coin update after reward claim');
+            // Also update local userStats state
+            setUserStats(statsResult.data);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch updated user stats:', err);
+    }
   };
 
   const filteredRewards = rewards.filter(reward => {

@@ -45,6 +45,7 @@ import { taskService } from '@/lib/task-service';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { coinEventEmitter } from '@/lib/coin-event-emitter';
 import {
   Dialog,
   DialogContent,
@@ -326,6 +327,36 @@ export default function ActivitiesPage() {
         
         if (user) {
           await loadAllTasks(user.id);
+          
+          // Fetch updated user stats to reflect new coins/points
+          try {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/api/users/stats`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+              });
+              
+              if (response.ok) {
+                const statsResult = await response.json();
+                if (statsResult.success && statsResult.data?.user) {
+                  const userStats = statsResult.data.user;
+                  // Emit coin update event to refresh navbar
+                  coinEventEmitter.emitCoinUpdate({
+                    pineCoins: parseFloat(userStats.total_coins) || 0,
+                    weeklyPoints: userStats.weekly_points || 0,
+                    totalPoints: userStats.total_points || 0,
+                  });
+                  console.log('Activities: Emitted coin update after task completion');
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to fetch updated user stats:', err);
+          }
         }
       } else {
         toast.error(result.error || 'Failed to submit proof');

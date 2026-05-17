@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import config from "@/lib/config";
+import { coinEventEmitter } from "@/lib/coin-event-emitter";
 
 interface User {
   name: string;
@@ -257,6 +258,21 @@ export function Navbar() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [router]);
+
+  // Listen for coin updates from other components
+  useEffect(() => {
+    const unsubscribe = coinEventEmitter.onCoinUpdate((data) => {
+      console.log('Navbar: Received coin update:', data);
+      setUser(prevUser => prevUser ? {
+        ...prevUser,
+        pineCoins: data.pineCoins,
+        weeklyPoints: data.weeklyPoints,
+        totalPoints: data.totalPoints,
+      } : null);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = () => {
     try {

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trophy, Gift, Target, Clock, RefreshCw } from "lucide-react";
 import { dashboardService } from "@/lib/dashboard-service";
 import config from "@/lib/config";
+import { coinEventEmitter } from "@/lib/coin-event-emitter";
 
 const wheelSegments = [
   { 
@@ -228,6 +229,35 @@ export default function SpinWheelPage() {
         setShowResult(true);
         setSpinsRemaining(prev => prev - 1);
         console.log('✅ Spin successful - Points:', selectedSegment.points, 'Coins:', coins);
+        
+        // Emit coin update event to refresh navbar
+        try {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            const response = await fetch(`${config.API_BASE}/api/users/stats`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            });
+            
+            if (response.ok) {
+              const statsResult = await response.json();
+              if (statsResult.success && statsResult.data?.user) {
+                const userStats = statsResult.data.user;
+                coinEventEmitter.emitCoinUpdate({
+                  pineCoins: parseFloat(userStats.total_coins) || 0,
+                  weeklyPoints: userStats.weekly_points || 0,
+                  totalPoints: userStats.total_points || 0,
+                });
+                console.log('Spin Wheel: Emitted coin update after spin');
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Failed to emit coin update:', err);
+        }
       } else {
         setError(updateResponse.error || 'Failed to update stats');
       }
