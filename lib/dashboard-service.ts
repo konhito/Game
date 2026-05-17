@@ -119,7 +119,6 @@ export interface UserTask {
   task?: Task;
 }
 
-// New interfaces for missing tables
 export interface TaskCategory {
   id: number;
   name: string;
@@ -207,16 +206,13 @@ export interface ApiResponse<T = any> {
 
 class DashboardService {
   private getAuthHeaders(): HeadersInit {
-    // Only access localStorage in the browser and ensure it's properly available
     let token: string | null = null;
     try {
       if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-        // Test if localStorage actually works
         const testKey = '__test__';
         try {
           localStorage.setItem(testKey, 'test');
           localStorage.removeItem(testKey);
-          // If we get here, localStorage works
           token = localStorage.getItem('auth_token');
         } catch (e) {
           // localStorage exists but doesn't work properly
@@ -226,12 +222,12 @@ class DashboardService {
       // Silently fail - we're probably in SSR
     }
     console.log('DashboardService: Getting auth headers, token present:', !!token);
-    
+
     const headers = {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` }),
     };
-    
+
     console.log('DashboardService: Auth headers:', headers);
     return headers;
   }
@@ -244,10 +240,7 @@ class DashboardService {
       });
       if (response.ok) {
         const data = await response.json();
-        return {
-          success: true,
-          data: data
-        };
+        return { success: true, data };
       } else {
         console.error('Health check failed with status:', response.status);
         throw new Error(`Health check failed with status: ${response.status}`);
@@ -258,16 +251,16 @@ class DashboardService {
     }
   }
 
-  // Get user statistics
+  // Get user statistics — always bypasses browser cache
   async getUserStats(userId: number): Promise<ApiResponse<{ users: UserStats[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         headers: this.getAuthHeaders(),
         credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized (token expired)
         if (response.status === 401) {
           const error = new Error('Authentication expired');
           (error as any).status = 401;
@@ -278,18 +271,17 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.user) {
         return {
           success: true,
-          data: { users: [result.data.user] }
+          data: { users: [result.data.user] },
         };
       } else {
         throw new Error('Invalid response format from backend');
       }
     } catch (error: any) {
       console.error('DashboardService: Error in getUserStats:', error);
-      // Check for network errors
       if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
         throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
       }
@@ -301,42 +293,38 @@ class DashboardService {
   async getUserActivities(userId: number, limit: number = 10): Promise<ApiResponse<{ activities: UserActivity[] }>> {
     const maxRetries = 3;
     let retryCount = 0;
-    
+
     const attemptRequest = async (): Promise<ApiResponse<{ activities: UserActivity[] }>> => {
       try {
         console.log(`🔍 DashboardService: Getting user activities for user: ${userId} (attempt ${retryCount + 1})`);
         console.log('🌐 API URL:', `${API_BASE}/api/users/activities?limit=${limit}`);
-        console.log('🔐 Auth headers:', this.getAuthHeaders());
-        
+
         const response = await fetch(`${API_BASE}/api/users/activities?limit=${limit}`, {
           headers: this.getAuthHeaders(),
           credentials: 'include',
         });
 
         console.log('📡 Response status:', response.status);
-        console.log('📡 Response headers:', response.headers);
 
         if (!response.ok) {
-          // Handle 401 Unauthorized (token expired) - don't retry
           if (response.status === 401) {
             const error = new Error('Authentication expired');
             (error as any).status = 401;
             throw error;
           }
-          
+
           if (response.status === 429 && retryCount < maxRetries) {
             retryCount++;
-            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+            const delay = Math.pow(2, retryCount) * 1000;
             console.log(`⏳ Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
             await new Promise(resolve => setTimeout(resolve, delay));
             return attemptRequest();
           }
-          
+
           let errorData;
           try {
             errorData = await response.json();
           } catch (parseError) {
-            // If response is not JSON, create a generic error
             errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
           }
           console.error('❌ API Error:', errorData);
@@ -345,11 +333,11 @@ class DashboardService {
 
         const result = await response.json();
         console.log('📊 Activities response:', result);
-        
+
         if (result.success && result.data && result.data.activities) {
           return {
             success: true,
-            data: { activities: result.data.activities }
+            data: { activities: result.data.activities },
           };
         } else {
           console.error('❌ Invalid response format:', result);
@@ -364,25 +352,25 @@ class DashboardService {
           await new Promise(resolve => setTimeout(resolve, delay));
           return attemptRequest();
         }
-        
+
         console.error('DashboardService: Error in getUserActivities:', error);
         throw new Error('Failed to fetch user activities');
       }
     };
-    
+
     return attemptRequest();
   }
 
-  // Get leaderboard
+  // Get leaderboard — computed live from local DB (weekly_points summed from userActivity this week),
+  // ordered by weekly_points desc then total_points desc. No browser cache.
   async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[]; weekly_pool?: WeeklyPool; weekly_rewards?: WeeklyReward[]; task_point_rules?: TaskPointRules }>> {
     try {
-      const response = await fetch(`${API_BASE}/api/users/leaderboard?limit=${limit}`, {
+      const response = await fetch(`/api/leaderboard?limit=${limit}`, {
         headers: this.getAuthHeaders(),
-        credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized (token expired)
         if (response.status === 401) {
           const error = new Error('Authentication expired');
           (error as any).status = 401;
@@ -393,7 +381,7 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.users) {
         return {
           success: true,
@@ -401,15 +389,14 @@ class DashboardService {
             users: result.data.users,
             weekly_pool: result.data.weekly_pool,
             weekly_rewards: result.data.weekly_rewards,
-            task_point_rules: result.data.task_point_rules
-          }
+            task_point_rules: result.data.task_point_rules,
+          },
         };
       } else {
         throw new Error('Invalid response format from backend');
       }
     } catch (error: any) {
       console.error('DashboardService: Error in getLeaderboard:', error);
-      // Check for network errors
       if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
         throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
       }
@@ -420,44 +407,33 @@ class DashboardService {
   // Get available tasks
   async getAvailableTasks(): Promise<ApiResponse<{ tasks: Task[] }>> {
     try {
-      console.log('DashboardService: Fetching available tasks from:', `${API_BASE}/api/tasks/available`);
-      
       const response = await fetch(`${API_BASE}/api/tasks/available`, {
         headers: this.getAuthHeaders(),
         credentials: 'include',
       });
 
-      console.log('DashboardService: Response status:', response.status);
-      console.log('DashboardService: Response headers:', response.headers);
-
       if (!response.ok) {
-        // Handle 401 Unauthorized (token expired)
         if (response.status === 401) {
           const error = new Error('Authentication expired');
           (error as any).status = 401;
           throw error;
         }
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error('DashboardService: Response not OK:', errorText);
         throw new Error(`Failed to fetch available tasks: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('DashboardService: Response data:', result);
-      
-      // The backend returns { success: true, data: { tasks: [], pagination: {} } }
+
       if (result.success && result.data && result.data.tasks) {
         return {
           success: true,
-          data: { tasks: result.data.tasks }
+          data: { tasks: result.data.tasks },
         };
       } else {
-        console.error('DashboardService: Invalid response format:', result);
         throw new Error('Invalid response format from backend');
       }
     } catch (error: any) {
       console.error('DashboardService: Error in getAvailableTasks:', error);
-      // Check for network errors
       if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
         throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
       }
@@ -474,7 +450,6 @@ class DashboardService {
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized (token expired)
         if (response.status === 401) {
           const error = new Error('Authentication expired');
           (error as any).status = 401;
@@ -485,19 +460,17 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
-      // The backend returns { success: true, data: { tasks: [], pagination: {} } }
+
       if (result.success && result.data && result.data.tasks) {
         return {
           success: true,
-          data: { tasks: result.data.tasks }
+          data: { tasks: result.data.tasks },
         };
       } else {
         throw new Error('Invalid response format from backend');
       }
     } catch (error: any) {
       console.error('DashboardService: Error in getUserTaskHistory:', error);
-      // Check for network errors
       if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
         throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
       }
@@ -505,7 +478,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get task categories
+  // Get task categories
   async getTaskCategories(): Promise<ApiResponse<{ categories: TaskCategory[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/tasks/categories`, {
@@ -518,11 +491,11 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.categories) {
         return {
           success: true,
-          data: { categories: result.data.categories }
+          data: { categories: result.data.categories },
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -533,7 +506,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get user products
+  // Get user products
   async getUserProducts(): Promise<ApiResponse<{ products: Product[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/products/user`, {
@@ -546,11 +519,11 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.products) {
         return {
           success: true,
-          data: { products: result.data.products }
+          data: { products: result.data.products },
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -561,7 +534,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get user orders
+  // Get user orders
   async getUserOrders(): Promise<ApiResponse<{ orders: Order[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/orders/user`, {
@@ -574,11 +547,11 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.orders) {
         return {
           success: true,
-          data: { orders: result.data.orders }
+          data: { orders: result.data.orders },
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -589,7 +562,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get user achievements
+  // Get user achievements
   async getUserAchievements(): Promise<ApiResponse<{ achievements: Achievement[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/achievements`, {
@@ -602,11 +575,11 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.achievements) {
         return {
           success: true,
-          data: { achievements: result.data.achievements }
+          data: { achievements: result.data.achievements },
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -617,7 +590,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get user notifications
+  // Get user notifications
   async getUserNotifications(): Promise<ApiResponse<{ notifications: Notification[] }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/notifications`, {
@@ -630,11 +603,11 @@ class DashboardService {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data && result.data.notifications) {
         return {
           success: true,
-          data: { notifications: result.data.notifications }
+          data: { notifications: result.data.notifications },
         };
       } else {
         throw new Error('Invalid response format from backend');
@@ -645,7 +618,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Mark notification as read
+  // Mark notification as read
   async markNotificationAsRead(notificationId: string): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE}/api/users/notifications/${notificationId}/read`, {
@@ -666,18 +639,14 @@ class DashboardService {
     }
   }
 
-  // NEW: Log user activity
+  // Log user activity
   async logActivity(activityType: string, description: string, metadata?: any): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE}/api/users/activities`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify({
-          activity_type: activityType,
-          description,
-          metadata
-        })
+        body: JSON.stringify({ activity_type: activityType, description, metadata }),
       });
 
       if (!response.ok) {
@@ -692,7 +661,7 @@ class DashboardService {
     }
   }
 
-  // NEW: Get comprehensive dashboard data
+  // Get comprehensive dashboard data
   async getDashboardOverview(): Promise<ApiResponse<DashboardOverview>> {
     try {
       const [
@@ -705,18 +674,18 @@ class DashboardService {
         productsResponse,
         ordersResponse,
         achievementsResponse,
-        notificationsResponse
+        notificationsResponse,
       ] = await Promise.all([
-        this.getUserStats(0), // userId will be extracted from token
+        this.getUserStats(0),
         this.getUserActivities(0, 5),
         this.getLeaderboard(10),
         this.getAvailableTasks(),
-        this.getUserTaskHistory(0), // userId will be extracted from token
+        this.getUserTaskHistory(0),
         this.getTaskCategories(),
         this.getUserProducts(),
         this.getUserOrders(),
         this.getUserAchievements(),
-        this.getUserNotifications()
+        this.getUserNotifications(),
       ]);
 
       return {
@@ -731,8 +700,8 @@ class DashboardService {
           userProducts: productsResponse.success ? productsResponse.data.products : [],
           userOrders: ordersResponse.success ? ordersResponse.data.orders : [],
           achievements: achievementsResponse.success ? achievementsResponse.data.achievements : [],
-          notifications: notificationsResponse.success ? notificationsResponse.data.notifications : []
-        }
+          notifications: notificationsResponse.success ? notificationsResponse.data.notifications : [],
+        },
       };
     } catch (error) {
       console.error('DashboardService: Error getting dashboard overview:', error);
@@ -743,7 +712,6 @@ class DashboardService {
   // Spin the wheel (integrated with point system)
   async spinWheel(): Promise<ApiResponse<{ points: number; coins: number; message: string }>> {
     try {
-      // Get spin wheel configuration from point system
       const response = await fetch(`${API_BASE}/api/points/config`, {
         headers: this.getAuthHeaders(),
         credentials: 'include',
@@ -761,14 +729,13 @@ class DashboardService {
         throw new Error('Spin wheel is currently disabled');
       }
 
-      // Use configured rewards or fallback to default (heavily weighted toward low points)
       const wheelSegments = spinRewards?.rewards || [
         { points: 10, probability: 0.70 },
         { points: 25, probability: 0.20 },
         { points: 50, probability: 0.08 },
         { points: 100, probability: 0.015 },
         { points: 200, probability: 0.004 },
-        { points: 500, probability: 0.001 }
+        { points: 500, probability: 0.001 },
       ];
 
       const random = Math.random();
@@ -783,16 +750,15 @@ class DashboardService {
         }
       }
 
-      // Calculate coins based on points (1000 points = 1 PineCoin)
       const coins = Math.round(selectedReward.points * 0.001 * 100) / 100;
 
       return {
         success: true,
         data: {
           points: selectedReward.points,
-          coins: coins,
-          message: `Congratulations! You won ${selectedReward.points} points and ${coins} PineCoins!`
-        }
+          coins,
+          message: `Congratulations! You won ${selectedReward.points} points and ${coins} PineCoins!`,
+        },
       };
     } catch (error) {
       console.error('DashboardService: Error spinning wheel:', error);
@@ -806,11 +772,7 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          action: 'spin_wheel',
-          points,
-          coins
-        })
+        body: JSON.stringify({ action: 'spin_wheel', points, coins }),
       });
 
       if (!response.ok) {
@@ -855,9 +817,7 @@ class DashboardService {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify({
-          action: 'daily_reward'
-        })
+        body: JSON.stringify({ action: 'daily_reward' }),
       });
 
       if (!response.ok) {

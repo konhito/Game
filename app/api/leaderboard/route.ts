@@ -1,21 +1,68 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+
+export async function GET(request: NextRequest) {
   try {
-    // Mock leaderboard for development
-    const mockLeaderboard = [
-      { userId: "user1", weeklyPoints: 3200, totalPoints: 8500, rank: 1, name: "Player1", image: null },
-      { userId: "user2", weeklyPoints: 2850, totalPoints: 7200, rank: 2, name: "Player2", image: null },
-      { userId: "user3", weeklyPoints: 2600, totalPoints: 6800, rank: 3, name: "Player3", image: null },
-      { userId: "user4", weeklyPoints: 2400, totalPoints: 6200, rank: 4, name: "Player4", image: null },
-      { userId: "user5", weeklyPoints: 450, totalPoints: 1250, rank: 5, name: "Player5", image: null },
-    ];
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get('limit') || '50';
 
-    return NextResponse.json(mockLeaderboard);
-  } catch (error) {
+    // Forward the auth token from the incoming request
+    const authHeader = request.headers.get('authorization');
+
+    const response = await fetch(
+      `${API_BASE}/api/users/leaderboard?limit=${limit}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        cache: 'no-store',
+      }
+    );
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => 'Unknown error');
+      return NextResponse.json(
+        { success: false, error: `Backend error: ${response.status} ${text}` },
+        { status: response.status }
+      );
+    }
+
+    const result = await response.json();
+
+    if (!result.success || !result.data?.users) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid response from backend' },
+        { status: 502 }
+      );
+    }
+
+    // Sort: weekly_points desc, then total_points desc as tiebreaker
+    const sorted: any[] = [...result.data.users].sort((a: any, b: any) => {
+      const wDiff = (b.weekly_points ?? 0) - (a.weekly_points ?? 0);
+      if (wDiff !== 0) return wDiff;
+      return (b.total_points ?? 0) - (a.total_points ?? 0);
+    });
+
+    // Re-assign rank after sort
+    const ranked = sorted.map((entry, index) => ({ ...entry, rank: index + 1 }));
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        users: ranked,
+        weekly_pool: result.data.weekly_pool,
+        weekly_rewards: result.data.weekly_rewards,
+        task_point_rules: result.data.task_point_rules,
+      },
+    });
+  } catch (error: any) {
     console.error('Error fetching leaderboard:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch leaderboard' },
+      { success: false, error: error.message || 'Failed to fetch leaderboard' },
       { status: 500 }
     );
   }

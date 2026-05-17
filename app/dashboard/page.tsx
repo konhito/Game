@@ -120,7 +120,7 @@ export default function DashboardPage() {
       const [statsRes, activitiesRes, leaderboardRes, tasksRes] = await Promise.allSettled([
         dashboardService.getUserStats(0),
         dashboardService.getUserActivities(0, 4),
-        dashboardService.getLeaderboard(10),
+        dashboardService.getLeaderboard(50),
         dashboardService.getAvailableTasks(),
       ]);
 
