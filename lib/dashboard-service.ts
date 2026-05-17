@@ -75,6 +75,8 @@ export interface TaskPointRules {
   comment_points: number;
   like_points: number;
   daily_login_points: number;
+  points_to_coins_ratio?: number;
+  spin_rewards?: number[];
   login_streak_bonus_days: number;
   login_streak_bonus_spins: number;
 }

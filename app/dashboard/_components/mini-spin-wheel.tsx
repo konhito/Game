@@ -7,7 +7,7 @@ import { dashboardService } from "@/lib/dashboard-service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const wheelSegments = [
+const defaultWheelSegments = [
   { id: 1, label: "200", points: 200, color: "#f59e0b" }, // amber-500
   { id: 2, label: "500", points: 500, color: "#ef4444" }, // red-500
   { id: 3, label: "10", points: 10, color: "#3b82f6" },  // blue-500
@@ -17,11 +17,13 @@ const wheelSegments = [
 ];
 
 export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }) {
+  const [wheelSegments, setWheelSegments] = useState(defaultWheelSegments);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [spinsRemaining, setSpinsRemaining] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
+  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
 
   useEffect(() => {
     const fetchSpins = async () => {
@@ -30,6 +32,29 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
         const statsResponse = await dashboardService.getUserStats(user.id);
         if (statsResponse.success) {
           setSpinsRemaining(statsResponse.data.users[0]?.spins_remaining || 0);
+        }
+
+        const leaderboardResponse = await dashboardService.getLeaderboard(1);
+        if (leaderboardResponse.success && leaderboardResponse.data?.task_point_rules) {
+          const rules = leaderboardResponse.data.task_point_rules;
+          setPointsToCoinsRatio(Number(rules.points_to_coins_ratio || 10));
+          if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
+            const rewards = rules.spin_rewards
+              .map((value: number) => Number(value))
+              .filter((value: number) => Number.isFinite(value) && value > 0);
+            if (rewards.length > 0) {
+              setWheelSegments((prev) =>
+                prev.map((segment, index) => {
+                  const reward = rewards[index % rewards.length];
+                  return {
+                    ...segment,
+                    points: reward,
+                    label: String(reward),
+                  };
+                })
+              );
+            }
+          }
         }
       }
     };
@@ -89,7 +114,8 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
 
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      const coins = Math.round(selectedSegment.points * 0.001 * 100) / 100;
+      const safeRatio = pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10;
+      const coins = Math.round((selectedSegment.points / safeRatio) * 10000) / 10000;
       const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
       
       if (updateResponse.success) {

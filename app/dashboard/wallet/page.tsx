@@ -36,9 +36,6 @@ interface WithdrawalRequest {
   processed_at?: string;
 }
 
-// Conversion rate: 1 PineCoin = ₽1 = $0.95
-const PINE_COIN_TO_USD = 0.95;
-
 export default function WalletPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -46,6 +43,9 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [minWithdrawal, setMinWithdrawal] = useState(10);
+  const [maxWithdrawal, setMaxWithdrawal] = useState(10000);
+  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
   
   // Form state
   const [amount, setAmount] = useState('');
@@ -76,6 +76,7 @@ export default function WalletPage() {
       try {
         const userData = JSON.parse(userStr);
         setUser(userData);
+        fetchWithdrawalConfig();
         fetchUserStats();
         fetchWithdrawals();
       } catch (error) {
@@ -104,6 +105,28 @@ export default function WalletPage() {
       console.error('Error fetching user stats:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWithdrawalConfig = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${config.API_BASE}/api/withdrawals/config`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.success && data?.data) {
+          setMinWithdrawal(Number(data.data.min_withdrawal_amount || 10));
+          setMaxWithdrawal(Number(data.data.max_withdrawal_amount || 10000));
+          setPointsToCoinsRatio(Number(data.data.points_to_coins_ratio || 10));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching withdrawal config:', error);
     }
   };
 
@@ -140,9 +163,13 @@ export default function WalletPage() {
     }
 
     // Minimum withdrawal: ₽10 PineCoins
-    const MIN_WITHDRAWAL = 10;
-    if (amountNum < MIN_WITHDRAWAL) {
-      toast.error(`Minimum withdrawal amount is ₽${MIN_WITHDRAWAL} PineCoins`);
+    if (amountNum < minWithdrawal) {
+      toast.error(`Minimum withdrawal amount is ₽${minWithdrawal} PineCoins`);
+      return;
+    }
+
+    if (amountNum > maxWithdrawal) {
+      toast.error(`Maximum withdrawal amount is ₽${maxWithdrawal} PineCoins`);
       return;
     }
 
@@ -228,7 +255,8 @@ export default function WalletPage() {
   }
 
   const currentBalance = parseFloat(userStats?.total_coins || 0);
-  const usdEquivalent = (currentBalance * PINE_COIN_TO_USD).toFixed(2);
+  const pineCoinToUsd = 0.95;
+  const usdEquivalent = (currentBalance * pineCoinToUsd).toFixed(2);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
@@ -268,9 +296,9 @@ export default function WalletPage() {
                 <div className="flex items-center gap-4 text-sm text-emerald-100">
                   <p>≈ ${usdEquivalent} USD</p>
                   <p>•</p>
-                  <p>1 PineCoin = ₽1 = ${PINE_COIN_TO_USD}</p>
+                  <p>1 PineCoin = ₽1 = ${pineCoinToUsd}</p>
                 </div>
-                <p className="text-emerald-100 text-sm mt-2">Minimum withdrawal: ₽10.00 PineCoins</p>
+                <p className="text-emerald-100 text-sm mt-2">Withdrawal range: ₽{minWithdrawal.toFixed(2)} to ₽{maxWithdrawal.toFixed(2)} PineCoins</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -305,17 +333,17 @@ export default function WalletPage() {
                           id="amount"
                           type="number"
                           step="0.01"
-                          min="10"
-                          max={currentBalance}
+                          min={minWithdrawal}
+                          max={Math.min(maxWithdrawal, currentBalance)}
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
-                          placeholder="10.00"
+                          placeholder={minWithdrawal.toFixed(2)}
                           className="pl-8 border-slate-300 focus:border-emerald-600 focus:ring-emerald-600"
                           required
                         />
                       </div>
                       <p className="text-xs text-slate-500">
-                        Available: ₽{currentBalance.toFixed(2)} | Min: ₽10.00 | ≈ ${(parseFloat(amount || '0') * PINE_COIN_TO_USD).toFixed(2)} USD
+                        Available: ₽{currentBalance.toFixed(2)} | Min: ₽{minWithdrawal.toFixed(2)} | Max: ₽{maxWithdrawal.toFixed(2)} | ≈ ${(parseFloat(amount || '0') * pineCoinToUsd).toFixed(2)} USD
                       </p>
                     </div>
 
@@ -483,14 +511,16 @@ export default function WalletPage() {
                       <p className="text-xs text-blue-800">
                         Withdrawal requests are typically processed within 24-48 hours. You will be notified once your request is reviewed. 
                         <br />
-                        <span className="font-medium">Exchange Rate:</span> 1 PineCoin = ₽1 = ${PINE_COIN_TO_USD} USD
+                        <span className="font-medium">Exchange Rate:</span> 1 PineCoin = ₽1 = ${pineCoinToUsd} USD
+                        <br />
+                        <span className="font-medium">Reward Conversion:</span> {pointsToCoinsRatio} points = 1 PineCoin
                       </p>
                     </div>
 
                     {/* Submit Button */}
                     <Button
                       type="submit"
-                      disabled={submitting || currentBalance < 10 || !amount || !paymentDetails.account_name || !paymentDetails.account_number || !paymentDetails.bank_name}
+                      disabled={submitting || currentBalance < minWithdrawal || !amount || !paymentDetails.account_name || !paymentDetails.account_number || !paymentDetails.bank_name}
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
                     >
                       {submitting ? (
@@ -545,7 +575,7 @@ export default function WalletPage() {
                                 ₽{parseFloat(withdrawal.amount).toFixed(2)} PineCoins
                               </p>
                               <p className="text-xs text-slate-500">
-                                ≈ ${(parseFloat(withdrawal.amount) * PINE_COIN_TO_USD).toFixed(2)} USD
+                                ≈ ${(parseFloat(withdrawal.amount) * pineCoinToUsd).toFixed(2)} USD
                               </p>
                               <p className="text-xs text-slate-500 capitalize mt-1">
                                 Bank Transfer

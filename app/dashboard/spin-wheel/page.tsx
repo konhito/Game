@@ -69,9 +69,10 @@ const spinPrices = [
 ];
 
 export default function SpinWheelPage() {
+  const [wheelSegmentsData, setWheelSegmentsData] = useState(wheelSegments);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [result, setResult] = useState<typeof wheelSegments[0] | null>(null);
+  const [result, setResult] = useState<typeof wheelSegmentsData[0] | null>(null);
   const [spinsRemaining, setSpinsRemaining] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [nextReset, setNextReset] = useState<{
@@ -83,6 +84,7 @@ export default function SpinWheelPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [streakBonus, setStreakBonus] = useState({ days: 3, spins: 2 });
+  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
 
   // Fetch reset information and user stats
   useEffect(() => {
@@ -113,6 +115,25 @@ export default function SpinWheelPage() {
               days: Number(rules.login_streak_bonus_days || 3),
               spins: Number(rules.login_streak_bonus_spins || 2)
             });
+            setPointsToCoinsRatio(Number(rules.points_to_coins_ratio || 10));
+
+            if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
+              const rewards = rules.spin_rewards
+                .map((value: number) => Number(value))
+                .filter((value: number) => Number.isFinite(value) && value > 0);
+              if (rewards.length > 0) {
+                setWheelSegmentsData((prev) =>
+                  prev.map((segment, index) => {
+                    const reward = rewards[index % rewards.length];
+                    return {
+                      ...segment,
+                      points: reward,
+                      label: String(reward),
+                    };
+                  })
+                );
+              }
+            }
           }
         }
         
@@ -138,7 +159,7 @@ export default function SpinWheelPage() {
 
       // Weighted probabilities favoring low points
       // Map each segment to its probability based on points
-      const segmentProbabilities = wheelSegments.map(seg => {
+      const segmentProbabilities = wheelSegmentsData.map(seg => {
         if (seg.points === 10) return 0.70; // 70% for 10 points
         if (seg.points === 25) return 0.20; // 20% for 25 points
         if (seg.points === 50) return 0.08; // 8% for 50 points
@@ -162,11 +183,11 @@ export default function SpinWheelPage() {
       }
 
       // Get the selected segment BEFORE calculating rotation
-      const selectedSegment = wheelSegments[selectedSegmentIndex];
+      const selectedSegment = wheelSegmentsData[selectedSegmentIndex];
       console.log('🎡 Selected segment:', selectedSegment, 'Index:', selectedSegmentIndex);
 
       // Calculate rotation to land on the selected segment
-      const segmentAngle = 360 / wheelSegments.length; // 60 degrees per segment
+      const segmentAngle = 360 / wheelSegmentsData.length; // degrees per segment
       
       // Calculate the center angle of the selected segment
       // Each segment starts at: index * segmentAngle - 90 (to start from top)
@@ -220,8 +241,8 @@ export default function SpinWheelPage() {
       await new Promise(resolve => setTimeout(resolve, 4000));
       
       // Update user stats on backend
-      // Conversion rate: 1000 points = 1 PineCoin
-      const coins = Math.round(selectedSegment.points * 0.001 * 100) / 100;
+      const safeRatio = pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10;
+      const coins = Math.round((selectedSegment.points / safeRatio) * 10000) / 10000;
       const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
       
       if (updateResponse.success) {
@@ -339,8 +360,8 @@ export default function SpinWheelPage() {
                     }}
                   >
                     <svg viewBox="0 0 200 200" className="w-full h-full">
-                      {wheelSegments.map((segment, index) => {
-                        const segmentAngle = 360 / wheelSegments.length;
+                      {wheelSegmentsData.map((segment, index) => {
+                        const segmentAngle = 360 / wheelSegmentsData.length;
                         const startAngle = index * segmentAngle - 90; // Start from top
                         const endAngle = startAngle + segmentAngle;
                         
@@ -529,7 +550,7 @@ export default function SpinWheelPage() {
                         You won {result.points} points!
                       </p>
                       <p className="text-lg text-yellow-200">
-                        {result.points} points and {(result.points * 0.001).toFixed(2)} PineCoins added to your account!
+                        {result.points} points and {(result.points / (pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10)).toFixed(4)} PineCoins added to your account!
                       </p>
                     </div>
                     <div className="flex justify-center gap-4 text-sm">
@@ -537,7 +558,7 @@ export default function SpinWheelPage() {
                         <span className="text-green-300">+{result.points} Points</span>
                       </div>
                       <div className="bg-blue-500/20 px-3 py-1 rounded-full">
-                        <span className="text-blue-300">+{(result.points * 0.001).toFixed(2)} PineCoins</span>
+                        <span className="text-blue-300">+{(result.points / (pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10)).toFixed(4)} PineCoins</span>
                       </div>
                     </div>
                   </CardContent>
@@ -598,7 +619,7 @@ export default function SpinWheelPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-3">
-                  {wheelSegments.map((segment) => (
+                  {wheelSegmentsData.map((segment) => (
                     <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg transition-all duration-300 cursor-pointer`}>
                       <div className="text-3xl mb-2 drop-shadow-lg">{segment.icon}</div>
                       <p className="text-lg font-black text-slate-900">{segment.label}</p>
@@ -629,7 +650,7 @@ export default function SpinWheelPage() {
                     <p className="text-purple-300 font-semibold">⭐ Bigger rewards have equal chances</p>
                   </div>
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30">
-                    <p className="text-green-300 font-semibold">💰 Points convert to PineCoins (1000 points = 1 PineCoin)</p>
+                    <p className="text-green-300 font-semibold">💰 Points convert to PineCoins ({pointsToCoinsRatio} points = 1 PineCoin)</p>
                   </div>
                   <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg p-3 border border-cyan-400/30">
                     <p className="text-cyan-300 font-semibold">🚀 Use PineCoins to buy extra spins</p>
