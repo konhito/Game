@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,7 @@ export default function AdminSettingsPage() {
   const [editedValues, setEditedValues] = useState<{ [key: string]: any }>({});
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('');
   const [newSetting, setNewSetting] = useState({
     key: '',
     value: '',
@@ -77,8 +78,41 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetchSettings();
-    fetchWeeklyPoolPrice();
   }, []);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredSettings = useMemo(() => {
+    if (!normalizedSearch) {
+      return settings;
+    }
+
+    return Object.entries(settings).reduce<GroupedSettings>((acc, [category, categorySettings]) => {
+      const filtered = categorySettings.filter((setting) => {
+        const haystack = `${setting.setting_key} ${setting.description || ''} ${category}`.toLowerCase();
+        return haystack.includes(normalizedSearch);
+      });
+
+      if (filtered.length > 0) {
+        acc[category] = filtered;
+      }
+      return acc;
+    }, {});
+  }, [normalizedSearch, settings]);
+
+  const filteredCategories = useMemo(() => Object.keys(filteredSettings), [filteredSettings]);
+
+  useEffect(() => {
+    if (filteredCategories.length === 0) {
+      if (activeTab) {
+        setActiveTab('');
+      }
+      return;
+    }
+
+    if (!filteredCategories.includes(activeTab)) {
+      setActiveTab(filteredCategories[0]);
+    }
+  }, [filteredCategories, activeTab]);
 
   const fetchSettings = async () => {
     try {
@@ -107,14 +141,18 @@ export default function AdminSettingsPage() {
       setEditedValues(initial);
       
       // Load leaderboard rewards if they exist in settings
-      if (initial.weekly_leaderboard_rank_1_reward) {
+      const rank1 = initial.weekly_leaderboard_rank_1_reward;
+      const rank2 = initial.weekly_leaderboard_rank_2_reward;
+      const rank3 = initial.weekly_leaderboard_rank_3_reward;
+      if (rank1 !== undefined || rank2 !== undefined || rank3 !== undefined) {
         setLeaderboardRewards({
-          rank_1_reward: initial.weekly_leaderboard_rank_1_reward?.toString() || '100.00',
-          rank_2_reward: initial.weekly_leaderboard_rank_2_reward?.toString() || '50.00',
-          rank_3_reward: initial.weekly_leaderboard_rank_3_reward?.toString() || '25.00'
+          rank_1_reward: (rank1 ?? '100.00').toString(),
+          rank_2_reward: (rank2 ?? '50.00').toString(),
+          rank_3_reward: (rank3 ?? '25.00').toString()
         });
       }
       
+      await fetchWeeklyPoolPrice();
       toast.success("Settings loaded successfully");
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -187,6 +225,10 @@ export default function AdminSettingsPage() {
           naira: data.data.naira?.toFixed(2) || '0.00',
           exchange_rate: data.data.exchange_rate || 0
         });
+        setEditedValues(prev => ({
+          ...prev,
+          weekly_pool_price: data.data.pinecoins
+        }));
         toast.success(`Weekly pool price updated successfully! ₽${data.data.pinecoins} (₦${data.data.naira?.toFixed(2)})`);
       }
     } catch (error: any) {
@@ -877,77 +919,85 @@ export default function AdminSettingsPage() {
       </Card>
 
       {/* Settings Tabs */}
-      <Tabs defaultValue={Object.keys(settings)[0] || 'general'} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-fit">
-          {Object.keys(settings).map((category) => (
-            <TabsTrigger key={category} value={category} className="capitalize">
-              <span className="flex items-center gap-2">
-                {getCategoryIcon(category)}
-                {category}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {filteredCategories.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No settings match your search.
+          </CardContent>
+        </Card>
+      ) : (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+            {filteredCategories.map((category) => (
+              <TabsTrigger key={category} value={category} className="capitalize">
+                <span className="flex items-center gap-2">
+                  {getCategoryIcon(category)}
+                  {category}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {Object.entries(settings).map(([category, categorySettings]) => (
-          <TabsContent key={category} value={category} className="space-y-4">
-            <div className="grid gap-6 md:grid-cols-2">
-              {categorySettings.map((setting) => (
-                <Card key={setting.setting_key} className="overflow-hidden">
-                  <CardHeader className={`${getCategoryColor(category)} pb-3`}>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {getCategoryIcon(category)}
-                      {setting.setting_key.split('_').map(word => 
-                        word.charAt(0).toUpperCase() + word.slice(1)
-                      ).join(' ')}
-                    </CardTitle>
-                    {setting.description && (
-                      <CardDescription className="text-xs">
-                        {setting.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor={setting.setting_key} className="text-sm font-medium">
-                          Value ({setting.data_type})
-                        </Label>
-                        <div className="mt-2">
-                          {renderSettingInput(setting)}
+          {Object.entries(filteredSettings).map(([category, categorySettings]) => (
+            <TabsContent key={category} value={category} className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {categorySettings.map((setting) => (
+                  <Card key={setting.setting_key} className="overflow-hidden">
+                    <CardHeader className={`${getCategoryColor(category)} pb-3`}>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {getCategoryIcon(category)}
+                        {setting.setting_key.split('_').map(word => 
+                          word.charAt(0).toUpperCase() + word.slice(1)
+                        ).join(' ')}
+                      </CardTitle>
+                      {setting.description && (
+                        <CardDescription className="text-xs">
+                          {setting.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor={setting.setting_key} className="text-sm font-medium">
+                            Value ({setting.data_type})
+                          </Label>
+                          <div className="mt-2">
+                            {renderSettingInput(setting)}
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          {setting.is_editable && (
+                            <>
+                              <Button
+                                onClick={() => handleSaveSingle(setting.setting_key)}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              >
+                                <Save className="h-3 w-3 mr-2" />
+                                Save
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteSetting(setting.setting_key)}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
-                      
-                      <div className="flex gap-2">
-                        {setting.is_editable && (
-                          <>
-                            <Button
-                              onClick={() => handleSaveSingle(setting.setting_key)}
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                            >
-                              <Save className="h-3 w-3 mr-2" />
-                              Save
-                            </Button>
-                            <Button
-                              onClick={() => handleDeleteSetting(setting.setting_key)}
-                              variant="destructive"
-                              size="sm"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
     </div>
   );
 }

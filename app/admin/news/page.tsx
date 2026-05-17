@@ -741,7 +741,7 @@ export default function AdminNewsPage() {
                           <img
                             src={resolveNewsImageUrl(article.featured_image, config.API_BASE) || undefined}
                             alt={article.title}
-                            className="w-full max-w-md h-36 object-cover rounded-lg mb-3 border border-slate-200"
+                            className="w-full h-48 object-cover rounded-lg mb-3 border border-slate-200"
                             onError={(e) => {
                               const target = e.currentTarget as HTMLImageElement;
                               target.onerror = null;

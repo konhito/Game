@@ -28,6 +28,7 @@ import {
   Newspaper
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
+import { authService } from '@/lib/auth-service';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -65,11 +66,15 @@ interface DashboardStats {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [userRole, setUserRole] = useState<string>('admin');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   useEffect(() => {
+    const currentUser = authService.getUser();
+    setUserRole(currentUser?.role || 'admin');
+
     const token = localStorage.getItem('auth_token');
     if (!token) {
       setError('Please sign in to access the admin dashboard');
@@ -214,6 +219,13 @@ export default function AdminDashboard() {
       color: "green"
     }
   ];
+  const moderatorAllowedHrefs = new Set([
+    '/admin/news',
+    '/admin/create-task',
+    '/admin/pending-proofs',
+    '/admin/test-page',
+  ]);
+  const isModerator = userRole === 'moderator';
 
   const adminTools = [
     { title: "AI Verification", href: "/admin/ai-verification", icon: Bot, color: "purple" },
@@ -315,22 +327,31 @@ export default function AdminDashboard() {
           >
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                const colorClasses = {
+                {quickActions.map((action, index) => {
+                  const Icon = action.icon;
+                  const isAllowed = !isModerator || moderatorAllowedHrefs.has(action.href);
+                  const colorClasses = {
                   blue: "bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700",
                   emerald: "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700",
                   purple: "bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700",
                   indigo: "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700",
                   green: "bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
-                };
-                return (
-                  <Link key={index} href={action.href}>
-                    <Card className={`${colorClasses[action.color as keyof typeof colorClasses]} border-2 hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer ${action.urgent ? 'ring-2 ring-orange-400' : ''}`}>
+                  };
+                  return (
+                  <Link
+                    key={index}
+                    href={isAllowed ? action.href : '#'}
+                    onClick={(event) => {
+                      if (!isAllowed) {
+                        event.preventDefault();
+                      }
+                    }}
+                  >
+                    <Card className={`${colorClasses[action.color as keyof typeof colorClasses]} border-2 transition-all duration-200 ${isAllowed ? 'hover:shadow-lg hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'} ${action.urgent ? 'ring-2 ring-orange-400' : ''}`}>
                       <CardContent className="p-4 text-center">
                         <Icon className={`w-6 h-6 mx-auto mb-2 ${action.urgent ? 'animate-pulse' : ''}`} />
                         <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
-                        <p className="text-xs opacity-75">{action.description}</p>
+                        <p className="text-xs opacity-75">{isAllowed ? action.description : 'Locked for moderator'}</p>
                         {action.urgent && (
                           <Badge className="mt-2 bg-orange-500 text-white text-xs">Urgent</Badge>
                         )}
@@ -516,6 +537,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {adminTools.map((tool, index) => {
                   const Icon = tool.icon;
+                  const isAllowed = !isModerator || moderatorAllowedHrefs.has(tool.href);
                   const colorClasses = {
                     purple: "bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700",
                     orange: "bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700",
@@ -525,11 +547,20 @@ export default function AdminDashboard() {
                     slate: "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
                   };
                   return (
-                    <Link key={index} href={tool.href}>
-                      <Card className={`${colorClasses[tool.color as keyof typeof colorClasses]} border-2 hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer`}>
+                    <Link
+                      key={index}
+                      href={isAllowed ? tool.href : '#'}
+                      onClick={(event) => {
+                        if (!isAllowed) {
+                          event.preventDefault();
+                        }
+                      }}
+                    >
+                      <Card className={`${colorClasses[tool.color as keyof typeof colorClasses]} border-2 transition-all duration-200 ${isAllowed ? 'hover:shadow-lg hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                         <CardContent className="p-4 text-center">
                           <Icon className="w-5 h-5 mx-auto mb-2" />
                           <h3 className="font-medium text-xs">{tool.title}</h3>
+                          {!isAllowed && <p className="text-[10px] mt-1 opacity-80">Locked</p>}
                         </CardContent>
                       </Card>
                     </Link>

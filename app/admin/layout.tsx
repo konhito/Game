@@ -25,8 +25,17 @@ import {
   ImageIcon,
   Menu,
   X,
-  TestTube
+  TestTube,
+  Lock
 } from 'lucide-react';
+
+const moderatorAllowedHrefs = new Set([
+  '/admin',
+  '/admin/news',
+  '/admin/create-task',
+  '/admin/pending-proofs',
+  '/admin/test-page',
+]);
 
 const adminPages = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -57,9 +66,8 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const isModerator = user?.role === 'moderator';
-  const allowedPages = isModerator
-    ? adminPages.filter((page) => page.href === '/admin/news')
-    : adminPages;
+  const isPageAllowedForCurrentUser = (href: string) => !isModerator || moderatorAllowedHrefs.has(href);
+  const currentPageAllowed = isPageAllowedForCurrentUser(pathname || '/admin');
 
   useEffect(() => {
     console.log('🔍 Admin layout: Checking authentication...');
@@ -78,15 +86,15 @@ export default function AdminLayout({
       return;
     }
 
-    if (currentUser.role === 'moderator' && pathname !== '/admin/news') {
-      router.push('/admin/news');
+    if (currentUser.role === 'moderator' && !moderatorAllowedHrefs.has(pathname || '/admin')) {
+      router.push('/admin');
       return;
     }
     
     console.log('✅ User is admin, setting user state');
     setUser(currentUser);
     setLoading(false);
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = () => {
     authService.logout();
@@ -137,22 +145,33 @@ export default function AdminLayout({
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4">
             <div className="space-y-1">
-              {allowedPages.map((page) => {
+              {adminPages.map((page) => {
                 const Icon = page.icon;
                 const isActive = pathname === page.href || (page.href !== '/admin' && pathname?.startsWith(page.href));
+                const isAllowed = isPageAllowedForCurrentUser(page.href);
                 return (
                   <Link
                     key={page.href}
-                    href={page.href}
-                    onClick={() => setSidebarOpen(false)}
+                    href={isAllowed ? page.href : '#'}
+                    onClick={(event) => {
+                      if (!isAllowed) {
+                        event.preventDefault();
+                        return;
+                      }
+                      setSidebarOpen(false);
+                    }}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
                       isActive
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        : isAllowed
+                        ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        : 'text-gray-400 cursor-not-allowed bg-gray-50'
                     }`}
+                    aria-disabled={!isAllowed}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm">{page.name}</span>
+                    {!isAllowed && <Lock className="h-3.5 w-3.5 ml-auto" />}
                   </Link>
                 );
               })}
@@ -209,7 +228,9 @@ export default function AdminLayout({
                   <Menu className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  {allowedPages.find(p => pathname === p.href || (p.href !== '/admin' && pathname?.startsWith(p.href)))?.name || 'Admin Panel'}
+                  {currentPageAllowed
+                    ? adminPages.find(p => pathname === p.href || (p.href !== '/admin' && pathname?.startsWith(p.href)))?.name || 'Admin Panel'
+                    : 'Locked Section'}
                 </h1>
               </div>
               <div className="hidden lg:flex items-center space-x-4">

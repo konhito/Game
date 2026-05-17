@@ -47,13 +47,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  // Special check for admin routes - only allow admin users
+  // Special check for admin routes - allow admins and moderators with scoped access
   if (pathname.startsWith("/admin") && isAuthenticated) {
     try {
       const userData = JSON.parse(customUserData);
-      if (userData.role !== 'admin') {
-        console.log('Redirecting non-admin user from admin route to dashboard');
+      const role = userData.role;
+      const moderatorAllowedAdminRoutes = new Set([
+        "/admin",
+        "/admin/news",
+        "/admin/create-task",
+        "/admin/pending-proofs",
+        "/admin/test-page",
+      ]);
+
+      if (role !== "admin" && role !== "moderator") {
+        console.log('Redirecting non-admin/moderator user from admin route to dashboard');
         return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+
+      if (role === "moderator" && !moderatorAllowedAdminRoutes.has(pathname)) {
+        console.log('Redirecting moderator from restricted admin route to /admin');
+        return NextResponse.redirect(new URL("/admin", request.url));
       }
     } catch (error) {
       console.error('Error parsing user data in middleware:', error);
