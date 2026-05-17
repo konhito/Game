@@ -277,7 +277,7 @@ export default function PointSystemAdmin() {
 
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const response = await fetch(`${config.API_BASE}/api/point-system/deduct`, {
+      const response = await fetch(`${config.API_BASE}/api/points/deduct`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ export default function PointSystemAdmin() {
 
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const response = await fetch(`${config.API_BASE}/api/point-system/reset`, {
+      const response = await fetch(`${config.API_BASE}/api/points/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

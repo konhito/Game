@@ -72,7 +72,7 @@ export default function SpinWheelPage() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<typeof wheelSegments[0] | null>(null);
-  const [spinsRemaining, setSpinsRemaining] = useState(3);
+  const [spinsRemaining, setSpinsRemaining] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [nextReset, setNextReset] = useState<{
     nextReset: string;
@@ -318,7 +318,7 @@ export default function SpinWheelPage() {
                 {nextReset && (
                   <div className="mt-2 text-xs sm:text-sm text-gray-400">
                     <Clock className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
-                    Next reset in {nextReset.hoursUntilReset}h (Period {nextReset.nextPeriod}/3)
+                    Next reset in {nextReset.hoursUntilReset}h
                   </div>
                 )}
               </CardHeader>
@@ -484,7 +484,7 @@ export default function SpinWheelPage() {
                 {/* Spins Info */}
                 <div className="mt-4 sm:mt-6 space-y-2">
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-2 sm:p-3 border border-green-400/30">
-                    <p className="text-green-300 font-semibold text-xs sm:text-sm md:text-base">🎯 Daily free spin</p>
+                    <p className="text-green-300 font-semibold text-xs sm:text-sm md:text-base">🎯 Daily free spins</p>
                   </div>
                   <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-2 sm:p-3 border border-orange-400/30">
                     <p className="text-orange-300 font-semibold text-xs sm:text-sm md:text-base">🔥 3-day streak = 2 bonus spins</p>
