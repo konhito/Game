@@ -144,8 +144,10 @@ export function Navbar() {
     },
   ];
 
+  const isAdmin = user?.role === "admin";
+
   // Add admin panel navigation if user is admin
-  const adminNavigation = user?.role === 'admin' ? [
+  const adminNavigation = isAdmin ? [
     {
       title: "Admin Panel",
       href: "/admin",
@@ -335,7 +337,11 @@ export function Navbar() {
           </Link>
 
           {/* Clean Navigation - Only Essential Items */}
-          <nav className="hidden xl:flex items-center space-x-3 lg:space-x-6 flex-1 justify-center max-w-2xl mx-auto">
+          <nav
+            className={`hidden xl:flex flex-1 flex-wrap items-center justify-center gap-x-2 gap-y-2 mx-auto min-w-0 ${
+              isAdmin ? "max-w-3xl" : "max-w-2xl"
+            }`}
+          >
             {allNavigation.map((item) => (
               <Link
                 key={item.href}
@@ -344,7 +350,11 @@ export function Navbar() {
                           item.href === "/dashboard/rewards" ? "nav-rewards" :
                           item.href === "/dashboard/prize-pool" ? "nav-prize-pool" :
                           item.href === "/dashboard/settings" ? "nav-settings" : undefined}
-                className={`relative px-3 lg:px-6 py-2 lg:py-3 rounded-xl text-xs lg:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`relative rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
+                  isAdmin
+                    ? "px-2.5 lg:px-4 py-1.5 lg:py-2 text-[11px] lg:text-xs"
+                    : "px-3 lg:px-6 py-2 lg:py-3 text-xs lg:text-sm"
+                } ${
                   item.isActive
                     ? item.isAdmin 
                       ? "text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:shadow-md hover:scale-105"
@@ -353,7 +363,9 @@ export function Navbar() {
                 }`}
               >
                 <div className="flex items-center gap-2 lg:gap-3">
-                  <item.icon className={`h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0 transition-all duration-200 ${
+                  <item.icon className={`flex-shrink-0 transition-all duration-200 ${
+                    isAdmin ? "h-3.5 w-3.5 lg:h-4 lg:w-4" : "h-4 w-4 lg:h-5 lg:w-5"
+                  } ${
                     item.isActive 
                       ? item.isAdmin ? "text-red-600 hover:text-red-700 hover:scale-110" : "text-emerald-600 hover:text-emerald-700 hover:scale-110"
                       : "text-slate-500 hover:text-emerald-600 hover:scale-110"
