@@ -9,7 +9,6 @@ export async function GET(
     const mockStats = {
       id: "stats1",
       userId: params.userId,
-      totalPoints: 1250,
       weeklyPoints: 450,
       totalPineCoins: "125.50",
       dailyLoginStreak: 3,

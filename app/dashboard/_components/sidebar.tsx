@@ -26,7 +26,7 @@ interface SidebarProps {
   userStats?: {
     spins_remaining?: number;
     current_streak?: number;
-    total_points?: number;
+    weekly_points?: number;
   } | null;
 }
 
@@ -164,11 +164,11 @@ export function Sidebar({ className, userStats }: SidebarProps) {
               <span className="font-semibold text-blue-600 group-hover:text-blue-700 group-hover:scale-110 transition-all duration-200">🎯 {userStats?.spins_remaining || 0}</span>
             </div>
             <div className="flex items-center justify-between text-sm hover:bg-slate-50 rounded-lg p-2 transition-all duration-200 cursor-pointer group">
-              <span className="text-muted-foreground flex items-center gap-2 group-hover:text-slate-700 transition-colors duration-200">
-                <span className="w-2 h-2 bg-green-500 rounded-full group-hover:bg-green-600 group-hover:scale-125 transition-all duration-200"></span>
-                Total Points
+                <span className="text-muted-foreground flex items-center gap-2 group-hover:text-slate-700 transition-colors duration-200">
+                  <span className="w-2 h-2 bg-green-500 rounded-full group-hover:bg-green-600 group-hover:scale-125 transition-all duration-200"></span>
+                Weekly Points
               </span>
-              <span className="font-semibold text-green-600 group-hover:text-green-700 group-hover:scale-110 transition-all duration-200">{userStats?.total_points || 0}</span>
+              <span className="font-semibold text-green-600 group-hover:text-green-700 group-hover:scale-110 transition-all duration-200">{userStats?.weekly_points || 0}</span>
             </div>
           </div>
         </div>

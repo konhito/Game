@@ -10,14 +10,13 @@ interface UserProfile {
 }
 
 interface UserStats {
-  total_points: number;
+  weekly_points: number;
   total_coins: number;
   tasks_completed: number;
   tasks_approved: number;
   tasks_rejected: number;
   current_streak: number;
   longest_streak: number;
-  weekly_points: number;
   spins_remaining: number;
   last_task_date?: string;
   last_login_date?: string;

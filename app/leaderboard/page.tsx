@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +12,7 @@ interface LeaderboardEntry {
   user_id: number;
   name: string;
   rank?: number;
-  total_points: number;
   weekly_points: number;
-  total_coins: number;
   current_streak: number;
   tasks_completed: number;
 }
@@ -159,7 +157,7 @@ export default function LeaderboardPage() {
           ? "bg-gray-400"
           : rank === 3
             ? "bg-orange-500"
-            : "bg-purple-500";
+            : "bg-slate-500";
 
     return {
       rank,
@@ -171,8 +169,7 @@ export default function LeaderboardPage() {
   }) : [
     { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", color: "bg-yellow-500" },
     { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", color: "bg-gray-400" },
-    { rank: 3, reward: "15%", amount: "PC 750", naira: "NGN 0", color: "bg-orange-500" },
-    { rank: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", color: "bg-purple-500" },
+    { rank: 3, reward: "20%", amount: "PC 1,000", naira: "NGN 0", color: "bg-orange-500" },
   ];
 
   const handleRefresh = async () => {
@@ -366,10 +363,6 @@ export default function LeaderboardPage() {
                                 <span className="text-orange-500">🔥</span> 
                                 {player.current_streak || 0} day streak
                               </span>
-                              <span className="flex items-center gap-1">
-                                <span className="text-emerald-500">💰</span> 
-                                ₽{Number(player.total_coins || 0).toFixed(0)}
-                              </span>
                             </div>
                           </div>
                         </div>
@@ -377,9 +370,6 @@ export default function LeaderboardPage() {
                           <div className="text-2xl font-bold text-slate-800">{player.weekly_points?.toLocaleString() || 0}</div>
                           <p className="text-sm text-slate-600">
                             <span className="text-green-600 font-medium">Weekly Points</span>
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {player.total_points.toLocaleString()} total
                           </p>
                         </div>
                       </div>
@@ -411,7 +401,7 @@ export default function LeaderboardPage() {
                     <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-md transition-all duration-200">
                       <div className="flex items-center gap-3">
                         <Badge className={`${reward.color} text-white shadow-sm`}>
-                          {reward.rank === "Random" ? "🎲" : `#${reward.rank}`}
+                          #{reward.rank}
                         </Badge>
                         <span className="font-semibold text-slate-700">{reward.reward}</span>
                       </div>
@@ -503,16 +493,12 @@ export default function LeaderboardPage() {
                     <span>Top 3 players get weekly rewards</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
-                    <span className="text-purple-500">🎲</span>
-                    <span>1 random player gets {weeklyRewards.find((r) => r.rank === "Random")?.reward || "5%"} bonus</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-700">
                     <span className="text-green-500">📊</span>
                     <span>Points rank you up; PineCoins are paid weekly</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-700">
                     <span className="text-emerald-500">🏦</span>
-                    <span>PineCoins can be converted and paid to your bank</span>
+                    <span>Top weekly performers receive PineCoins, then can request withdrawal</span>
                   </div>
                 </div>
               </CardContent>

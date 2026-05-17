@@ -5,7 +5,6 @@ const API_BASE = config.API_BASE;
 export interface UserStats {
   id: number;
   user_id: number;
-  total_points: number;
   total_coins: number;
   tasks_completed: number;
   tasks_approved: number;
@@ -14,7 +13,7 @@ export interface UserStats {
   longest_streak: number;
   last_task_date?: string;
   spins_remaining?: number;
-  weekly_points?: number;
+  weekly_points: number;
   last_login_date?: string;
   last_daily_claim_date?: string;
   last_spin_reset_date?: string;
@@ -41,13 +40,12 @@ export interface LeaderboardEntry {
   user_id?: number;
   name: string;
   email: string;
-  total_points: number;
   total_coins: number;
   tasks_completed: number;
   tasks_approved: number;
   current_streak: number;
   longest_streak: number;
-  weekly_points?: number;
+  weekly_points: number;
   rank?: number;
 }
 
@@ -75,7 +73,6 @@ export interface TaskPointRules {
   comment_points: number;
   like_points: number;
   daily_login_points: number;
-  points_to_coins_ratio?: number;
   spin_rewards?: number[];
   login_streak_bonus_days: number;
   login_streak_bonus_spins: number;
@@ -363,8 +360,7 @@ class DashboardService {
     return attemptRequest();
   }
 
-  // Get leaderboard — computed live from local DB (weekly_points summed from userActivity this week),
-  // ordered by weekly_points desc then total_points desc. No browser cache.
+  // Get leaderboard — computed live from local DB, ordered by weekly points.
   async getLeaderboard(limit: number = 10): Promise<ApiResponse<{ users: LeaderboardEntry[]; weekly_pool?: WeeklyPool; weekly_rewards?: WeeklyReward[]; task_point_rules?: TaskPointRules }>> {
     try {
       const response = await fetch(`/api/leaderboard?limit=${limit}`, {
@@ -712,7 +708,7 @@ class DashboardService {
   }
 
   // Spin the wheel (integrated with point system)
-  async spinWheel(): Promise<ApiResponse<{ points: number; coins: number; message: string }>> {
+  async spinWheel(): Promise<ApiResponse<{ points: number; message: string }>> {
     try {
       const response = await fetch(`${API_BASE}/api/points/config`, {
         headers: this.getAuthHeaders(),
@@ -752,14 +748,11 @@ class DashboardService {
         }
       }
 
-      const coins = Math.round(selectedReward.points * 0.001 * 100) / 100;
-
       return {
         success: true,
         data: {
           points: selectedReward.points,
-          coins,
-          message: `Congratulations! You won ${selectedReward.points} points and ${coins} PineCoins!`,
+          message: `Congratulations! You won ${selectedReward.points} points!`,
         },
       };
     } catch (error) {
@@ -769,12 +762,12 @@ class DashboardService {
   }
 
   // Update user stats after spinning wheel
-  async updateUserStatsAfterSpin(points: number, coins: number): Promise<ApiResponse> {
+  async updateUserStatsAfterSpin(points: number): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ action: 'spin_wheel', points, coins }),
+        body: JSON.stringify({ action: 'spin_wheel', points }),
       });
 
       if (!response.ok) {

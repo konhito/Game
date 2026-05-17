@@ -347,8 +347,7 @@ export default function ActivitiesPage() {
                   // Emit coin update event to refresh navbar
                   coinEventEmitter.emitCoinUpdate({
                     pineCoins: parseFloat(userStats.total_coins) || 0,
-                    weeklyPoints: userStats.weekly_points || 0,
-                    totalPoints: userStats.total_points || 0,
+                    weeklyPoints: userStats.weekly_points || 0
                   });
                   console.log('Activities: Emitted coin update after task completion');
                 }

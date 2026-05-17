@@ -199,7 +199,7 @@ export default function RewardsPage() {
     if (reward.claimed || !userStats) return false;
     
     if (reward.category === 'points') {
-      return userStats.total_points >= reward.points_required;
+      return userStats.weekly_points >= reward.points_required;
     } else if (reward.category === 'coins') {
       return userStats.total_coins >= reward.coins_required;
     } else if (reward.category === 'special') {
@@ -234,8 +234,7 @@ export default function RewardsPage() {
             // Emit coin update event to refresh navbar
             coinEventEmitter.emitCoinUpdate({
               pineCoins: parseFloat(userStats.total_coins) || 0,
-              weeklyPoints: userStats.weekly_points || 0,
-              totalPoints: userStats.total_points || 0,
+              weeklyPoints: userStats.weekly_points || 0
             });
             console.log('Rewards: Emitted coin update after reward claim');
             // Also update local userStats state
@@ -306,8 +305,8 @@ export default function RewardsPage() {
                         <Star className="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm text-slate-500 font-medium">Total Points</p>
-                        <p className="text-2xl font-bold text-slate-900">{userStats.total_points || 0}</p>
+                        <p className="text-sm text-slate-500 font-medium">Weekly Points</p>
+                        <p className="text-2xl font-bold text-slate-900">{userStats.weekly_points || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -438,12 +437,12 @@ export default function RewardsPage() {
                         <div className="space-y-2">
                           {reward.points_required > 0 && (
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-slate-600">Points needed:</span>
+                              <span className="text-sm text-slate-600">Weekly points needed:</span>
                               <span className="text-sm font-semibold text-slate-900">
                                 {reward.points_required}
                                 {userStats && (
-                                  <span className={`ml-2 ${userStats.total_points >= reward.points_required ? 'text-emerald-600' : 'text-red-500'}`}>
-                                    ({userStats.total_points || 0})
+                                  <span className={`ml-2 ${userStats.weekly_points >= reward.points_required ? 'text-emerald-600' : 'text-red-500'}`}>
+                                    ({userStats.weekly_points || 0})
                                   </span>
                                 )}
                               </span>

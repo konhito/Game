@@ -40,11 +40,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Sort: weekly_points desc, then total_points desc as tiebreaker
+    // Sort by weekly_points only (highest first)
     const sorted: any[] = [...result.data.users].sort((a: any, b: any) => {
-      const wDiff = (b.weekly_points ?? 0) - (a.weekly_points ?? 0);
-      if (wDiff !== 0) return wDiff;
-      return (b.total_points ?? 0) - (a.total_points ?? 0);
+      return (b.weekly_points ?? 0) - (a.weekly_points ?? 0);
     });
 
     // Re-assign rank after sort

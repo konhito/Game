@@ -26,7 +26,7 @@ export interface UserLevel {
   id: number;
   user_id: number;
   current_level: number;
-  total_points: number;
+  weekly_points: number;
   points_to_next_level: number;
   level_benefits: any;
   last_level_up?: string;
@@ -35,19 +35,19 @@ export interface UserLevel {
 export interface PointSystemAnalytics {
   transactionSummary: Array<{
     transaction_type: string;
-    total_points: number;
+    weekly_points: number;
     total_coins: number;
     count: number;
   }>;
   dailyTrends: Array<{
     date: string;
-    total_points: number;
+    weekly_points: number;
     total_coins: number;
     transaction_count: number;
   }>;
   topUsers: Array<{
     user_id: number;
-    total_points: number;
+    weekly_points: number;
     total_coins: number;
     user_name: string;
     user_email: string;

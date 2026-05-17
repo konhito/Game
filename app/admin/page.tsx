@@ -51,7 +51,7 @@ interface DashboardStats {
   top_performing_users: Array<{
     id: number;
     name: string;
-    total_points: number;
+    weekly_points: number;
     total_coins: number;
     tasks_approved: number;
   }>;
@@ -466,7 +466,7 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-slate-900 text-sm">{user.total_points.toLocaleString()} pts</p>
+                            <p className="font-semibold text-slate-900 text-sm">{user.weekly_points.toLocaleString()} wk pts</p>
                             <p className="text-xs text-emerald-600">₽{user.total_coins.toLocaleString()}</p>
                           </div>
                         </div>

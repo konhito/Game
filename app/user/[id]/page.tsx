@@ -43,14 +43,13 @@ interface UserProfile {
 }
 
 interface UserStats {
-  total_points: number;
+  weekly_points: number;
   total_coins: number;
   tasks_completed: number;
   tasks_approved: number;
   tasks_rejected: number;
   current_streak: number;
   longest_streak: number;
-  weekly_points: number;
   spins_remaining: number;
   last_task_date?: string;
   last_login_date?: string;
@@ -333,8 +332,8 @@ export default function UserProfilePage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-emerald-600">{stats.total_points}</div>
-                    <div className="text-sm text-slate-600">Total Points</div>
+                    <div className="text-2xl font-bold text-emerald-600">{stats.weekly_points}</div>
+                    <div className="text-sm text-slate-600">Weekly Points</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{stats.total_coins}</div>

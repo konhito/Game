@@ -716,7 +716,7 @@ export default function AdminTestPage() {
                   {leaderboardData.slice(0, 10).map((user, index) => (
                     <div key={user.id || index} className="p-2 bg-gray-50 rounded text-xs">
                       <p>
-                        <strong>#{index + 1}</strong> {user.name} - {user.total_points} points
+                        <strong>#{index + 1}</strong> {user.name} - {user.weekly_points || 0} weekly points
                       </p>
                     </div>
                   ))}

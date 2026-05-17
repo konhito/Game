@@ -22,7 +22,7 @@ export default function AboutPage() {
               About PineCrest
             </h1>
             <p className="text-lg text-slate-600 mb-12">
-              Transforming social media engagement into real rewards
+              Weekly points competition with top-3 PineCoin rewards
             </p>
 
             <div className="space-y-12">
@@ -32,9 +32,8 @@ export default function AboutPage() {
                   Our Mission
                 </h2>
                 <p className="text-slate-700 leading-relaxed">
-                  PineCrest is a gamified rewards platform that empowers users to earn real value from their social media activities. 
-                  We believe that your online engagement should be rewarded, and we've built a platform that makes it easy to 
-                  convert your social media participation into PineCoins and real rewards.
+                  PineCrest is a gamified platform where users earn weekly points from social activities and compete for the top 3 spots.
+                  Weekly points reset every Monday, and the top performers receive PineCoins.
                 </p>
               </section>
 
@@ -46,13 +45,13 @@ export default function AboutPage() {
                 <div className="space-y-4 text-slate-700">
                   <p>
                     PineCrest connects users with engaging social media tasks from brands and creators. Complete tasks like 
-                    liking posts, sharing content, following accounts, and watching videos to earn points and PineCoins.
+                    liking posts, sharing content, following accounts, and watching videos to earn weekly points.
                   </p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Complete verified social media tasks</li>
-                    <li>Earn points and PineCoins for every activity</li>
-                    <li>Compete on leaderboards for additional rewards</li>
-                    <li>Redeem PineCoins for real prizes and rewards</li>
+                    <li>Earn weekly points for each activity</li>
+                    <li>Compete for top-3 leaderboard positions every week</li>
+                    <li>Receive PineCoins when you finish in the weekly top 3</li>
                     <li>Track your progress and achievements</li>
                   </ul>
                 </div>
@@ -73,7 +72,7 @@ export default function AboutPage() {
                   <div className="p-4 bg-blue-50 rounded-lg">
                     <h3 className="font-semibold text-slate-900 mb-2">Real Rewards</h3>
                     <p className="text-sm text-slate-700">
-                      Convert your PineCoins into real prizes, gift cards, and cash rewards.
+                      Top 3 weekly performers receive PineCoins and can request withdrawals.
                     </p>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg">
@@ -115,8 +114,7 @@ export default function AboutPage() {
                   Get Started Today
                 </h2>
                 <p className="text-slate-700 mb-6">
-                  Join thousands of users already earning rewards on PineCrest. Sign up today and start converting 
-                  your social media activities into real value!
+                  Join PineCrest and start earning weekly points from your social media activities.
                 </p>
                 <Link
                   href="/sign-up"

@@ -27,7 +27,7 @@ export default function SharedFooter() {
               <span className="text-base sm:text-lg md:text-xl font-bold ml-2">PineCrest</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed">
-              Earn rewards from your social media activities and convert them to real money.
+              Earn weekly points from social activities and compete for top-3 PineCoin rewards.
             </p>
           </div>
           

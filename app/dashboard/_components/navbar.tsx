@@ -25,7 +25,6 @@ interface User {
   avatar: string | null;
   pineCoins: number;
   weeklyPoints: number;
-  totalPoints: number;
   role?: string;
 }
 
@@ -67,8 +66,7 @@ export function Navbar() {
             avatar: prevUser?.avatar || null,
             role: prevUser?.role || "user",
             pineCoins: parseFloat(userStats.total_coins) || 0,
-            weeklyPoints: userStats.weekly_points || 0,
-            totalPoints: userStats.total_points || 0,
+            weeklyPoints: userStats.weekly_points || 0
           }));
           console.log('Navbar: Updated user with real stats:', userStats);
         }
@@ -82,8 +80,7 @@ export function Navbar() {
           avatar: prevUser?.avatar || null,
           role: prevUser?.role || "user",
           pineCoins: 0,
-          weeklyPoints: 0,
-          totalPoints: 0,
+          weeklyPoints: 0
         }));
       }
     } catch (error) {
@@ -96,8 +93,7 @@ export function Navbar() {
         avatar: prevUser?.avatar || null,
         role: prevUser?.role || "user",
         pineCoins: 0,
-        weeklyPoints: 0,
-        totalPoints: 0,
+        weeklyPoints: 0
       }));
     } finally {
       // Set loading to false after stats are fetched
@@ -190,7 +186,6 @@ export function Navbar() {
               avatar: userData.image || null,
               pineCoins: 0, // Will be updated from real data
               weeklyPoints: 0, // Will be updated from real data
-              totalPoints: 0, // Will be updated from real data
               role: userData.role || "user",
             });
             
@@ -225,7 +220,6 @@ export function Navbar() {
               avatar: userData.image || null,
               pineCoins: 0, // Will be updated from real data
               weeklyPoints: 0, // Will be updated from real data
-              totalPoints: 0, // Will be updated from real data
               role: userData.role || "user",
             });
             
@@ -266,8 +260,7 @@ export function Navbar() {
       setUser(prevUser => prevUser ? {
         ...prevUser,
         pineCoins: data.pineCoins,
-        weeklyPoints: data.weeklyPoints,
-        totalPoints: data.totalPoints,
+        weeklyPoints: data.weeklyPoints
       } : null);
     });
 

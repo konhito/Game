@@ -23,7 +23,6 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
   const [spinsRemaining, setSpinsRemaining] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
-  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
 
   useEffect(() => {
     const fetchSpins = async () => {
@@ -37,7 +36,6 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
         const leaderboardResponse = await dashboardService.getLeaderboard(1);
         if (leaderboardResponse.success && leaderboardResponse.data?.task_point_rules) {
           const rules = leaderboardResponse.data.task_point_rules;
-          setPointsToCoinsRatio(Number(rules.points_to_coins_ratio || 10));
           if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
             const rewards = rules.spin_rewards
               .map((value: number) => Number(value))
@@ -114,9 +112,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
 
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      const safeRatio = pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10;
-      const coins = Math.round((selectedSegment.points / safeRatio) * 10000) / 10000;
-      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points);
       
       if (updateResponse.success) {
         setSpinsRemaining(prev => prev - 1);

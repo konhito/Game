@@ -51,7 +51,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  total_points: number;
+  weekly_points: number;
   total_coins: number;
 }
 
@@ -82,7 +82,6 @@ export default function PointSystemAdmin() {
   });
   const [resetForm, setResetForm] = useState({
     userId: '',
-    resetPoints: false,
     resetCoins: false,
     resetWeeklyPoints: false,
     description: ''
@@ -105,7 +104,7 @@ export default function PointSystemAdmin() {
         id: Number(user.id),
         name: String(user.name || `User #${user.id}`),
         email: String(user.email || ''),
-        total_points: Number(user.total_points || 0),
+        weekly_points: Number(user.weekly_points || 0),
         total_coins: Number(user.total_coins || 0)
       }))
       .filter((user) => {
@@ -312,7 +311,7 @@ export default function PointSystemAdmin() {
       return;
     }
 
-    if (!resetForm.resetPoints && !resetForm.resetCoins && !resetForm.resetWeeklyPoints) {
+    if (!resetForm.resetCoins && !resetForm.resetWeeklyPoints) {
       alert('Please select at least one option to reset');
       return;
     }
@@ -331,7 +330,6 @@ export default function PointSystemAdmin() {
         },
         body: JSON.stringify({
           userId: parseInt(resetForm.userId),
-          resetPoints: resetForm.resetPoints,
           resetCoins: resetForm.resetCoins,
           resetWeeklyPoints: resetForm.resetWeeklyPoints,
           description: resetForm.description || 'Admin reset penalty'
@@ -339,7 +337,7 @@ export default function PointSystemAdmin() {
       });
 
       if (response.ok) {
-        setResetForm({ userId: '', resetPoints: false, resetCoins: false, resetWeeklyPoints: false, description: '' });
+        setResetForm({ userId: '', resetCoins: false, resetWeeklyPoints: false, description: '' });
         setShowResetForm(false);
         fetchData();
         alert('User stats reset successfully!');
@@ -547,12 +545,12 @@ export default function PointSystemAdmin() {
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Total Points Awarded
-                </CardTitle>
-              </CardHeader>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Weekly Points Awarded
+                  </CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {transactions.reduce((sum, t) => sum + (t.points_change > 0 ? t.points_change : 0), 0)}
@@ -797,16 +795,6 @@ export default function PointSystemAdmin() {
 
               <div className="space-y-2">
                 <Label>What to Reset:</Label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="resetPoints"
-                    checked={resetForm.resetPoints}
-                    onChange={(e) => setResetForm(prev => ({ ...prev, resetPoints: e.target.checked }))}
-                    className="w-4 h-4"
-                  />
-                  <Label htmlFor="resetPoints">Total Points</Label>
-                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"

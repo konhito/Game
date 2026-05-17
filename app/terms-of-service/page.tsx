@@ -71,9 +71,9 @@ export default function TermsOfService() {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium mb-2">Randomized rewards</h3>
+                    <h3 className="text-lg font-medium mb-2">Weekly top-3 rewards</h3>
                     <p className="leading-relaxed">
-                      Odds and prize pools may vary and are capped per user to prevent abuse.
+                      Weekly points determine rank placement; only top leaderboard positions receive PineCoin rewards.
                     </p>
                   </div>
                   <div>

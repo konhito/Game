@@ -7,7 +7,6 @@
 type CoinUpdateListener = (data: {
   pineCoins: number;
   weeklyPoints: number;
-  totalPoints: number;
 }) => void;
 
 class CoinEventEmitter {
@@ -20,7 +19,6 @@ class CoinEventEmitter {
   emitCoinUpdate(data: {
     pineCoins: number;
     weeklyPoints: number;
-    totalPoints: number;
   }) {
     // Emit via custom event for cross-tab communication
     const event = new CustomEvent('coinUpdate', { detail: data });

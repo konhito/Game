@@ -43,7 +43,7 @@ export interface User {
   email: string;
   role: string;
   created_at: string;
-  total_points?: number;
+  weekly_points?: number;
   total_coins?: number;
   tasks_completed?: number;
   tasks_approved?: number;

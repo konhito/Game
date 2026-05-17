@@ -58,7 +58,7 @@ interface UserData {
   is_active: boolean;
   last_login: string;
   created_at: string;
-  total_points: number;
+  weekly_points: number;
   total_coins: number;
   tasks_completed: number;
   tasks_approved: number;
@@ -503,8 +503,8 @@ export default function UsersPage() {
                     <h4 className="font-medium text-gray-900 text-sm">Performance Stats</h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="text-center p-2 bg-blue-50 rounded-lg">
-                        <div className="text-lg font-bold text-blue-600">{user.total_points}</div>
-                        <div className="text-xs text-blue-600">Points</div>
+                        <div className="text-lg font-bold text-blue-600">{user.weekly_points}</div>
+                        <div className="text-xs text-blue-600">Weekly Points</div>
                       </div>
                       <div className="text-center p-2 bg-green-50 rounded-lg">
                         <div className="text-lg font-bold text-green-600">₽{user.total_coins}</div>

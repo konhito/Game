@@ -84,7 +84,6 @@ export default function SpinWheelPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [streakBonus, setStreakBonus] = useState({ days: 3, spins: 2 });
-  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
 
   // Fetch reset information and user stats
   useEffect(() => {
@@ -115,7 +114,6 @@ export default function SpinWheelPage() {
               days: Number(rules.login_streak_bonus_days || 3),
               spins: Number(rules.login_streak_bonus_spins || 2)
             });
-            setPointsToCoinsRatio(Number(rules.points_to_coins_ratio || 10));
 
             if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
               const rewards = rules.spin_rewards
@@ -241,15 +239,13 @@ export default function SpinWheelPage() {
       await new Promise(resolve => setTimeout(resolve, 4000));
       
       // Update user stats on backend
-      const safeRatio = pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10;
-      const coins = Math.round((selectedSegment.points / safeRatio) * 10000) / 10000;
-      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points, coins);
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points);
       
       if (updateResponse.success) {
         setResult(selectedSegment);
         setShowResult(true);
         setSpinsRemaining(prev => prev - 1);
-        console.log('✅ Spin successful - Points:', selectedSegment.points, 'Coins:', coins);
+        console.log('✅ Spin successful - Points:', selectedSegment.points);
         
         // Emit coin update event to refresh navbar
         try {
@@ -269,8 +265,7 @@ export default function SpinWheelPage() {
                 const userStats = statsResult.data.user;
                 coinEventEmitter.emitCoinUpdate({
                   pineCoins: parseFloat(userStats.total_coins) || 0,
-                  weeklyPoints: userStats.weekly_points || 0,
-                  totalPoints: userStats.total_points || 0,
+                  weeklyPoints: userStats.weekly_points || 0
                 });
                 console.log('Spin Wheel: Emitted coin update after spin');
               }
@@ -550,15 +545,12 @@ export default function SpinWheelPage() {
                         You won {result.points} points!
                       </p>
                       <p className="text-lg text-yellow-200">
-                        {result.points} points and {(result.points / (pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10)).toFixed(4)} PineCoins added to your account!
+                        {result.points} weekly points added to your account.
                       </p>
                     </div>
                     <div className="flex justify-center gap-4 text-sm">
                       <div className="bg-green-500/20 px-3 py-1 rounded-full">
                         <span className="text-green-300">+{result.points} Points</span>
-                      </div>
-                      <div className="bg-blue-500/20 px-3 py-1 rounded-full">
-                        <span className="text-blue-300">+{(result.points / (pointsToCoinsRatio > 0 ? pointsToCoinsRatio : 10)).toFixed(4)} PineCoins</span>
                       </div>
                     </div>
                   </CardContent>
@@ -650,10 +642,7 @@ export default function SpinWheelPage() {
                     <p className="text-purple-300 font-semibold">⭐ Bigger rewards have equal chances</p>
                   </div>
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30">
-                    <p className="text-green-300 font-semibold">💰 Points convert to PineCoins ({pointsToCoinsRatio} points = 1 PineCoin)</p>
-                  </div>
-                  <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg p-3 border border-cyan-400/30">
-                    <p className="text-cyan-300 font-semibold">🚀 Use PineCoins to buy extra spins</p>
+                    <p className="text-green-300 font-semibold">🏆 Earn weekly points to climb the leaderboard</p>
                   </div>
                 </div>
               </CardContent>

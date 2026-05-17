@@ -45,7 +45,6 @@ export default function WalletPage() {
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [minWithdrawal, setMinWithdrawal] = useState(10);
   const [maxWithdrawal, setMaxWithdrawal] = useState(10000);
-  const [pointsToCoinsRatio, setPointsToCoinsRatio] = useState(10);
   
   // Form state
   const [amount, setAmount] = useState('');
@@ -122,7 +121,6 @@ export default function WalletPage() {
         if (data?.success && data?.data) {
           setMinWithdrawal(Number(data.data.min_withdrawal_amount || 10));
           setMaxWithdrawal(Number(data.data.max_withdrawal_amount || 10000));
-          setPointsToCoinsRatio(Number(data.data.points_to_coins_ratio || 10));
         }
       }
     } catch (error) {
@@ -513,7 +511,6 @@ export default function WalletPage() {
                         <br />
                         <span className="font-medium">Exchange Rate:</span> 1 PineCoin = ₽1 = ${pineCoinToUsd} USD
                         <br />
-                        <span className="font-medium">Reward Conversion:</span> {pointsToCoinsRatio} points = 1 PineCoin
                       </p>
                     </div>
 

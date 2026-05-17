@@ -10,7 +10,6 @@ import {
   Activity,
   ArrowRight,
   CheckCircle2,
-  Coins,
   Flame,
   ListTodo,
   Loader2,
@@ -223,7 +222,6 @@ export default function DashboardPage() {
   }
 
   const weeklyPoints = dashboardData.userStats?.weekly_points ?? 0;
-  const totalCoins = Number(dashboardData.userStats?.total_coins || 0);
   const currentStreak = dashboardData.userStats?.current_streak ?? 0;
   const currentRank = currentUserLeaderboardEntry?.rank;
 
@@ -291,7 +289,7 @@ export default function DashboardPage() {
 
         {/* Top Stats Cards */}
         <motion.div 
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
         >
           <StatCard
@@ -300,13 +298,6 @@ export default function DashboardPage() {
             hint="Resets every Monday"
             icon={<Trophy className="h-6 w-6" />}
             colorClass="from-amber-400 to-orange-500"
-          />
-          <StatCard
-            title="Total Balance"
-            value={`${totalCoins.toFixed(2)} PC`}
-            hint="Available PineCoins"
-            icon={<Coins className="h-6 w-6" />}
-            colorClass="from-emerald-400 to-emerald-600"
           />
           <StatCard
             title="Current Rank"
@@ -397,13 +388,12 @@ export default function DashboardPage() {
                       <th className="px-6 py-4 font-medium">Rank</th>
                       <th className="px-6 py-4 font-medium">Player</th>
                       <th className="px-6 py-4 font-medium text-right">Points</th>
-                      <th className="px-6 py-4 font-medium text-right">Balance</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {dashboardData.leaderboard.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                        <td colSpan={3} className="px-6 py-8 text-center text-slate-500">
                           No leaderboard data available.
                         </td>
                       </tr>
@@ -425,9 +415,6 @@ export default function DashboardPage() {
                           </td>
                           <td className="px-6 py-3 text-right font-medium text-slate-900">
                             {(entry.weekly_points || 0).toLocaleString()}
-                          </td>
-                          <td className="px-6 py-3 text-right text-slate-600">
-                            {Number(entry.total_coins || 0).toFixed(2)} PC
                           </td>
                         </tr>
                       ))

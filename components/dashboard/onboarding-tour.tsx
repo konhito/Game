@@ -42,7 +42,7 @@ const tourSteps: TourStep[] = [
     id: "stats-overview",
     target: "[data-tour='stats-cards']",
     title: "Your Stats Overview 📊",
-    content: "Here you can see your total points, weekly points, current rank, and PineCoins balance. These stats update in real-time as you complete activities!",
+    content: "Here you can see your weekly points, current rank, and PineCoins balance. These stats update in real-time as you complete activities!",
     position: "bottom",
     icon: <TrendingUp className="w-6 h-6" />
   },
@@ -50,7 +50,7 @@ const tourSteps: TourStep[] = [
     id: "spin-wheel",
     target: "[data-tour='spin-wheel-card']",
     title: "Daily Spin Wheel 🎯",
-    content: "Spin the wheel daily to win 20-150 points plus PineCoins! You get free spins every day, and bonus spins for maintaining a 3-day streak. Click 'Quick Spin' to try your luck!",
+    content: "Spin the wheel daily to win 20-150 weekly points. You get free spins every day, and bonus spins for maintaining a 3-day streak. Click 'Quick Spin' to try your luck!",
     position: "bottom",
     icon: <Target className="w-6 h-6" />
   },
@@ -66,7 +66,7 @@ const tourSteps: TourStep[] = [
     id: "progress-goals",
     target: "[data-tour='progress-card']",
     title: "Progress & Goals 📈",
-    content: "Track your level progress, weekly goals, and current streak. Complete tasks and activities to level up and unlock special rewards!",
+    content: "Track your weekly goals and current streak. Complete tasks and activities to climb the leaderboard and finish in the weekly top 3.",
     position: "bottom",
     icon: <Star className="w-6 h-6" />
   },

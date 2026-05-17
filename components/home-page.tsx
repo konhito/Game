@@ -623,7 +623,7 @@ export default function HomePage() {
                 About PineCrest
               </h2>
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 sm:mb-6 px-3 leading-relaxed">
-                Transforming social media engagement into real rewards
+                Weekly points competition with top-3 PineCoin rewards
               </p>
             </motion.div>
 
@@ -637,9 +637,8 @@ export default function HomePage() {
               <div className="px-2">
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">Our Mission</h3>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
-                  PineCrest empowers users to earn real value from their social media activities.
-                  We connect users with engaging tasks from brands and creators, making it easy to
-                  convert your online engagement into PineCoins and real rewards.
+                  PineCrest helps users earn weekly points from social activities and compete for top leaderboard positions.
+                  The weekly top 3 users receive PineCoins, and points reset every Monday.
                 </p>
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Why Choose Us</h3>
                 <ul className="space-y-3 text-muted-foreground">
@@ -665,7 +664,7 @@ export default function HomePage() {
                     <div className="footer-glass-pill w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-emerald-600" />
                     </div>
-                    <span>Real rewards you can redeem for cash and prizes</span>
+                    <span>Top-3 weekly performers receive PineCoins and can request withdrawal</span>
                   </li>
                 </ul>
               </div>
