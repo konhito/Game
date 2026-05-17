@@ -317,7 +317,10 @@ export default function ArticlePage() {
                       alt={article.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (target.src.endsWith("/Icon.png")) return;
+                        console.error("News hero image failed to load:", target.src);
+                        target.src = "/Icon.png";
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
@@ -527,7 +530,10 @@ export default function ArticlePage() {
                           alt={relatedArticle.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
+                            const target = e.currentTarget as HTMLImageElement;
+                            if (target.src.endsWith("/Icon.png")) return;
+                            console.error("Related news image failed to load:", target.src);
+                            target.src = "/Icon.png";
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>

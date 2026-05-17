@@ -533,7 +533,10 @@ export default function HomePage() {
                                 alt={news.title}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = "none";
+                                  const target = e.currentTarget as HTMLImageElement;
+                                  if (target.src.endsWith("/Icon.png")) return;
+                                  console.error("Homepage news image failed to load:", target.src);
+                                  target.src = "/Icon.png";
                                 }}
                               />
                             ) : (

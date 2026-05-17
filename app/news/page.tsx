@@ -220,7 +220,10 @@ export default function NewsPage() {
                         alt={news.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (target.src.endsWith("/Icon.png")) return;
+                          console.error("Featured news image failed to load:", target.src);
+                          target.src = "/Icon.png";
                         }}
                       />
                       <div className="absolute top-4 left-4">
@@ -353,7 +356,10 @@ export default function NewsPage() {
                           alt={news.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
+                            const target = e.currentTarget as HTMLImageElement;
+                            if (target.src.endsWith("/Icon.png")) return;
+                            console.error("News grid image failed to load:", target.src);
+                            target.src = "/Icon.png";
                           }}
                         />
                         <div className="absolute top-2 left-2">

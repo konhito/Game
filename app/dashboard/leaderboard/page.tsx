@@ -215,7 +215,7 @@ export default function LeaderboardPage() {
   const getUserPoints = () => {
     if (!currentUser) return 0;
     const userEntry = leaderboardData.find((entry) => entry.user_id === currentUser.id);
-    return userEntry?.total_points || 0;
+    return userEntry?.weekly_points || 0;
   };
 
   const getUserWeeklyPoints = () => {
@@ -320,7 +320,7 @@ export default function LeaderboardPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <CardTitle className="text-slate-900">Top players</CardTitle>
-                  <CardDescription>Top 10 by total points</CardDescription>
+                  <CardDescription>Top 10 by weekly points</CardDescription>
                 </div>
                 <Badge variant="secondary" className="w-fit rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                   <Clock3 className="mr-1.5 h-3.5 w-3.5" />
@@ -375,9 +375,9 @@ export default function LeaderboardPage() {
                           </div>
 
                           <div className="text-left sm:text-right">
-                            <p className="text-lg font-semibold text-slate-900 sm:text-xl">{player.total_points.toLocaleString()}</p>
+                            <p className="text-lg font-semibold text-slate-900 sm:text-xl">{(player.weekly_points || 0).toLocaleString()}</p>
                             <p className="text-xs text-slate-600">
-                              Weekly change: <span className="font-medium text-emerald-700">+{player.weekly_points || 0}</span>
+                              Total points: <span className="font-medium text-slate-700">{player.total_points.toLocaleString()}</span>
                             </p>
                           </div>
                         </div>
@@ -492,7 +492,7 @@ export default function LeaderboardPage() {
                 <p className="text-xl font-semibold text-slate-900">{getUserRank() ? `#${getUserRank()}` : "Unranked"}</p>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Total points</p>
+                <p className="text-xs text-slate-500">Weekly points</p>
                 <p className="text-xl font-semibold text-slate-900">{getUserPoints().toLocaleString()}</p>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
