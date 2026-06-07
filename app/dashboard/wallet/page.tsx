@@ -261,9 +261,9 @@ export default function WalletPage() {
       <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
@@ -301,7 +301,7 @@ export default function WalletPage() {
             </Card>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Withdrawal Form */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -352,7 +352,7 @@ export default function WalletPage() {
                         Bank Transfer Details
                       </h3>
 
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="account_name" className="text-slate-700 font-medium">
                             Account Holder Name <span className="text-red-500">*</span>

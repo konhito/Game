@@ -12,8 +12,8 @@ export default function Chat() {
   });
 
   return (
-    <div className="flex flex-col w-full py-24 justify-center items-center">
-      <div className="w-full max-w-xl space-y-4 mb-20">
+    <div className="flex min-h-[100svh] w-full flex-col items-center justify-between bg-slate-50 px-3 pb-32 pt-4 sm:px-4 sm:pb-36 sm:pt-6">
+      <div className="w-full max-w-xl space-y-4 pb-6">
         {messages.map((message, i) => (
           <div
             key={message.id}
@@ -24,7 +24,7 @@ export default function Chat() {
           >
             <div
               className={cn(
-                "max-w-[65%] px-3 py-1.5 text-sm shadow-sm",
+                "max-w-[85%] px-3 py-2 text-sm shadow-sm sm:max-w-[65%]",
                 message.role === "user"
                   ? "bg-[#0B93F6] text-white rounded-2xl rounded-br-sm"
                   : "bg-[#E9E9EB] text-black rounded-2xl rounded-bl-sm",
@@ -51,10 +51,10 @@ export default function Chat() {
       </div>
 
       <form
-        className="flex gap-2 justify-center w-full items-center fixed bottom-0"
+        className="fixed bottom-0 left-0 right-0 z-20 flex w-full justify-center border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:px-4"
         onSubmit={handleSubmit}
       >
-        <div className="flex flex-col gap-2 justify-center items-start mb-8 max-w-xl w-full border p-2 rounded-lg bg-white ">
+        <div className="flex w-full max-w-xl flex-col gap-2 rounded-lg border bg-white p-2 shadow-sm">
           <Input
             className="w-full border-0 shadow-none !ring-transparent "
             value={input}

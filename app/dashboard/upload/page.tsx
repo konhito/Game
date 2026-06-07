@@ -136,15 +136,15 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">File Upload</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">File Upload</h1>
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
           Upload images to Cloudflare R2 storage with drag and drop support
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* Upload Area */}
         <Card>
           <CardHeader>
@@ -158,7 +158,7 @@ export default function UploadPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div
-              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
+              className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-all duration-300 sm:p-8 ${
                 dragActive
                   ? "border-primary bg-primary/5 scale-105"
                   : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/5 hover:scale-[1.02]"
@@ -260,7 +260,7 @@ export default function UploadPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {uploadedFiles.map((file) => (
                 <div
                   key={file.id}

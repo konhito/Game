@@ -14,18 +14,18 @@ export default async function PaymentPage() {
   const subscriptionDetails = await getSubscriptionDetails();
 
   return (
-    <div>
-      <div className="p-6 space-y-4">
-        <div className="relative min-h-screen">
+    <div className="p-4 sm:p-6">
+      <div className="space-y-4">
+        <div className="relative min-h-[60svh]">
           {!subscriptionDetails.hasSubscription ||
           subscriptionDetails.subscription?.status !== "active" ? (
             <>
-              <div className="absolute inset-0 z-10 rounded-lg flex items-center justify-center">
-                <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg text-center max-w-md">
-                  <h3 className="text-xl font-semibold mb-2">
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg px-4">
+                <div className="max-w-md rounded-lg bg-white p-6 text-center shadow-lg dark:bg-gray-900 sm:p-8">
+                  <h3 className="mb-2 text-lg font-semibold sm:text-xl">
                     Subscription Required
                   </h3>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="mb-4 text-sm text-muted-foreground sm:text-base">
                     You need an active subscription to access payment management
                     features.
                   </p>
@@ -45,7 +45,7 @@ export default async function PaymentPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">
                           Current Plan
@@ -72,7 +72,7 @@ export default async function PaymentPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-sm font-semibold text-muted-foreground">
                       Status

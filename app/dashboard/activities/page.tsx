@@ -457,13 +457,13 @@ export default function ActivitiesPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
+            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
           >
             <Link href="/dashboard">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-slate-300 text-slate-700 hover:bg-white hover:shadow-md transition-all duration-200"
+                className="w-full sm:w-auto border-slate-300 text-slate-700 hover:bg-white hover:shadow-md transition-all duration-200"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
@@ -474,7 +474,7 @@ export default function ActivitiesPage() {
               variant="outline" 
               onClick={() => user && loadAllTasks(user.id)}
               disabled={refreshingTasks}
-              className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+              className="w-full sm:w-auto border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshingTasks ? 'animate-spin' : ''}`} />
               {refreshingTasks ? 'Refreshing...' : 'Refresh'}
@@ -492,15 +492,15 @@ export default function ActivitiesPage() {
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24"></div>
               <CardContent className="p-8 relative z-10">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-xl">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-xl">
                       <Rocket className="h-10 w-10 text-white" />
                     </div>
                     <div>
-                      <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
+                      <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2">
                         Tasks & Activities
                       </h1>
-                      <p className="text-emerald-50 text-lg">
+                      <p className="text-emerald-50 text-base sm:text-lg">
                         Complete tasks, submit proof, and earn amazing rewards
                       </p>
                     </div>
@@ -515,7 +515,7 @@ export default function ActivitiesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
           >
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300"></div>

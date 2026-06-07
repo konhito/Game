@@ -290,16 +290,16 @@ export default function SignInPage() {
         <Trophy size={55} />
       </motion.div>
 
-      <div className="container relative z-10 mx-auto flex min-h-screen flex-col items-center justify-center py-12">
+      <div className="container relative z-10 mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         <Link
           href="/"
-          className="absolute top-8 left-8 flex items-center text-slate-600 hover:text-emerald-600 transition-colors"
+          className="relative mb-6 flex w-full max-w-6xl items-center text-slate-600 hover:text-emerald-600 transition-colors sm:absolute sm:left-8 sm:top-8 sm:mb-0 sm:w-auto"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="grid w-full max-w-6xl grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
           {/* Main Sign In Card */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -308,8 +308,8 @@ export default function SignInPage() {
             className="flex flex-col justify-center"
           >
             <Card className="bg-white/80 border-slate-200/50 backdrop-blur-sm shadow-xl">
-              <CardHeader className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 flex items-center justify-center">
+              <CardHeader className="text-center space-y-4 p-5 sm:p-6">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center">
                   <img 
                     src="/Icon.png" 
                     alt="PineCrest Logo" 
@@ -317,7 +317,7 @@ export default function SignInPage() {
                   />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold text-slate-800">
+                  <CardTitle className="text-2xl font-bold text-slate-800 sm:text-3xl">
                     Welcome Back!
                   </CardTitle>
                   <CardDescription className="text-slate-600 mt-2">
@@ -325,7 +325,7 @@ export default function SignInPage() {
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-5 p-5 sm:space-y-6 sm:p-6">
                 {/* User Switching Alert */}
                 {isUserSwitching && currentUser && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
@@ -471,7 +471,7 @@ export default function SignInPage() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col justify-center space-y-6"
+            className="hidden flex-col justify-center space-y-6 lg:flex"
           >
             <div className="text-center lg:text-left">
               <h2 className="text-3xl font-bold text-slate-800 mb-4">

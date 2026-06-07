@@ -144,7 +144,7 @@ function SettingsContent() {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-6 p-6">
+      <div className="flex flex-col gap-6 p-4 sm:p-6">
         {/* Header Skeleton */}
         <div>
           <Skeleton className="h-9 w-32 mb-2 bg-gray-200 dark:bg-gray-800" />
@@ -203,7 +203,7 @@ function SettingsContent() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
@@ -217,7 +217,7 @@ function SettingsContent() {
         onValueChange={handleTabChange}
         className="w-full max-w-4xl"
       >
-        <TabsList className="transition-all duration-300">
+        <TabsList className="grid w-full grid-cols-2 transition-all duration-300">
           <TabsTrigger 
             value="profile"
             className="transition-all duration-300 hover:scale-105 data-[state=active]:scale-105"
@@ -245,7 +245,7 @@ function SettingsContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={imagePreview || user?.image || ""} />
                   <AvatarFallback>
@@ -305,7 +305,7 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input

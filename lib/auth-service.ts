@@ -133,7 +133,7 @@ class AuthService {
       
       // Set cookies with immediate effect - use explicit expiration date
       const expirationDate = new Date();
-      expirationDate.setTime(expirationDate.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
+      expirationDate.setTime(expirationDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
       const expires = `; expires=${expirationDate.toUTCString()}`;
       
       // Set cookies with all necessary flags

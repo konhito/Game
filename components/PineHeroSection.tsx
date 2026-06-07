@@ -16,7 +16,7 @@ export function PineHeroSection({
   referralPoints,
 }: PineHeroSectionProps) {
   return (
-    <div id="home-hero" className="relative z-10 h-screen w-full overflow-hidden">
+    <div id="home-hero" className="relative z-10 min-h-[100svh] w-full overflow-hidden">
       <AuroraBackground
         className="bg-transparent"
         style={{
@@ -32,11 +32,11 @@ export function PineHeroSection({
             duration: 0.5,
             ease: [0.4, 0, 0.2, 1],
           }}
-          className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4 sm:px-6 md:px-8"
+          className="relative z-10 flex min-h-[100svh] w-full flex-col items-center justify-center px-4 py-20 sm:px-6 sm:py-24 md:px-8 md:py-0"
           style={{ willChange: "opacity, transform" }}
         >
           <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center">
-            <h1 className="mb-3 text-center text-lg font-semibold leading-tight tracking-[-0.01em] text-gray-900/90 sm:text-xl md:mb-4 md:text-2xl lg:text-3xl">
+              <h1 className="mb-3 text-center text-2xl font-semibold leading-tight tracking-[-0.02em] text-gray-900/90 sm:text-3xl md:mb-4 md:text-4xl lg:text-5xl">
               Turn Your Social Activity
               <br />
               Into Weekly Rewards
@@ -44,16 +44,16 @@ export function PineHeroSection({
 
             <div className="mx-auto mb-4 h-px w-10 bg-gray-400/70 sm:w-12 md:mb-6" />
 
-            <TextAnimate
-              by="word"
-              animation="blurInUp"
-              startOnView={false}
-              delay={1.9}
-              duration={0.75}
-              className="px-4 text-center text-sm font-normal text-gray-600 sm:text-base md:text-lg"
-            >
-              Earn from daily social actions and referrals
-            </TextAnimate>
+              <TextAnimate
+                by="word"
+                animation="blurInUp"
+                startOnView={false}
+                delay={1.9}
+                duration={0.75}
+                className="px-4 text-center text-base font-normal text-gray-600 sm:text-lg md:text-xl"
+              >
+                Earn from daily social actions and referrals
+              </TextAnimate>
 
             <div className="mt-5 w-full max-w-xl rounded-lg border border-slate-200/70 bg-white/80 p-3 shadow-sm sm:mt-6 sm:p-4">
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">

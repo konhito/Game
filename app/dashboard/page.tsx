@@ -182,7 +182,11 @@ export default function DashboardPage() {
   };
 
   const handleClaimDaily = async () => {
-    if (claimingDaily || isDailyClaimedToday) return;
+    if (claimingDaily) return;
+    if (isDailyClaimedToday) {
+      setDailyMessage({ type: 'error', text: 'You have already claimed today’s daily reward. Come back tomorrow.' });
+      return;
+    }
 
     try {
       setClaimingDaily(true);
@@ -190,7 +194,19 @@ export default function DashboardPage() {
 
       const response = await dashboardService.updateUserStatsAfterDailyReward();
       if (!response.success) {
-        setDailyMessage({ type: 'error', text: response.error || "Failed to claim daily reward." });
+        const errorText = String(response.error || '').toLowerCase();
+        const alreadyClaimed =
+          errorText.includes('already claimed') ||
+          errorText.includes('already taken') ||
+          errorText.includes('already redeemed') ||
+          errorText.includes('claimed today');
+
+        setDailyMessage({
+          type: 'error',
+          text: alreadyClaimed
+            ? 'You have already claimed today’s daily reward. Come back tomorrow.'
+            : response.error || "Failed to claim daily reward.",
+        });
         return;
       }
 
@@ -255,11 +271,11 @@ export default function DashboardPage() {
             </p>
           </motion.div>
           <motion.div 
-            className="flex items-center gap-3"
+            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}
           >
             {dailyMessage && (
-              <span className={`text-sm px-3 py-1.5 rounded-md border ${
+              <span className={`text-sm px-3 py-1.5 rounded-md border w-full sm:w-auto ${
                 dailyMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
               }`}>
                 {dailyMessage.text}
@@ -270,7 +286,7 @@ export default function DashboardPage() {
               size="sm"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="bg-white/80 backdrop-blur-md border-slate-200/50 text-slate-700 hover:bg-white/90 shadow-sm transition-all"
+              className="w-full sm:w-auto bg-white/80 backdrop-blur-md border-slate-200/50 text-slate-700 hover:bg-white/90 shadow-sm transition-all"
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Refresh
@@ -279,7 +295,7 @@ export default function DashboardPage() {
               size="sm"
               onClick={handleClaimDaily}
               disabled={claimingDaily || isDailyClaimedToday}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
+              className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
             >
               {claimingDaily ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
               {isDailyClaimedToday ? "Reward Claimed" : "Claim Daily"}
@@ -288,10 +304,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Stats Cards */}
-        <motion.div 
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-        >
+          <motion.div 
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+          >
           <StatCard
             title="Weekly Points"
             value={weeklyPoints.toLocaleString()}
@@ -322,7 +338,7 @@ export default function DashboardPage() {
           <div className="space-y-6 lg:col-span-1 flex flex-col">
             {/* Mini Spin Wheel */}
             <motion.div 
-              className="flex-1 min-h-[360px]"
+              className="flex-1 min-h-[320px] sm:min-h-[360px]"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             >
               <MiniSpinWheel onSpinComplete={() => fetchDashboardData({ silent: true })} />

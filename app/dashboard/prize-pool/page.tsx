@@ -122,24 +122,24 @@ export default function PrizePoolPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12 relative">
+        <div className="text-center mb-8 sm:mb-12 relative">
           <div className="absolute inset-0 flex items-center justify-center opacity-5">
             <Gift className="w-96 h-96" />
           </div>
           <div className="relative z-10">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 mb-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
                 <Gift className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                 Prize Pools
               </h1>
             </div>
-            <p className="text-slate-600 text-lg">Join prize pools and win amazing rewards! 🎁</p>
-            <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
+            <p className="text-slate-600 text-sm sm:text-lg">Join prize pools and win amazing rewards! 🎁</p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6 mt-4 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 <span>Compete with players</span>
@@ -154,23 +154,23 @@ export default function PrizePoolPage() {
 
         {/* Active Prize Pools */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
             <Target className="w-6 h-6 text-green-500" />
             Active Prize Pools
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {prizePools.filter(pool => pool.status === 'active').map((pool) => (
               <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-purple-300/50 cursor-pointer group">
                 <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
+                    <CardTitle className="text-lg sm:text-xl text-slate-800">{pool.title}</CardTitle>
                     {getStatusBadge(pool.status)}
                   </div>
                   <CardDescription className="text-slate-600">
                     {pool.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   {/* Prize Image */}
                   {pool.image_url && (
                     <div className="mb-4 rounded-xl overflow-hidden border-2 border-slate-200">

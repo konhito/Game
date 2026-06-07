@@ -135,7 +135,7 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {/* Header */}
         <motion.div
           className="text-center mb-12"
@@ -143,15 +143,15 @@ export default function NewsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="flex items-center justify-center mb-4">
-            <Link href="/" className="inline-flex items-center text-emerald-600 hover:text-emerald-700 transition-colors mr-4">
+          <div className="mb-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-0">
+            <Link href="/" className="inline-flex items-center text-emerald-600 transition-colors hover:text-emerald-700 sm:mr-4">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-800">
+            <h1 className="text-3xl font-bold text-slate-800 md:text-5xl">
               News
             </h1>
           </div>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+          <p className="mx-auto max-w-3xl text-base text-slate-600 sm:text-lg md:text-xl">
             Stay updated with the latest features, challenges, community news, and platform updates
           </p>
         </motion.div>
@@ -163,7 +163,7 @@ export default function NewsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-md sm:p-6">
             <div className="flex flex-col md:flex-row gap-4">
               {/* Search Bar */}
               <div className="flex-1 relative">
@@ -178,12 +178,12 @@ export default function NewsPage() {
               </div>
 
               {/* Category Filter */}
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {categories.map((category) => (
                   <Button
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
-                    className={`${selectedCategory === category
+                    className={`w-full sm:w-auto ${selectedCategory === category
                         ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                         : "border-slate-200 text-slate-600 hover:border-emerald-500 hover:text-emerald-600"
                       }`}
@@ -209,7 +209,7 @@ export default function NewsPage() {
               <Star className="w-6 h-6 text-amber-500 mr-2" />
               Featured News
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {featuredNews.map((news) => (
                 <Card key={news.id} className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
                   {/* Featured Image */}
@@ -318,7 +318,7 @@ export default function NewsPage() {
               </Card>
 
               {/* News Grid Skeleton */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {[...Array(12)].map((_, index) => (
                   <Card key={index} className="bg-white/80 border-slate-200/50 shadow-lg">
                     <div className="h-48 bg-slate-200 rounded-t-lg animate-pulse"></div>
@@ -339,7 +339,7 @@ export default function NewsPage() {
               </div>
             </div>
           ) : paginatedNews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedNews.map((news, index) => (
                 <motion.div
                   key={news.id}
@@ -429,7 +429,7 @@ export default function NewsPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <motion.div
-            className="flex justify-center items-center space-x-2"
+            className="flex flex-wrap items-center justify-center gap-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -480,7 +480,7 @@ export default function NewsPage() {
           transition={{ duration: 0.6, delay: 0.5 }}
         >
             <Card className="bg-white border border-slate-200 shadow-lg">
-              <CardContent className="p-8 text-center">
+              <CardContent className="p-5 text-center sm:p-8">
                 <Zap className="w-12 h-12 mx-auto mb-4 text-emerald-600" />
                 <h3 className="text-2xl font-bold mb-2 text-slate-800">Stay Updated</h3>
                 <p className="text-slate-600 mb-6 max-w-2xl mx-auto">

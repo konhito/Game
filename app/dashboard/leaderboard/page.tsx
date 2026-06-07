@@ -279,9 +279,9 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-[oklch(0.98_0.01_190)] p-4 sm:p-6">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto max-w-7xl space-y-6 px-1 sm:px-0">
+        <header className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
                 <Trophy className="h-3.5 w-3.5" />

@@ -255,7 +255,7 @@ export default function RewardsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="max-w-6xl mx-auto space-y-8">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
@@ -269,25 +269,25 @@ export default function RewardsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </Button>
               </Link>
             </div>
-            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white rounded-2xl p-5 sm:p-8 border border-slate-200 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center mb-4">
                 <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                   <Gift className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-900">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
                     Rewards Center
                   </h1>
                   <p className="text-slate-600 mt-1">
@@ -298,7 +298,7 @@ export default function RewardsPage() {
               
               {/* User Stats */}
               {userStats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-2">
                   <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:bg-slate-100 hover:shadow-md hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 cursor-pointer">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
@@ -334,7 +334,7 @@ export default function RewardsPage() {
               </div>
               <h2 className="text-xl font-bold text-slate-900">Filter Rewards</h2>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
               {[
                 { key: 'all', label: 'All Rewards', icon: <Gift className="w-4 h-4" />, color: 'emerald' },
                 { key: 'points', label: 'Points Rewards', icon: <Star className="w-4 h-4" />, color: 'yellow' },
@@ -395,7 +395,7 @@ export default function RewardsPage() {
           </div>
 
           {/* Rewards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredRewards.map((reward, index) => (
               <motion.div
                 key={reward.id}

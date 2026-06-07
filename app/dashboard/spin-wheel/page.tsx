@@ -340,7 +340,7 @@ export default function SpinWheelPage() {
               </CardHeader>
               <CardContent className="text-center px-3 sm:px-6 pb-4 sm:pb-6">
                 {/* Wheel Container */}
-                <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 mx-auto mb-4 sm:mb-6">
+                <div className="relative mx-auto mb-4 h-56 w-56 sm:mb-6 sm:h-72 sm:w-72 md:h-80 md:w-80">
                   {/* Pointer at top */}
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-30">
                     <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-red-500"></div>
@@ -477,7 +477,7 @@ export default function SpinWheelPage() {
                 <Button 
                   onClick={spinWheel}
                   disabled={spinsRemaining <= 0 || isSpinning}
-                  className={`w-32 h-14 sm:w-36 sm:h-15 md:w-40 md:h-16 text-base sm:text-lg md:text-xl font-black rounded-full shadow-2xl transition-all duration-300 relative overflow-hidden group ${
+                  className={`h-14 w-full max-w-[13rem] sm:w-36 md:w-40 md:h-16 text-base sm:text-lg md:text-xl font-black rounded-full shadow-2xl transition-all duration-300 relative overflow-hidden group ${
                     spinsRemaining > 0 && !isSpinning
                       ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-300 hover:via-orange-400 hover:to-red-400 text-white hover:scale-110 hover:shadow-yellow-500/50 active:scale-95'
                       : 'bg-gray-500 cursor-not-allowed'
@@ -575,14 +575,14 @@ export default function SpinWheelPage() {
               <CardContent>
                 <div className="space-y-4">
                   {spinPrices.map((offer, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 transition-all duration-300 cursor-pointer">
+                    <div key={index} className="flex flex-col gap-3 rounded-xl border border-purple-400/30 bg-gradient-to-r from-purple-500/20 to-pink-500/20 p-4 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="font-black text-lg text-slate-900">{offer.spins} Spins</p>
                         <p className="text-sm text-purple-300 font-semibold">
                           {offer.discount} discount
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <p className="font-black text-xl text-yellow-300">{offer.price} PineCoins</p>
                         <Button 
                           onClick={() => buySpins(offer.spins, offer.price)}
@@ -610,7 +610,7 @@ export default function SpinWheelPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {wheelSegmentsData.map((segment) => (
                     <div key={segment.id} className={`text-center p-4 rounded-xl bg-gradient-to-br ${segment.gradient} shadow-lg transition-all duration-300 cursor-pointer`}>
                       <div className="text-3xl mb-2 drop-shadow-lg">{segment.icon}</div>

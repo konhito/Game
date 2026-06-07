@@ -246,17 +246,17 @@ export default function UserProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => router.back()}>
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => router.back()} className="w-fit">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <h1 className="text-xl font-bold text-slate-800">User Profile</h1>
+              <h1 className="text-lg font-bold text-slate-800 sm:text-xl">User Profile</h1>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
@@ -265,6 +265,7 @@ export default function UserProfilePage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => setShowEditDialog(true)}
+                  className="w-full sm:w-auto"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Profile
@@ -275,8 +276,8 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column - Profile Info */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
@@ -330,7 +331,7 @@ export default function UserProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-emerald-600">{stats.weekly_points}</div>
                     <div className="text-sm text-slate-600">Weekly Points</div>
@@ -385,7 +386,7 @@ export default function UserProfilePage() {
                         key={activity.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+                        className="flex flex-col gap-3 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 sm:flex-row sm:items-start"
                       >
                         {getActivityIcon(activity.activity_type)}
                         <div className="flex-1 min-w-0">
@@ -420,12 +421,12 @@ export default function UserProfilePage() {
                         key={task.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors"
+                        className="flex flex-col gap-3 rounded-lg bg-green-50 p-3 transition-colors hover:bg-green-100 sm:flex-row sm:items-center"
                       >
                         <div className="text-2xl">{getPlatformIcon(task.task.platform)}</div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-800">{task.task.title}</p>
-                          <div className="flex items-center space-x-4 text-xs text-slate-500">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
                             <span className="capitalize">{task.task.platform}</span>
                             <span className="capitalize">{task.task.task_type}</span>
                             <span>{formatDateTime(task.completed_at)}</span>

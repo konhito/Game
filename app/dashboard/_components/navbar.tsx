@@ -122,7 +122,7 @@ export function Navbar() {
       isActive: pathname === "/news",
     },
     {
-      title: "Activities",
+      title: "Tasks",
       href: "/dashboard/activities",
       icon: Target,
       isActive: pathname === "/dashboard/activities",
@@ -146,7 +146,7 @@ export function Navbar() {
   // Add admin panel navigation if user is admin
   const adminNavigation = isAdmin ? [
     {
-      title: "Admin Panel",
+      title: "Admin",
       href: "/admin",
       icon: Shield,
       isActive: pathname === "/admin",
@@ -347,8 +347,8 @@ export function Navbar() {
 
           {/* Clean Navigation - Only Essential Items */}
           <nav
-            className={`hidden xl:flex flex-1 flex-wrap items-center justify-center gap-x-2 gap-y-2 mx-auto min-w-0 ${
-              isAdmin ? "max-w-3xl" : "max-w-2xl"
+            className={`hidden xl:flex flex-1 flex-nowrap items-center justify-center gap-1.5 mx-auto min-w-0 overflow-x-auto scrollbar-hide ${
+              isAdmin ? "max-w-4xl" : "max-w-3xl"
             }`}
           >
             {allNavigation.map((item) => (
@@ -359,9 +359,9 @@ export function Navbar() {
                           item.href === "/dashboard/rewards" ? "nav-rewards" :
                           item.href === "/dashboard/prize-pool" ? "nav-prize-pool" :
                           item.href === "/dashboard/settings" ? "nav-settings" : undefined}
-                className={`relative rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`relative shrink-0 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
                   isAdmin
-                    ? "px-2.5 lg:px-4 py-1.5 lg:py-2 text-[11px] lg:text-xs"
+                    ? "px-2.5 lg:px-3.5 py-1.5 lg:py-2 text-[11px] lg:text-[12px]"
                     : "px-3 lg:px-6 py-2 lg:py-3 text-xs lg:text-sm"
                 } ${
                   item.isActive
@@ -371,7 +371,7 @@ export function Navbar() {
                     : "text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm hover:scale-105"
                 }`}
               >
-                <div className="flex items-center gap-2 lg:gap-3">
+                <div className="flex items-center gap-1.5 lg:gap-2.5">
                   <item.icon className={`flex-shrink-0 transition-all duration-200 ${
                     isAdmin ? "h-3.5 w-3.5 lg:h-4 lg:w-4" : "h-4 w-4 lg:h-5 lg:w-5"
                   } ${
@@ -432,7 +432,7 @@ export function Navbar() {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64" align="end" forceMount>
+              <DropdownMenuContent className="w-[92vw] max-w-64" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">Navigation Menu</p>
@@ -446,7 +446,7 @@ export function Navbar() {
                   <DropdownMenuItem key={item.href} asChild>
                     <Link href={item.href} className="cursor-pointer flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span className="truncate">{item.title}</span>
                       {item.isActive && (
                         <div className={`ml-auto w-2 h-2 rounded-full ${
                           item.isAdmin ? "bg-red-500" : "bg-emerald-500"
@@ -470,7 +470,7 @@ export function Navbar() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-72" align="end" forceMount>
+              <DropdownMenuContent className="w-[92vw] max-w-72" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-2 p-2">
                     <div className="flex items-center space-x-3">
@@ -488,7 +488,7 @@ export function Navbar() {
                       </div>
                     </div>
                     {/* Quick Stats */}
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
                       <div className="text-center">
                         <div className="text-sm font-bold text-emerald-600">{user.weeklyPoints || 0}</div>
                         <div className="text-xs text-slate-500">Weekly Pts</div>
@@ -514,27 +514,27 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/rewards" className="flex items-center gap-3 w-full">
-                    <Target className="h-4 w-4 text-purple-600" />
-                    <span>Rewards</span>
+                    <Link href="/dashboard/rewards" className="flex items-center gap-3 w-full">
+                      <Target className="h-4 w-4 text-purple-600" />
+                    <span className="truncate">Rewards</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/prize-pool" className="flex items-center gap-3 w-full">
-                    <Gift className="h-4 w-4 text-pink-600" />
-                    <span>Prize Pools</span>
+                    <Link href="/dashboard/prize-pool" className="flex items-center gap-3 w-full">
+                      <Gift className="h-4 w-4 text-pink-600" />
+                    <span className="truncate">Prize Pools</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/news" className="flex items-center gap-3 w-full">
-                    <Newspaper className="h-4 w-4 text-orange-600" />
-                    <span>News</span>
+                    <Link href="/news" className="flex items-center gap-3 w-full">
+                      <Newspaper className="h-4 w-4 text-orange-600" />
+                    <span className="truncate">News</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                  <Link href="/dashboard/wallet" className="flex items-center gap-3 w-full">
-                    <Wallet className="h-4 w-4 text-blue-600" />
-                    <span>Wallet</span>
+                    <Link href="/dashboard/wallet" className="flex items-center gap-3 w-full">
+                      <Wallet className="h-4 w-4 text-blue-600" />
+                    <span className="truncate">Wallet</span>
                   </Link>
                 </DropdownMenuItem>
                 {/* Profile Section */}

@@ -815,15 +815,24 @@ class DashboardService {
         body: JSON.stringify({ action: 'daily_reward' }),
       });
 
+      const result = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error('Failed to update user stats');
+        return (
+          result || {
+            success: false,
+            error: response.status === 409 ? 'Daily reward already claimed today.' : 'Failed to update user stats',
+          }
+        );
       }
 
-      const result = await response.json();
       return result;
     } catch (error) {
       console.error('DashboardService: Error updating user stats after daily reward:', error);
-      throw new Error('Failed to update user stats');
+      return {
+        success: false,
+        error: 'Failed to update user stats',
+      } as ApiResponse;
     }
   }
 }
