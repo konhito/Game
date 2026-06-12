@@ -139,8 +139,9 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
           {spinsRemaining > 0 ? `${spinsRemaining} spins available` : "No spins remaining today"}
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 pb-6 flex-1 flex flex-col items-center justify-center">
-        <div className="relative w-48 h-48 mb-6">
+      <CardContent className="flex flex-1 flex-col items-center px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+        <div className="flex flex-1 w-full flex-col items-center justify-center">
+          <div className="relative h-40 w-40 sm:h-48 sm:w-48">
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-10">
             <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[20px] border-l-transparent border-r-transparent border-t-slate-800 drop-shadow-md"></div>
           </div>
@@ -183,7 +184,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
                       x={textX}
                       y={textY}
                       fill="white"
-                      fontSize="16"
+                      fontSize="14"
                       fontWeight="600"
                       textAnchor="middle"
                       dominantBaseline="middle"
@@ -199,33 +200,46 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
             </svg>
           </div>
         </div>
+        </div>
 
-        {error && <p className="text-sm text-red-500 mb-3 text-center">{error}</p>}
-        {lastWin && !isSpinning && !error && (
-          <motion.p 
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-sm font-medium text-emerald-600 mb-3 text-center"
+        <div className="mt-4 flex w-full max-w-[240px] flex-col items-center">
+          <div
+            aria-live="polite"
+            className="mb-3 flex min-h-10 w-full items-center justify-center text-center"
           >
-            You won {lastWin} points!
-          </motion.p>
-        )}
+            {error ? (
+              <p className="text-sm text-red-500"> {error} </p>
+            ) : lastWin && !isSpinning ? (
+              <motion.p
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm font-medium text-emerald-600"
+              >
+                You won {lastWin} points!
+              </motion.p>
+            ) : (
+              <span className="text-sm text-slate-400">
+                {spinsRemaining > 0 ? "Spin to earn bonus points" : "Come back tomorrow for more spins"}
+              </span>
+            )}
+          </div>
 
-        <Button 
-          onClick={spinWheel}
-          disabled={spinsRemaining <= 0 || isSpinning}
-          className={`w-full max-w-[200px] transition-all ${
-            spinsRemaining > 0 && !isSpinning
-              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-          }`}
-        >
-          {isSpinning ? (
-            <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Spinning...</>
-          ) : (
-            <><Play className="w-4 h-4 mr-2" /> Spin Wheel</>
-          )}
-        </Button>
+          <Button
+            onClick={spinWheel}
+            disabled={spinsRemaining <= 0 || isSpinning}
+            className={`w-full transition-all ${
+              spinsRemaining > 0 && !isSpinning
+                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+            }`}
+          >
+            {isSpinning ? (
+              <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Spinning...</>
+            ) : (
+              <><Play className="w-4 h-4 mr-2" /> Spin Wheel</>
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

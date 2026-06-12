@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Calendar, User, ArrowLeft, ArrowRight, TrendingUp, Star, Zap, Eye } from "lucide-react";
+import { Search, Calendar, User, ArrowLeft, ArrowRight, TrendingUp, Star, Zap, Eye, X } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { resolveNewsImageUrl } from "@/lib/news-image";
 
 interface NewsArticle {
@@ -33,11 +33,13 @@ export default function NewsPage() {
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const normalizedSearchTerm = deferredSearchTerm.trim().toLowerCase();
 
   // Fetch news articles from CMS
   useEffect(() => {
     fetchNewsArticles();
-  }, [searchTerm, selectedCategory]);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -49,8 +51,6 @@ export default function NewsPage() {
       setError(false);
       const params = new URLSearchParams();
       params.append('limit', '100');
-      if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory !== 'All') params.append('category', selectedCategory.toLowerCase());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`);
 
@@ -103,9 +103,11 @@ export default function NewsPage() {
 
   // Filter news based on search and category
   const filteredNews = displayNews.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+    const matchesSearch =
+      !normalizedSearchTerm ||
+      item.title.toLowerCase().includes(normalizedSearchTerm) ||
+      item.excerpt.toLowerCase().includes(normalizedSearchTerm) ||
+      (item.tags && item.tags.some(tag => tag.toLowerCase().includes(normalizedSearchTerm)));
     const matchesCategory =
       selectedCategory === "All" ||
       (item.category && item.category.toLowerCase() === selectedCategory.toLowerCase());
@@ -121,6 +123,7 @@ export default function NewsPage() {
   const totalPages = Math.ceil(latestNews.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedNews = latestNews.slice(startIndex, startIndex + itemsPerPage);
+  const hasActiveFilters = searchTerm.trim().length > 0 || selectedCategory !== "All";
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -164,21 +167,51 @@ export default function NewsPage() {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-md sm:p-6">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col gap-4">
               {/* Search Bar */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Search news..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-3 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
-                />
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search news..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-12 border-slate-200 pl-10 pr-12 focus:border-emerald-500 focus:ring-emerald-500"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      aria-label="Clear search"
+                      onClick={() => setSearchTerm("")}
+                      className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-3 text-sm text-slate-500 lg:min-w-[220px] lg:justify-end">
+                  <span>
+                    {filteredNews.length} result{filteredNews.length === 1 ? "" : "s"}
+                  </span>
+                  {hasActiveFilters && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setSelectedCategory("All");
+                      }}
+                      className="h-9 px-3 text-slate-600 hover:text-emerald-600"
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Category Filter */}
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
                 {categories.map((category) => (
                   <Button
                     key={category}

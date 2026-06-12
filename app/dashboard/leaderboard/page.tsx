@@ -103,10 +103,11 @@ export default function LeaderboardPage() {
                 ? "bg-slate-200 text-slate-700 border-slate-300"
                 : rank === 3
                   ? "bg-orange-100 text-orange-800 border-orange-200"
-                  : "bg-slate-100 text-slate-700 border-slate-300";
+                  : "bg-emerald-100 text-emerald-800 border-emerald-200";
 
           return {
             rank,
+            rankLabel: typeof rank === "number" ? `#${rank}` : String(rank),
             reward: `${Number(reward.percentage || 0).toFixed(2).replace(/\.00$/, "")}%`,
             amount: `PC ${Number(reward.pinecoins || 0).toLocaleString()}`,
             naira: `NGN ${Number(reward.naira || 0).toLocaleString()}`,
@@ -114,9 +115,10 @@ export default function LeaderboardPage() {
           };
         })
       : [
-          { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", tone: "bg-amber-100 text-amber-800 border-amber-200" },
-          { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", tone: "bg-slate-200 text-slate-700 border-slate-300" },
-          { rank: 3, reward: "20%", amount: "PC 1,000", naira: "NGN 0", tone: "bg-orange-100 text-orange-800 border-orange-200" },
+          { rank: 1, rankLabel: "#1", reward: "50%", amount: "PC 2,500", naira: "NGN 0", tone: "bg-amber-100 text-amber-800 border-amber-200" },
+          { rank: 2, rankLabel: "#2", reward: "30%", amount: "PC 1,500", naira: "NGN 0", tone: "bg-slate-200 text-slate-700 border-slate-300" },
+          { rank: 3, rankLabel: "#3", reward: "15%", amount: "PC 750", naira: "NGN 0", tone: "bg-orange-100 text-orange-800 border-orange-200" },
+          { rank: "Random", rankLabel: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", tone: "bg-emerald-100 text-emerald-800 border-emerald-200" },
         ];
 
   useEffect(() => {
@@ -393,7 +395,7 @@ export default function LeaderboardPage() {
                   <div key={index} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${reward.tone}`}>
-                        #{reward.rank}
+                        {reward.rankLabel}
                       </span>
                       <span className="text-sm font-medium text-slate-700">{reward.reward}</span>
                     </div>
@@ -459,7 +461,7 @@ export default function LeaderboardPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate-700">
                 <p>Leaderboard resets every Monday at 00:00 UTC.</p>
-                <p>Top 3 ranks receive fixed reward shares.</p>
+                <p>Top 3 ranks receive fixed reward shares, and 5% goes to one randomly selected user.</p>
                 <p>Points drive rank placement, PineCoin rewards settle weekly.</p>
               </CardContent>
             </Card>

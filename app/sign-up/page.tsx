@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, DollarSign, Target } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, Target, UserPlus } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
 import { robustRedirect, verifyAuthState } from "@/lib/redirection-utils";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,7 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -76,6 +78,17 @@ export default function SignUpPage() {
     checkAuthAndRedirect();
   }, [router]);
 
+  useEffect(() => {
+    const referralFromUrl = searchParams.get("ref")?.trim();
+    if (!referralFromUrl) return;
+
+    setFormData((prev) => (
+      prev.referralCode.trim()
+        ? prev
+        : { ...prev, referralCode: referralFromUrl }
+    ));
+  }, [searchParams]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -112,6 +125,7 @@ export default function SignUpPage() {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
+        referral_code: formData.referralCode.trim() || undefined,
       });
 
       console.log("Registration successful:", result);
@@ -279,10 +293,10 @@ export default function SignUpPage() {
                 />
               </div>
               <h1 className="text-4xl font-bold text-slate-800 mb-4">
-                Share and Earn Money
+                Earn Points For Real Activity
               </h1>
               <p className="text-slate-600 text-lg">
-                Create your account and start sharing social media links to earn real money!
+                Create your account, complete social actions, and climb the leaderboard with points.
               </p>
             </div>
 
@@ -295,8 +309,8 @@ export default function SignUpPage() {
                   <Share2 className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Share Social Media</h3>
-                  <p className="text-slate-600">Post links on your social platforms and earn money</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Share News Posts</h3>
+                  <p className="text-slate-600">Share approved news posts and earn points for each one.</p>
                 </div>
               </motion.div>
 
@@ -305,11 +319,11 @@ export default function SignUpPage() {
                 className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <DollarSign className="w-7 h-7 text-white" />
+                  <UserPlus className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Real Money Rewards</h3>
-                  <p className="text-slate-600">Convert your earnings to real cash</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Invite Friends</h3>
+                  <p className="text-slate-600">Use a referral code during signup so successful invites award points.</p>
                 </div>
               </motion.div>
 
@@ -321,8 +335,8 @@ export default function SignUpPage() {
                   <Target className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Simple Tasks</h3>
-                  <p className="text-slate-600">Easy social media tasks for guaranteed earnings</p>
+                  <h3 className="font-semibold text-slate-800 text-lg">Simple Point Tasks</h3>
+                  <p className="text-slate-600">Start with signup points, then keep earning through shares and referrals.</p>
                 </div>
               </motion.div>
             </div>
@@ -333,22 +347,22 @@ export default function SignUpPage() {
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-emerald-600">$20</div>
-                <div className="text-sm text-emerald-600">Signup Bonus</div>
+                <div className="text-2xl font-bold text-emerald-600">50</div>
+                <div className="text-sm text-emerald-600">Signup Points</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-violet-600">$5</div>
-                <div className="text-sm text-violet-600">Per Share</div>
+                <div className="text-2xl font-bold text-violet-600">10</div>
+                <div className="text-sm text-violet-600">Share Points</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-center p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-lg"
               >
-                <div className="text-2xl font-bold text-amber-600">$10</div>
-                <div className="text-sm text-amber-600">Daily Tasks</div>
+                <div className="text-2xl font-bold text-amber-600">30</div>
+                <div className="text-sm text-amber-600">Referral Points</div>
               </motion.div>
             </div>
           </motion.div>
@@ -370,7 +384,7 @@ export default function SignUpPage() {
                     Create Your Account
                   </CardTitle>
                   <CardDescription className="text-slate-600 mt-2">
-                    Join thousands of users and start earning money today
+                    Join the leaderboard and start earning points today
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -429,6 +443,26 @@ export default function SignUpPage() {
                       className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode" className="text-slate-700 font-medium">
+                      Referral Code <span className="text-slate-400">(Optional)</span>
+                    </Label>
+                    <Input
+                      id="referralCode"
+                      name="referralCode"
+                      type="text"
+                      placeholder="Enter a referral code"
+                      value={formData.referralCode}
+                      onChange={handleInputChange}
+                      disabled={isLoading}
+                      autoComplete="off"
+                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
+                    />
+                    <p className="text-xs text-slate-500">
+                      If someone invited you, paste their code here before creating your account.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -563,16 +597,16 @@ export default function SignUpPage() {
               </CardContent>
             </Card>
 
-            {/* Welcome Bonus */}
+            {/* Welcome Points */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-6 p-6 bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200 rounded-xl text-center"
             >
-              <div className="text-2xl font-bold text-emerald-800 mb-2">💰 Welcome Bonus!</div>
+              <div className="text-2xl font-bold text-emerald-800 mb-2">Welcome Points</div>
               <p className="text-emerald-700">
-                Get <span className="font-semibold">$20</span> instantly when you create your account
+                Get <span className="font-semibold">50 points</span> instantly when you create your account
               </p>
             </motion.div>
           </motion.div>

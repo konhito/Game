@@ -10,6 +10,7 @@ export interface User {
   whatsapp?: string;
   role: string;
   image?: string;
+  referral_code?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -31,6 +32,7 @@ export interface RegisterRequest {
   password: string;
   phone?: string;
   whatsapp?: string;
+  referral_code?: string;
 }
 
 export interface ForgotPasswordRequest {

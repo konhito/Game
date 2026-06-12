@@ -157,19 +157,21 @@ export default function LeaderboardPage() {
           ? "bg-gray-400"
           : rank === 3
             ? "bg-orange-500"
-            : "bg-slate-500";
+            : "bg-emerald-500";
 
     return {
       rank,
+      rankLabel: typeof rank === "number" ? `#${rank}` : String(rank),
       reward: `${Number(reward.percentage || 0).toFixed(2).replace(/\.00$/, "")}%`,
       amount: `PC ${Number(reward.pinecoins || 0).toLocaleString()}`,
       naira: `NGN ${Number(reward.naira || 0).toLocaleString()}`,
       color
     };
   }) : [
-    { rank: 1, reward: "50%", amount: "PC 2,500", naira: "NGN 0", color: "bg-yellow-500" },
-    { rank: 2, reward: "30%", amount: "PC 1,500", naira: "NGN 0", color: "bg-gray-400" },
-    { rank: 3, reward: "20%", amount: "PC 1,000", naira: "NGN 0", color: "bg-orange-500" },
+    { rank: 1, rankLabel: "#1", reward: "50%", amount: "PC 2,500", naira: "NGN 0", color: "bg-yellow-500" },
+    { rank: 2, rankLabel: "#2", reward: "30%", amount: "PC 1,500", naira: "NGN 0", color: "bg-gray-400" },
+    { rank: 3, rankLabel: "#3", reward: "15%", amount: "PC 750", naira: "NGN 0", color: "bg-orange-500" },
+    { rank: "Random", rankLabel: "Random", reward: "5%", amount: "PC 250", naira: "NGN 0", color: "bg-emerald-500" },
   ];
 
   const handleRefresh = async () => {
@@ -401,7 +403,7 @@ export default function LeaderboardPage() {
                     <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200 hover:shadow-md transition-all duration-200">
                       <div className="flex items-center gap-3">
                         <Badge className={`${reward.color} text-white shadow-sm`}>
-                          #{reward.rank}
+                          {reward.rankLabel}
                         </Badge>
                         <span className="font-semibold text-slate-700">{reward.reward}</span>
                       </div>
