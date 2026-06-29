@@ -8,7 +8,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
+import { authService } from "@/lib/auth-service";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,14 +36,22 @@ export default function UserProfile({ mini }: { mini?: boolean }) {
     setError(null);
 
     try {
-      const result = await authClient.getSession();
+      const user = authService.getUser();
 
-      if (!result.data?.user) {
+      if (!user) {
         router.push("/sign-in");
         return;
       }
 
-      setUserInfo(result.data?.user);
+      setUserInfo({
+        id: String(user.id),
+        name: user.name || user.email || "User",
+        image: (user as any).image || (user as any).picture || null,
+        email: user.email || "",
+        emailVerified: Boolean((user as any).emailVerified || (user as any).email_verified),
+        createdAt: new Date((user as any).createdAt || Date.now()),
+        updatedAt: new Date((user as any).updatedAt || Date.now()),
+      });
     } catch (error) {
       console.error("Error fetching user data:", error);
       setError("Failed to load user profile. Please try refreshing the page.");
@@ -57,13 +65,8 @@ export default function UserProfile({ mini }: { mini?: boolean }) {
   }, [fetchUserData]);
 
   const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/sign-in"); // redirect to login page
-        },
-      },
-    });
+    authService.logout();
+    router.push("/sign-in");
   };
 
   if (error) {

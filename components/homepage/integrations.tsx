@@ -1,9 +1,9 @@
 import { Card } from "@/components/ui/card";
-import { Nextjs } from "@/components/logos/Nextjs";
-import { NeonPostgres } from "@/components/logos/NeonPostgres";
-import { Polar } from "@/components/logos/Polar";
-import { TailwindCSS } from "@/components/logos/TailwindCSS";
-import { Shadcnui } from "@/components/logos/Shadcnui";
+import Nextjs from "@/components/logos/Nextjs";
+import NeonPostgres from "@/components/logos/NeonPostgres";
+import Polar from "@/components/logos/Polar";
+import TailwindCSS from "@/components/logos/TailwindCSS";
+import Shadcnui from "@/components/logos/shadcnui";
 import * as React from "react";
 
 export default function Integrations() {

@@ -258,13 +258,13 @@ export default function ActivitiesPage() {
         taskService.getUserTaskHistory({ limit: 50 })
       ]);
 
-      const available = availableResult.success ? (availableResult.data.tasks || []) : [];
-      const history = historyResult.success ? (historyResult.data.tasks || []) : [];
+      const available: AvailableTask[] = availableResult.success ? (availableResult.data.tasks || []) : [];
+      const history: TaskActivity[] = historyResult.success ? (historyResult.data.tasks || []) : [];
 
       // Map history tasks to include full task details if available
       const startedAndCompletedTasks = history.map((ht: TaskActivity) => {
         const taskId = (ht as any).task_id || ht.id;
-        const correspondingAvailableTask = available.find(at => at.id === taskId);
+        const correspondingAvailableTask = available.find((at: AvailableTask) => at.id === taskId);
         return {
           ...correspondingAvailableTask,
           ...ht,
@@ -281,13 +281,13 @@ export default function ActivitiesPage() {
       // Filter out tasks from 'available' that are already 'started' or 'completed' in history
       const uniqueAvailableTasks = available.filter(at => {
         const taskId = at.id;
-        const hasHistory = startedAndCompletedTasks.some(st => {
+        const hasHistory = startedAndCompletedTasks.some((st: TaskItem) => {
           const stId = st.id;
           const stStatus = st.status?.toLowerCase().trim();
           return stId === taskId && (stStatus === 'started' || stStatus === 'pending' || stStatus === 'approved' || stStatus === 'rejected');
         });
         return !hasHistory;
-      }).map(at => ({ ...at, status: 'available' }));
+      }).map((at: AvailableTask) => ({ ...at, status: 'available' }));
 
       const combinedTasksMap = new Map<number, TaskItem>();
       [...uniqueAvailableTasks, ...startedAndCompletedTasks].forEach(task => {

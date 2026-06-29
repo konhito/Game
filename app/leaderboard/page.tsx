@@ -347,7 +347,7 @@ export default function LeaderboardPage() {
                       >
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-3">
-                            <span className="text-3xl">{getAvatar(player.rank)}</span>
+                            <span className="text-3xl">{getAvatar(player.rank ?? index + 1)}</span>
                             <div className="text-center min-w-[50px]">
                               <div className={`text-xl font-bold ${
                                 player.rank === 1 ? 'text-yellow-600' :

@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     // Mock user stats for development
     const mockStats = {
       id: "stats1",
-      userId: params.userId,
+      userId,
       weeklyPoints: 450,
       totalPineCoins: "125.50",
       dailyLoginStreak: 3,

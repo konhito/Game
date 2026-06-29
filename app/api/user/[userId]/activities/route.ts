@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     // Mock activities for development
     const mockActivities = [
       { 
         id: "1", 
-        userId: params.userId, 
+        userId, 
         type: "daily_login", 
         points: 5, 
         description: "Daily Login", 
@@ -17,7 +18,7 @@ export async function GET(
       },
       { 
         id: "2", 
-        userId: params.userId, 
+        userId, 
         type: "wheel_spin", 
         points: 20, 
         description: "Spinning Wheel", 
@@ -25,7 +26,7 @@ export async function GET(
       },
       { 
         id: "3", 
-        userId: params.userId, 
+        userId, 
         type: "referral", 
         points: 10, 
         description: "Referral Bonus", 

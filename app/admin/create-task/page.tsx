@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,7 @@ const taskTypes = [
   'like', 'share', 'follow', 'comment', 'subscribe', 'retweet', 'mention', 'review'
 ];
 
-export default function CreateTaskPage() {
+function CreateTaskContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const taskId = searchParams.get('id');
@@ -64,7 +64,8 @@ export default function CreateTaskPage() {
           reward_points: task.reward_points?.toString() || '',
           reward_coins: task.reward_coins?.toString() || '',
           max_participants: task.max_participants?.toString() || '',
-          deadline: task.deadline ? new Date(task.deadline).toISOString().slice(0, 16) : ''
+          deadline: task.deadline ? new Date(task.deadline).toISOString().slice(0, 16) : '',
+          url: task.url || ''
         });
       } else {
         setError('Failed to fetch task for editing');
@@ -352,5 +353,17 @@ export default function CreateTaskPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CreateTaskPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8">
+        <div className="animate-pulse text-gray-500">Loading task form...</div>
+      </div>
+    }>
+      <CreateTaskContent />
+    </Suspense>
   );
 }

@@ -195,7 +195,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
                   </g>
                 );
               })}
-              <circle cx="100" cy="100" r="16" fill="#ffffff" shadow="md" />
+              <circle cx="100" cy="100" r="16" fill="#ffffff" className="drop-shadow-md" />
               <circle cx="100" cy="100" r="12" fill="#f1f5f9" />
             </svg>
           </div>

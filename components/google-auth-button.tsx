@@ -140,7 +140,7 @@ export default function GoogleAuthButton({
         onSuccess?.();
       } catch (error) {
         console.error("Error handling Google response:", error);
-        onError?.(error.message || "Google authentication failed");
+        onError?.(error instanceof Error ? error.message : "Google authentication failed");
       }
     };
 
