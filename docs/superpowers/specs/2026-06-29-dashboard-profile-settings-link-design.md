@@ -1,4 +1,4 @@
-# Dashboard Profile Settings Link Design
+# Dashboard Navigation And Daily Spin Design
 
 ## Goal
 
@@ -29,3 +29,20 @@ No settings-page content, sidebar navigation, profile route, logout behavior, st
 - The item renders in the profile dropdown with the requested label and subtitle.
 - Activating the item navigates to `/dashboard/settings`.
 
+## Daily Spin Layout
+
+The Daily Spin card must size itself to its content instead of sharing the left-column height equally with Quick Tasks. The existing wheel dimensions and interaction remain unchanged.
+
+The dashboard will:
+
+- Remove equal `flex-1` height distribution from the Daily Spin wrapper and Quick Tasks card.
+- Give the Daily Spin wrapper enough minimum height for its header, wheel, status message, and button.
+- Keep the Spin button fully visible inside the card without scrolling or clipping.
+- Preserve responsive wheel sizing and normal vertical stacking on mobile.
+
+## Daily Spin Verification
+
+- The full Spin button is visible at the desktop viewport represented by the supplied screenshot.
+- The button remains visible at mobile width.
+- The wheel, result message, and button do not overlap.
+- Existing spin behavior remains unchanged.
