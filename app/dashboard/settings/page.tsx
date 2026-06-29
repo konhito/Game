@@ -19,6 +19,7 @@ import { Settings2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { TelegramConnectionCard } from "@/components/telegram-connection-card";
 
 interface User {
   id: number;
@@ -336,6 +337,7 @@ function SettingsContent() {
               </Button>
             </CardContent>
           </Card>
+          <TelegramConnectionCard />
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
