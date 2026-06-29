@@ -335,17 +335,17 @@ export default function DashboardPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           
           {/* Left Column */}
-          <div className="space-y-6 lg:col-span-1 flex flex-col">
+          <div className="space-y-6 lg:col-span-1">
             {/* Mini Spin Wheel */}
             <motion.div 
-              className="flex-1 min-h-[320px] sm:min-h-[360px]"
+              className="min-h-[440px] sm:min-h-[460px]"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             >
               <MiniSpinWheel onSpinComplete={() => fetchDashboardData({ silent: true })} />
             </motion.div>
 
             {/* Available Tasks */}
-            <Card className="border-slate-200/50 bg-white/90 backdrop-blur-md shadow-md flex-1 transition-all duration-200 hover:shadow-lg">
+            <Card className="border-slate-200/50 bg-white/90 backdrop-blur-md shadow-md transition-all duration-200 hover:shadow-lg">
               <CardHeader className="bg-white/50 border-b border-slate-100 pb-4">
                 <CardTitle className="text-lg font-medium text-slate-900 flex items-center gap-2">
                   <ListTodo className="h-5 w-5 text-slate-700" />

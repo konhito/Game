@@ -556,6 +556,15 @@ export function Navbar() {
                     </div>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                  <Link href="/dashboard/settings" className="flex items-center gap-3 w-full">
+                    <Settings className="h-4 w-4 text-slate-600" />
+                    <div className="flex flex-col">
+                      <span>Settings</span>
+                      <span className="text-xs text-slate-500">Profile, Telegram &amp; account</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
                 
