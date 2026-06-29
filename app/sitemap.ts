@@ -41,9 +41,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let newsArticles: Array<{ url: string; lastModified: Date; changeFrequency: 'weekly'; priority: number }> = [];
   try {
     const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(`${apiBase}/api/news?limit=100`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
     
     if (response.ok) {
       const result = await response.json();

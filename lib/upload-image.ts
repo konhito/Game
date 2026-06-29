@@ -3,17 +3,23 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 
-const r2 = new S3Client({
-  region: "auto", // required for R2
-  endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_UPLOAD_IMAGE_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_UPLOAD_IMAGE_SECRET_ACCESS_KEY!,
-  },
-});
+let r2: S3Client | null = null;
+
+function getR2Client() {
+  r2 ??= new S3Client({
+    region: "auto", // required for R2
+    endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_UPLOAD_IMAGE_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_UPLOAD_IMAGE_SECRET_ACCESS_KEY!,
+    },
+  });
+
+  return r2;
+}
 
 export const uploadImageAssets = async (buffer: Buffer, key: string) => {
-  await r2.send(
+  await getR2Client().send(
     new PutObjectCommand({
       Bucket: process.env.R2_UPLOAD_IMAGE_BUCKET_NAME!,
       Key: key,
