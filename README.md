@@ -34,7 +34,7 @@ A comprehensive, production-ready SaaS starter kit built with Next.js 15, featur
 - Loading skeletons and optimistic UI updates
 
 ### 🗄️ Database & Storage
-- **Neon PostgreSQL** - Serverless database
+- **PostgreSQL** - Local EC2 database
 - **Drizzle ORM** - Type-safe database toolkit
 - **Cloudflare R2** - Scalable file storage with zero egress fees
 - Database migrations with Drizzle Kit
@@ -51,7 +51,7 @@ A comprehensive, production-ready SaaS starter kit built with Next.js 15, featur
 - **Framework**: Next.js 15.3.1 with App Router
 - **Language**: TypeScript with strict mode
 - **Styling**: Tailwind CSS v4 + shadcn/ui
-- **Database**: Neon PostgreSQL + Drizzle ORM
+- **Database**: PostgreSQL + Drizzle ORM
 - **Authentication**: Better Auth v1.2.8
 - **Payments**: Polar.sh
 - **AI**: OpenAI SDK
@@ -88,7 +88,7 @@ A comprehensive, production-ready SaaS starter kit built with Next.js 15, featur
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL database (Neon recommended)
+- PostgreSQL database reachable from the app (localhost when it runs on EC2)
 - Cloudflare R2 bucket for file storage
 - Polar.sh account for subscriptions
 - OpenAI API key for AI features
@@ -111,7 +111,7 @@ npm install
 Create a `.env.local` file with:
 ```env
 # Database
-DATABASE_URL="your-neon-database-url"
+DATABASE_URL="postgresql://casino_user:your-password@localhost:5432/casino_db"
 
 # Authentication
 BETTER_AUTH_SECRET="your-secret-key"
