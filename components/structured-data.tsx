@@ -1,5 +1,7 @@
 "use client";
 
+import { siteConfig } from "@/lib/seo-config";
+
 interface StructuredDataProps {
   data: Record<string, any>;
 }
@@ -19,8 +21,8 @@ export const organizationSchema = {
   "@type": "Organization",
   name: "Pinecrest",
   description: "Social media rewards and engagement platform where users earn points and rewards for completing tasks and sharing content.",
-  url: "https://pinecrest.com",
-  logo: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png",
+  url: siteConfig.url,
+  logo: siteConfig.ogImage,
   sameAs: [
     // Add your social media profiles here
     // "https://twitter.com/pinecrest",
@@ -40,13 +42,13 @@ export const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Pinecrest",
-  url: "https://pinecrest.com",
+  url: siteConfig.url,
   description: "Earn points, climb the leaderboard, and win rewards through engaging activities and challenges.",
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://pinecrest.com/news?search={search_term_string}"
+      urlTemplate: `${siteConfig.url}/news?search={search_term_string}`
     },
     "query-input": "required name=search_term_string"
   }
@@ -57,7 +59,7 @@ export const webApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "Pinecrest",
-  url: "https://pinecrest.com",
+  url: siteConfig.url,
   applicationCategory: "Social Networking",
   operatingSystem: "Web Browser",
   offers: {
@@ -115,16 +117,16 @@ export function generateArticleSchema(article: {
       name: "Pinecrest",
       logo: {
         "@type": "ImageObject",
-        url: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png"
+        url: siteConfig.ogImage
       }
     },
     datePublished: article.publishedAt,
     dateModified: article.updatedAt || article.publishedAt,
     image: article.imageUrl,
-    url: `https://pinecrest.com/news/${article.slug}`,
+    url: `${siteConfig.url}/news/${article.slug}`,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://pinecrest.com/news/${article.slug}`
+      "@id": `${siteConfig.url}/news/${article.slug}`
     }
   };
 }

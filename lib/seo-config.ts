@@ -3,8 +3,8 @@ import { Metadata } from 'next';
 const siteConfig = {
   name: 'Pinecrest',
   description: 'Earn points, climb the leaderboard, and win real rewards through social media activities and tasks.',
-  url: 'https://pinecrest.com',
-  ogImage: 'https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png',
+  url: 'https://pinecrest247.com',
+  ogImage: 'https://pinecrest247.com/Logo1.png',
   keywords: [
     'earn money online',
     'social media rewards',

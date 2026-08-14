@@ -131,12 +131,12 @@ export default function ArticlePage() {
 
     // URL regex pattern - matches http, https, www, and email addresses
     const urlPattern = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
-    const anchorPattern = /(<a\b[^>]*>[\s\S]*?<\/a>)/gi;
+    const htmlTagPattern = /(<[^>]+>)/g;
 
     return text
-      .split(anchorPattern)
+      .split(htmlTagPattern)
       .map((segment) => {
-        if (/^<a\b[^>]*>[\s\S]*<\/a>$/i.test(segment)) {
+        if (/^<[^>]+>$/i.test(segment)) {
           return segment;
         }
 
@@ -166,7 +166,13 @@ export default function ArticlePage() {
   const processContent = (content: string): string => {
     if (!content || typeof content !== 'string') return '';
 
-    let processed = content;
+    let processed = escapeHtml(content);
+
+    // Convert markdown images before links, so ![alt](url) is not treated as a link.
+    processed = processed.replace(/!\[([^\]]*)\]\(([^\s)]+)\)/g, (match, alt, url) => {
+      const src = /^(https?:\/\/|\/)/i.test(url) ? url : `https://${url}`;
+      return `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" class="my-6 max-w-full rounded-lg" loading="lazy" />`;
+    });
 
     // Convert markdown links [text](url) to HTML links
     processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {

@@ -5,10 +5,10 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import SharedHeader from "@/components/shared-header";
 import SharedFooter from "@/components/shared-footer";
-import { headers } from "next/headers";
+import { siteConfig } from "@/lib/seo-config";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pinecrest.com'),
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: "Pinecrest - Share and Earn Rewards | Social Media Engagement Platform",
     template: "%s | Pinecrest"
@@ -41,11 +41,11 @@ export const metadata: Metadata = {
     title: "Pinecrest - Share and Earn Rewards",
     description:
       "Earn points, climb the leaderboard, and win real rewards through social media activities. Share content, complete tasks, and get paid!",
-    url: "https://pinecrest.com",
+    url: siteConfig.url,
     siteName: "Pinecrest",
     images: [
       {
-        url: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png",
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
         alt: "Pinecrest - Share and Earn Rewards Platform",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pinecrest - Share and Earn Rewards",
     description: "Earn points, climb the leaderboard, and win real rewards through social media activities.",
-    images: ["https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png"],
+    images: [siteConfig.ogImage],
   },
   robots: {
     index: true,
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     // bing: 'your-bing-verification-code',
   },
   alternates: {
-    canonical: 'https://pinecrest.com',
+    canonical: siteConfig.url,
   },
   icons: {
     // Use the Pinecrest brand logo consistently across favicon targets.

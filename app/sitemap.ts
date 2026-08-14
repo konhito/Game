@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pinecrest.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pinecrest247.com';
 
   // Static pages with their priorities and change frequencies
   const staticPages = [

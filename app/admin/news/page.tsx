@@ -110,7 +110,10 @@ export default function AdminNewsPage() {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentImageInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const contentHistoryRef = useRef<string[]>([]);
+  const contentRedoRef = useRef<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -182,6 +185,63 @@ export default function AdminNewsPage() {
     }
   };
 
+  const updateContent = (content: string) => {
+    setFormData((current) => {
+      if (current.content !== content) {
+        contentHistoryRef.current.push(current.content);
+        contentRedoRef.current = [];
+      }
+      return { ...current, content };
+    });
+  };
+
+  const undoContent = () => {
+    const previous = contentHistoryRef.current.pop();
+    if (previous === undefined) return;
+    setFormData((current) => {
+      contentRedoRef.current.push(current.content);
+      return { ...current, content: previous };
+    });
+  };
+
+  const handleContentKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+      e.preventDefault();
+      undoContent();
+    }
+  };
+
+  const handleContentImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      const body = new FormData();
+      body.append("featured_image", file);
+      const response = await fetch(`${config.API_BASE}/api/news/admin/images`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.data?.image) throw new Error(result?.error || "Image upload failed");
+
+      const textarea = contentRef.current;
+      const start = textarea?.selectionStart ?? formData.content.length;
+      const end = textarea?.selectionEnd ?? start;
+      const markdown = `![${file.name}](${config.API_BASE}${result.data.image})`;
+      updateContent(formData.content.slice(0, start) + markdown + formData.content.slice(end));
+      setTimeout(() => {
+        textarea?.focus();
+        textarea?.setSelectionRange(start + markdown.length, start + markdown.length);
+      }, 0);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Image upload failed");
+    }
+  };
+
   // Clear selected file
   const clearFile = () => {
     setSelectedFile(null);
@@ -205,7 +265,7 @@ export default function AdminNewsPage() {
     const linkMarkdown = `[${anchorText}](${normalizedUrl})`;
     const newContent = formData.content.substring(0, start) + linkMarkdown + formData.content.substring(end);
 
-    setFormData({ ...formData, content: newContent });
+    updateContent(newContent);
     setShowLinkDialog(false);
     setLinkUrl("");
     setLinkText("");
@@ -256,7 +316,7 @@ export default function AdminNewsPage() {
     }
 
     const newContent = formData.content.substring(0, start) + formattedText + formData.content.substring(end);
-    setFormData({ ...formData, content: newContent });
+    updateContent(newContent);
 
     // Focus back on textarea
     setTimeout(() => {
@@ -488,6 +548,8 @@ export default function AdminNewsPage() {
   };
 
   const applyArticleToForm = (article: NewsArticle) => {
+    contentHistoryRef.current = [];
+    contentRedoRef.current = [];
     const safeContent = hasMeaningfulText(article.content)
       ? article.content
       : hasMeaningfulText(formData.content)
@@ -576,6 +638,8 @@ export default function AdminNewsPage() {
   };
 
   const resetForm = () => {
+    contentHistoryRef.current = [];
+    contentRedoRef.current = [];
     setFormData({
       title: "",
       slug: "",
@@ -988,13 +1052,31 @@ export default function AdminNewsPage() {
                                 <LinkIcon className="w-4 h-4 mr-1" />
                                 Link
                               </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => contentImageInputRef.current?.click()}
+                                title="Insert Image"
+                              >
+                                <ImageIcon className="w-4 h-4 mr-1" />
+                                Image
+                              </Button>
                             </div>
                           </div>
+                          <input
+                            ref={contentImageInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            onChange={handleContentImageSelect}
+                            className="hidden"
+                          />
                           <Textarea
                             ref={contentRef}
                             id="content"
                             value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                            onChange={(e) => updateContent(e.target.value)}
+                            onKeyDown={handleContentKeyDown}
                             placeholder="Write your article content here... You can use markdown formatting and insert links."
                             rows={12}
                             required
