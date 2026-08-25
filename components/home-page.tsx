@@ -1,30 +1,25 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Share2, Gift, Target, Calendar, Coins, Users, ArrowRight, MessageCircle, Eye, UserPlus, Newspaper, Star, CheckCircle, ShieldCheck, Clock3, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CircleCheck,
+  Clock3,
+  Coins,
+  Eye,
+  Gift,
+  MoveUpRight,
+  Newspaper,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { StructuredData, organizationSchema, websiteSchema, webApplicationSchema } from "@/components/structured-data";
 import { resolveNewsImageUrl } from "@/lib/news-image";
-import { PineHeroSection } from "@/components/PineHeroSection";
-import { CinematicFooter, CinematicStyles } from "@/components/ui/motion-footer";
-
-// Animated Counter Component
-function AnimatedCounter({ value, suffix = "", className = "" }: { value: number; suffix?: string; className?: string }) {
-  return (
-    <motion.span
-      className={`font-bold ${className}`}
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {value.toLocaleString()}{suffix}
-    </motion.span>
-  );
-}
 
 interface NewsArticle {
   id: number;
@@ -45,8 +40,6 @@ interface TaskPointRules {
   comment_points: number;
   like_points: number;
   daily_login_points: number;
-  login_streak_bonus_days: number;
-  login_streak_bonus_spins: number;
 }
 
 const defaultTaskPointRules: TaskPointRules = {
@@ -57,774 +50,132 @@ const defaultTaskPointRules: TaskPointRules = {
   comment_points: 5,
   like_points: 5,
   daily_login_points: 5,
-  login_streak_bonus_days: 3,
-  login_streak_bonus_spins: 2
 };
+
+const reveal = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
+};
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const age = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (age < 60) return "Just now";
+  if (age < 3600) return `${Math.floor(age / 60)} min ago`;
+  if (age < 86400) return `${Math.floor(age / 3600)} hr ago`;
+  if (age < 604800) return `${Math.floor(age / 86400)} days ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function SectionMark({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
+  return (
+    <p className={`eyebrow ${light ? "text-[var(--lime)]" : "text-[var(--pine)]"}`}>
+      <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-current align-middle" />
+      {children}
+    </p>
+  );
+}
 
 export default function HomePage() {
   const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
+  const [taskPointRules, setTaskPointRules] = useState(defaultTaskPointRules);
   const [loadingNews, setLoadingNews] = useState(true);
-  const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
-  const itemsPerPage = 6;
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  // Fetch news articles after page loads
   useEffect(() => {
-    // Wait a bit to ensure all other data is loaded first
-    const timer = setTimeout(() => {
-      fetchNews(1);
-      (async () => {
-        try {
-          const response = await fetch(`${apiBase}/api/users/leaderboard/public?limit=1`);
-          if (!response.ok) return;
-          const result = await response.json();
-          const rules = result?.data?.task_point_rules;
-          if (rules) {
-            setTaskPointRules({
-              ...defaultTaskPointRules,
-              ...rules
-            });
+    let active = true;
+
+    const loadHomeData = async () => {
+      try {
+        const [newsResponse, leaderboardResponse] = await Promise.all([
+          fetch(`${apiBase}/api/news?page=1&limit=6`),
+          fetch(`${apiBase}/api/users/leaderboard/public?limit=1`),
+        ]);
+
+        if (active && newsResponse.ok) {
+          const result = await newsResponse.json();
+          if (result.success && result.data?.articles) setNewsItems(result.data.articles);
+        }
+
+        if (active && leaderboardResponse.ok) {
+          const result = await leaderboardResponse.json();
+          if (result.data?.task_point_rules) {
+            setTaskPointRules((current) => ({ ...current, ...result.data.task_point_rules }));
           }
-        } catch (error) {
-          console.error("Error fetching task point rules:", error);
         }
-      })();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [apiBase]);
-
-  const fetchNews = async (page: number) => {
-    try {
-      setLoadingNews(true);
-
-      const params = new URLSearchParams();
-      params.append('page', page.toString());
-      params.append('limit', itemsPerPage.toString());
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data.articles) {
-          setNewsItems(result.data.articles);
-        }
+      } catch (error) {
+        console.error("Unable to load homepage data:", error);
+      } finally {
+        if (active) setLoadingNews(false);
       }
-    } catch (error) {
-      console.error('Error fetching news articles:', error);
-    } finally {
-      setLoadingNews(false);
-    }
-  };
+    };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-    return date.toLocaleDateString();
-  };
-
-  // Sample testimonials
-  const testimonials = [
-    {
-      id: 1,
-      name: "Yakubu Ajayi",
-      role: "Social Media Influencer",
-      content: "PineCrest has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
-      avatar: "👩‍💼",
-      rating: 5
-    },
-    {
-      id: 2,
-      name: "Nkem Okoye",
-      role: "Content Creator",
-      content: "The referral system is amazing. I've earned over 500 points just by sharing with friends!",
-      avatar: "👨‍💻",
-      rating: 5
-    },
-    {
-      id: 3,
-      name: "Ibrahim Bakak",
-      role: "Student",
-      content: "Perfect for students! I earn PineCoins while studying and sharing educational content.",
-      avatar: "👩‍🎓",
-      rating: 5
-    }
-  ];
+    loadHomeData();
+    return () => {
+      active = false;
+    };
+  }, [apiBase]);
 
   return (
     <>
-      {/* Structured Data for SEO */}
       <StructuredData data={organizationSchema} />
       <StructuredData data={websiteSchema} />
       <StructuredData data={webApplicationSchema} />
 
-      <CinematicStyles />
-      <div className="relative overflow-hidden">
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden relative">
-          {/* Enhanced Animated Background Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Main floating orbs */}
-          <motion.div
-            className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-60"
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360]
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div
-            className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-200 to-emerald-200 rounded-full blur-3xl opacity-60"
-            animate={{
-              scale: [1.2, 1, 1.2],
-              rotate: [360, 180, 0]
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-200 to-blue-200 rounded-full blur-3xl opacity-40"
-            animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, -180, -360]
-            }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          />
-
-          {/* Additional floating elements */}
-          <motion.div
-            className="absolute top-20 left-1/4 w-32 h-32 bg-gradient-to-br from-emerald-300 to-green-300 rounded-full blur-2xl opacity-50"
-            animate={{
-              y: [0, -20, 0],
-              x: [0, 10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-20 right-1/4 w-40 h-40 bg-gradient-to-br from-blue-300 to-cyan-300 rounded-full blur-2xl opacity-50"
-            animate={{
-              y: [0, 20, 0],
-              x: [0, -10, 0],
-              scale: [1, 0.9, 1]
-            }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Subtle grid pattern */}
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}></div>
-
-          {/* Geometric shapes */}
-          <motion.div
-            className="absolute top-1/3 right-1/3 w-16 h-16 border-2 border-emerald-200/30 rotate-45"
-            animate={{
-              rotate: [45, 405, 45],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-1/3 left-1/3 w-12 h-12 border-2 border-blue-200/30 rounded-full"
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.6, 0.3]
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute top-1/4 left-1/2 w-8 h-8 bg-gradient-to-br from-emerald-300/20 to-blue-300/20 rounded-full"
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 20, 0]
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Floating particles */}
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-emerald-400/40 rounded-full"
-              style={{
-                left: `${20 + i * 15}%`,
-                top: `${30 + i * 10}%`,
-              }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.4, 0.8, 0.4],
-                scale: [1, 1.5, 1]
-              }}
-              transition={{
-                duration: 3 + i * 0.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.5
-              }}
-            />
-          ))}
-
-          {/* Gradient overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-100/20"></div>
-        </div>
-          {/* Hero Section */}
-          <PineHeroSection
-            signupPoints={taskPointRules.signup_points}
-            referralPoints={taskPointRules.referral_points}
-          />
-        </div>
-
-        <div className="cinematic-footer-wrapper relative bg-background text-foreground">
-          <div className="footer-aurora pointer-events-none absolute left-1/2 top-1/2 z-0 h-[60vh] w-[80vw] -translate-x-1/2 -translate-y-1/2 animate-footer-breathe rounded-[50%] blur-[80px]" />
-          <div className="footer-bg-grid pointer-events-none absolute inset-0 z-0" />
-          <div className="relative z-10">
-            {/* Leaderboard Section */}
-            <section id="leaderboard" className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-background/60 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="text-center mb-6 sm:mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <Trophy className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-emerald-600 mx-auto mb-3 sm:mb-4" />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                Weekly Leaderboard
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-3 leading-relaxed">
-                Compete with other users and climb the ranks to win amazing rewards
-              </p>
-              <Link href="/dashboard/leaderboard" className="inline-block px-3">
-                <Button className="footer-glass-pill inline-flex items-center gap-2 rounded-full px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 text-sm sm:text-base md:text-lg font-semibold text-foreground shadow-lg transition-all duration-200 hover:shadow-xl active:shadow-md hover:scale-105 active:scale-100 touch-target no-select">
-                  View Full Leaderboard <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-              </Link>
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card className="bg-background/70 border-border/50 shadow-sm">
-                <CardContent className="p-4 sm:p-5">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground/80 mb-1">Signup Bonus</p>
-                  <p className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Coins className="w-5 h-5 text-emerald-600" />
-                    <AnimatedCounter value={taskPointRules.signup_points} suffix=" pts" />
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-background/70 border-border/50 shadow-sm">
-                <CardContent className="p-4 sm:p-5">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground/80 mb-1">Referral Reward</p>
-                  <p className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-600" />
-                    <AnimatedCounter value={taskPointRules.referral_points} suffix=" pts" />
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-background/70 border-border/50 shadow-sm">
-                <CardContent className="p-4 sm:p-5">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground/80 mb-1">Daily Login</p>
-                  <p className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Clock3 className="w-5 h-5 text-emerald-700" />
-                    <AnimatedCounter value={taskPointRules.daily_login_points} suffix=" pts" />
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-10 sm:py-14 md:py-18 px-4 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            {/* Subtle background enhancement */}
-            <div className="absolute inset-0 bg-background/40 border border-border/40 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 pointer-events-none"></div>
-            <motion.div
-              className="text-center mb-6 sm:mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                How You Earn PineCoins
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-3 leading-relaxed">
-                Multiple ways to earn rewards from your social media activities
-              </p>
-              <div className="mt-4 sm:mt-5 flex flex-wrap justify-center gap-2 sm:gap-3 px-3">
-                <span className="footer-glass-pill inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground">
-                  <ShieldCheck className="w-4 h-4" />
-                  AI-verified task proof
-                </span>
-                <span className="footer-glass-pill inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground">
-                  <Sparkles className="w-4 h-4" />
-                  Real rewards every week
-                </span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {[
-                {
-                  icon: Share2,
-                  title: "Share Content",
-                  description: `Share posts on social media and earn ${taskPointRules.share_social_points} points per share`,
-                  points: `${taskPointRules.share_social_points} pts`,
-                  color: "from-emerald-500 to-emerald-600"
-                },
-                {
-                  icon: Eye,
-                  title: "Watch Videos",
-                  description: "Watch sponsored content and earn 5 points per video",
-                  points: "5 pts",
-                  color: "from-blue-500 to-blue-600"
-                },
-                {
-                  icon: UserPlus,
-                  title: "Refer Friends",
-                  description: `Invite friends and earn ${taskPointRules.referral_points} points per successful referral`,
-                  points: `${taskPointRules.referral_points} pts`,
-                  color: "from-emerald-600 to-emerald-700"
-                },
-                {
-                  icon: Calendar,
-                  title: "Daily Login",
-                  description: `Log in daily to claim ${taskPointRules.daily_login_points} points and maintain your streak`,
-                  points: `${taskPointRules.daily_login_points} pts`,
-                  color: "from-blue-600 to-blue-700"
-                },
-                {
-                  icon: MessageCircle,
-                  title: "Engage & Comment",
-                  description: `Comment and like posts to earn ${taskPointRules.comment_points} and ${taskPointRules.like_points} points`,
-                  points: `${taskPointRules.comment_points}/${taskPointRules.like_points} pts`,
-                  color: "from-emerald-500 to-blue-500"
-                },
-                {
-                  icon: Gift,
-                  title: "Special Rewards",
-                  description: "Complete challenges and earn bonus points",
-                  points: "50+ pts",
-                  color: "from-blue-500 to-emerald-500"
-                }
-              ].map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -3, scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                >
-                  <Card className="h-full bg-background/70 backdrop-blur-md border-border/40 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 cursor-pointer no-select">
-                    <CardHeader className="text-center pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-md`}>
-                        <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                      </div>
-                      <CardTitle className="text-base sm:text-lg text-foreground leading-snug">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center px-4 sm:px-6 pb-4 sm:pb-6">
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3 leading-relaxed">{feature.description}</p>
-                      <Badge className={`bg-gradient-to-r ${feature.color} text-white px-3 py-1.5 text-xs font-semibold shadow-sm`}>
-                        {feature.points}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* News Section */}
-        <section id="news" className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-background/60 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto">
-            {/* Enhanced background pattern */}
-            <div className="absolute inset-0 bg-background/40 border border-border/40 rounded-2xl sm:rounded-3xl -m-2 sm:-m-4 pointer-events-none"></div>
-            <motion.div
-              className="text-center mb-6 sm:mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                Latest News & Updates
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-3 leading-relaxed">
-                Stay updated with the latest features, challenges, and community news
-              </p>
-              <Link href="/news" className="inline-flex mt-4 text-sm sm:text-base text-muted-foreground hover:text-foreground font-semibold">
-                Browse all updates <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Link>
-            </motion.div>
-
-            {loadingNews ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10">
-                {[...Array(itemsPerPage)].map((_, index) => (
-                  <Card key={index} className="h-full bg-background/70 backdrop-blur-md border-border/40 shadow-lg animate-pulse">
-                    <CardHeader>
-                      <div className="h-4 bg-muted/60 rounded w-1/4 mb-2"></div>
-                      <div className="h-6 bg-muted/60 rounded w-3/4"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-4 bg-muted/60 rounded w-full mb-2"></div>
-                      <div className="h-4 bg-muted/60 rounded w-2/3"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : newsItems.length > 0 ? (
-              <>
-                <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10"
-                  variants={containerVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                >
-                  {newsItems.map((news, index) => (
-                    <motion.div
-                      key={news.id}
-                      variants={itemVariants}
-                      whileHover={{ y: -3, scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    >
-                      <Link href={`/news/${encodeURIComponent(news.slug)}`} className="block h-full">
-                        <Card className="h-full bg-background/70 backdrop-blur-md border-border/40 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 no-select cursor-pointer">
-                          <div className="relative h-44 w-full overflow-hidden bg-muted/40">
-                            {news.featured_image ? (
-                              <img
-                                src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined}
-                                alt={news.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.currentTarget as HTMLImageElement;
-                                  if (target.src.endsWith("/Icon.png")) return;
-                                  console.error("Homepage news image failed to load:", target.src);
-                                  target.src = "/Icon.png";
-                                }}
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center text-muted-foreground/80">
-                                <div className="text-center">
-                                  <Newspaper className="w-8 h-8 mx-auto mb-2 text-emerald-700" />
-                                  <p className="text-sm font-medium">PineCrest Update</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <CardHeader>
-                            <div className="flex items-center justify-between mb-2">
-                              {news.tags && news.tags.length > 0 && (
-                                <Badge className="footer-glass-pill text-muted-foreground">
-                                  {news.tags[0]}
-                                </Badge>
-                              )}
-                              <span className="text-sm text-muted-foreground/80">
-                                {formatDate(news.published_at)}
-                              </span>
-                            </div>
-                            <CardTitle className="text-lg text-foreground line-clamp-2">
-                              {news.title}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground mb-4 line-clamp-3">{news.excerpt}</p>
-                            <div className="inline-flex items-center text-muted-foreground hover:text-foreground font-medium transition-colors">
-                              Read More <ArrowRight className="w-4 h-4 ml-2" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </motion.div>
-                  ))}
-                </motion.div>
-
-                <motion.div
-                  className="text-center relative z-10"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <Link href="/news" className="relative z-10">
-                    <Button className="footer-glass-pill rounded-full px-8 py-4 text-lg font-semibold text-foreground shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 relative z-10 pointer-events-auto">
-                      View All News & Updates
-                    </Button>
-                  </Link>
-                </motion.div>
-              </>
-            ) : (
-              <motion.div
-                className="text-center py-12 relative z-10"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-              >
-                <p className="text-muted-foreground text-lg mb-4">No news available at the moment.</p>
-                <Link href="/news" className="relative z-10">
-                  <Button className="footer-glass-pill rounded-full px-8 py-4 text-lg font-semibold text-foreground shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 relative z-10 pointer-events-auto">
-                    View All News & Updates
-                  </Button>
-                </Link>
-              </motion.div>
-            )}
-          </div>
-        </section>
-
-        {/* About Section */}
-        <section id="about" className="py-10 sm:py-14 md:py-18 px-4 relative z-10 bg-background/60 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="text-center mb-6 sm:mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <Users className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-emerald-600 mx-auto mb-3 sm:mb-4" />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                About PineCrest
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 sm:mb-6 px-3 leading-relaxed">
-                Weekly points competition with top-3 PineCoin rewards
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-10 items-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="px-2">
-                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">Our Mission</h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  PineCrest helps users earn weekly points from social activities and compete for top leaderboard positions.
-                  The weekly top 3 users receive PineCoins, and points reset every Monday.
+      <div className="pine-page overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+        <section id="home-hero" className="relative isolate min-h-[780px] overflow-hidden bg-[var(--forest)] text-[var(--paper)]">
+          <div className="hero-rings absolute -right-[18vw] top-[8vh] -z-10 h-[72vw] w-[72vw] max-h-[860px] max-w-[860px] rounded-full border border-[var(--lime)]/20" />
+          <div className="hero-rings absolute right-[7vw] top-[24vh] -z-10 h-[38vw] w-[38vw] max-h-[470px] max-w-[470px] rounded-full border border-[var(--lime)]/25" />
+          <div className="absolute inset-0 -z-10 opacity-25 [background-image:linear-gradient(rgba(231,239,218,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(231,239,218,.12)_1px,transparent_1px)] [background-size:72px_72px]" />
+          <div className="mx-auto flex min-h-[780px] w-full max-w-[1440px] flex-col justify-between px-6 pb-10 pt-32 sm:px-10 lg:px-16">
+            <div className="grid items-end gap-16 lg:grid-cols-[1.12fr_.88fr]">
+              <motion.div initial="hidden" animate="visible" variants={reveal}>
+                <SectionMark light>Social effort, made visible</SectionMark>
+                <h1 className="display-heading mt-7 max-w-5xl text-[clamp(4rem,10vw,10rem)] leading-[.82] tracking-[-.075em] text-[var(--paper)]">
+                  Make the<br />
+                  everyday<br />
+                  <span className="text-[var(--lime)]">count.</span>
+                </h1>
+                <p className="mt-9 max-w-xl text-lg leading-8 text-[var(--paper)]/70 sm:text-xl">
+                  Pinecrest turns the small things you already do online into a clear path to points, recognition, and real weekly rewards.
                 </p>
-                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Why Choose Us</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-3">
-                    <div className="footer-glass-pill w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <span>AI-verified tasks ensure authenticity and prevent fraud</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="footer-glass-pill w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <span>Fair weekly leaderboards with automatic resets</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="footer-glass-pill w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <span>Secure platform with industry-standard protection</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="footer-glass-pill w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <span>Top-3 weekly performers receive PineCoins and can request withdrawal</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="space-y-6">
-                <Card className="bg-background/70 border border-border/40 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
-                        <Target className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-foreground">Verified Tasks</h4>
-                        <p className="text-sm text-muted-foreground">All tasks are AI-verified</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-background/70 border border-border/40 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <Gift className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-foreground">Real Rewards</h4>
-                        <p className="text-sm text-muted-foreground">Redeem PineCoins for prizes</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-background/70 border border-border/40 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-amber-600 rounded-lg flex items-center justify-center">
-                        <Trophy className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-foreground">Fair Competition</h4>
-                        <p className="text-sm text-muted-foreground">Weekly leaderboard resets</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
+                <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+                  <Link href="/sign-up" className="pine-button pine-button-lime">Start earning <ArrowUpRight size={18} /></Link>
+                  <Link href="#features" className="pine-button pine-button-quiet">See how it works</Link>
+                </div>
+              </motion.div>
 
-            <motion.div
-              className="text-center mt-8 sm:mt-10 md:mt-12 px-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Link href="/about">
-                <Button className="footer-glass-pill rounded-full px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-foreground w-full sm:w-auto shadow-lg transition-all duration-200 hover:shadow-xl">
-                  Learn More About Us
-                </Button>
-              </Link>
-            </motion.div>
+              <motion.div className="relative mx-auto w-full max-w-[470px] lg:mb-8" initial={{ opacity: 0, scale: 0.94, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}>
+                <div className="signal-panel relative overflow-hidden rounded-[2rem] border border-[var(--lime)]/20 bg-[var(--forest-deep)] p-5 shadow-2xl sm:p-7">
+                  <div className="flex items-center justify-between border-b border-[var(--paper)]/10 pb-5"><div><p className="eyebrow text-[var(--paper)]/50">Your weekly signal</p><p className="mt-2 text-2xl font-semibold tracking-tight">Momentum is building</p></div><div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lime)] text-[var(--forest)]"><Sparkles size={20} /></div></div>
+                  <div className="relative mt-8 h-48 overflow-hidden rounded-2xl bg-[var(--forest)]/70 p-5">
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--lime)]/20" /><div className="absolute inset-x-0 top-1/2 h-px bg-[var(--lime)]/10" /><div className="absolute inset-x-0 top-1/4 h-px bg-[var(--lime)]/10" />
+                    <svg viewBox="0 0 420 170" className="absolute inset-0 h-full w-full" role="img" aria-label="A rising weekly points trend"><motion.path d="M0 142 C44 139 55 121 88 126 S128 108 155 112 S194 81 225 92 S264 72 293 78 S332 37 362 49 S396 27 420 18" fill="none" stroke="var(--lime)" strokeWidth="4" strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /><motion.path d="M0 142 C44 139 55 121 88 126 S128 108 155 112 S194 81 225 92 S264 72 293 78 S332 37 362 49 S396 27 420 18 V170 H0Z" fill="url(#signal-fill)" initial={{ opacity: 0 }} animate={{ opacity: [0, .55, .55, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /><defs><linearGradient id="signal-fill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="var(--lime)" stopOpacity=".3" /><stop offset="1" stopColor="var(--lime)" stopOpacity="0" /></linearGradient></defs></svg>
+                    <div className="absolute bottom-4 left-5 text-xs text-[var(--paper)]/45">Mon</div><div className="absolute bottom-4 right-5 text-xs text-[var(--paper)]/45">Sun</div>
+                  </div>
+                  <div className="mt-5 flex items-end justify-between"><div><p className="text-4xl font-semibold tracking-[-.06em] text-[var(--lime)]">+{taskPointRules.signup_points + taskPointRules.share_social_points}</p><p className="mt-1 text-sm text-[var(--paper)]/50">points available to start</p></div><ArrowUpRight className="text-[var(--lime)]" size={25} /></div>
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div className="flex items-center justify-between border-t border-[var(--paper)]/15 pt-5 text-xs uppercase tracking-[.18em] text-[var(--paper)]/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .8 }}><span>01 / Start where you are</span><a href="#features" className="flex items-center gap-2 text-[var(--lime)]" aria-label="Scroll to how it works">Scroll to explore <ArrowDownRight size={15} /></a></motion.div>
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="text-center mb-6 sm:mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                What Our Users Say
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-3 leading-relaxed">
-                Join thousands of satisfied users earning rewards from social media
-              </p>
-            </motion.div>
+        <section className="border-b border-[var(--ink)]/10 bg-[var(--paper)] px-6 py-9 sm:px-10 lg:px-16"><div className="mx-auto grid max-w-[1440px] gap-7 text-sm sm:grid-cols-3 sm:gap-0"><div className="flex items-center gap-3 sm:border-r sm:border-[var(--ink)]/15"><ShieldCheck size={18} className="text-[var(--pine)]" /><span>Clear task verification</span></div><div className="flex items-center gap-3 sm:justify-center sm:border-r sm:border-[var(--ink)]/15"><Trophy size={18} className="text-[var(--pine)]" /><span>Weekly leaderboard rewards</span></div><div className="flex items-center gap-3 sm:justify-end"><Coins size={18} className="text-[var(--pine)]" /><span>No fee to get started</span></div></div></section>
 
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={testimonial.id}
-                  variants={itemVariants}
-                  whileHover={{ y: -3, scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                >
-                  <Card className="h-full bg-background/70 backdrop-blur-md border-border/40 shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 no-select">
-                    <CardHeader className="text-center pb-4">
-                      <div className="text-4xl mb-4">{testimonial.avatar}</div>
-                      <div className="flex justify-center mb-2">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                        ))}
-                      </div>
-                      <CardTitle className="text-lg text-foreground">{testimonial.name}</CardTitle>
-                      <CardDescription className="text-muted-foreground">{testimonial.role}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                      <p className="text-muted-foreground italic">"{testimonial.content}"</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
+        <section id="features" className="px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto grid max-w-[1440px] gap-16 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal}><SectionMark>The Pinecrest method</SectionMark><h2 className="display-heading mt-6 max-w-xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">A better rhythm for showing up.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--ink-muted)]">Progress should feel less like a casino and more like a trail marker. Do the thing. See it verified. Keep moving.</p><Link href="/about" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[.14em] text-[var(--pine)]">Why Pinecrest <MoveUpRight size={16} /></Link></motion.div><div className="space-y-0">{[{ no: "01", title: "Choose a small action", copy: "Share, watch, comment, or check in. The best task is the one that fits naturally into your day.", icon: Eye }, { no: "02", title: "Let the proof do the work", copy: "Every task is checked before it becomes progress, so the number in your account stays meaningful.", icon: CircleCheck }, { no: "03", title: "Turn momentum into reward", copy: "Climb the weekly board, collect your PineCoins, and come back with a little more momentum.", icon: Gift }].map(({ no, title, copy, icon: Icon }) => <motion.div key={no} className="group grid gap-5 border-t border-[var(--ink)]/15 py-8 sm:grid-cols-[64px_1fr_42px] sm:items-start" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .4 }} variants={reveal}><span className="font-mono text-xs tracking-[.16em] text-[var(--pine)]">{no}</span><div><h3 className="text-2xl font-semibold tracking-[-.035em]">{title}</h3><p className="mt-3 max-w-xl leading-7 text-[var(--ink-muted)]">{copy}</p></div><Icon className="mt-1 text-[var(--pine)] transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" size={22} /></motion.div>)}</div></div></section>
 
-        {/* CTA Section */}
-        <section className="py-10 sm:py-14 md:py-18 px-4 relative z-10 safe-bottom mb-10 sm:mb-14 md:mb-20">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6 px-3">
-                Ready to Start Earning?
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-5 sm:mb-6 md:mb-8 max-w-xl mx-auto px-3 leading-relaxed">
-                Join PineCrest today and start earning rewards from your social media activities.
-                It's free to join and you can start earning immediately!
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-3">
-                <Link href="/sign-up" className="inline-block w-full sm:w-auto sm:min-w-[220px]">
-                  <Button className="footer-glass-pill w-full rounded-full px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base md:text-lg font-semibold text-foreground shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-100 touch-target no-select">
-                    Get Started Now
-                  </Button>
-                </Link>
-                <Link href="/news" className="inline-block w-full sm:w-auto sm:min-w-[220px]">
-                  <Button className="footer-glass-pill w-full rounded-full px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base md:text-lg font-semibold text-muted-foreground shadow-lg transition-all duration-200 hover:shadow-xl hover:text-foreground touch-target no-select">
-                    Explore News
-                  </Button>
-                </Link>
-              </div>
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5 px-3">
-                <span className="footer-glass-pill rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground">
-                  No sign-up fee
-                </span>
-                <span className="footer-glass-pill rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground">
-                  Weekly leaderboard payouts
-                </span>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-          </div>
-        </div>
+        <section id="leaderboard" className="relative overflow-hidden bg-[var(--pine)] px-6 py-24 text-[var(--paper)] sm:px-10 lg:px-16 lg:py-32"><div className="absolute -right-28 top-12 h-72 w-72 rounded-full border border-[var(--lime)]/20" /><div className="absolute -right-6 top-32 h-44 w-44 rounded-full border border-[var(--lime)]/20" /><div className="relative mx-auto grid max-w-[1440px] items-start gap-14 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><div><SectionMark light>Every week has a story</SectionMark><h2 className="display-heading mt-6 max-w-lg text-5xl leading-[.93] tracking-[-.065em] sm:text-7xl">Bring your name to the top.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--paper)]/65">The leaderboard keeps the finish line visible. Top performers earn recognition and PineCoins when the week closes.</p><Link href="/leaderboard" className="pine-button pine-button-lime mt-9">Open leaderboard <ArrowUpRight size={18} /></Link></div><div className="rounded-[1.75rem] border border-[var(--paper)]/15 bg-[var(--forest)]/35 p-5 sm:p-8"><div className="mb-6 flex items-center justify-between border-b border-[var(--paper)]/15 pb-5"><span className="eyebrow text-[var(--paper)]/50">This week</span><span className="flex items-center gap-2 text-sm text-[var(--lime)]"><span className="h-2 w-2 animate-pulse rounded-full bg-[var(--lime)]" /> Live points</span></div><div className="space-y-1">{[{ rank: "01", name: "The pace setter", score: "2,480" }, { rank: "02", name: "Quiet momentum", score: "2,160" }, { rank: "03", name: "One to watch", score: "1,940" }].map((row, index) => <div key={row.rank} className={`grid grid-cols-[48px_1fr_auto] items-center gap-4 rounded-xl px-4 py-5 ${index === 0 ? "bg-[var(--lime)] text-[var(--forest)]" : "text-[var(--paper)]"}`}><span className="font-mono text-xs opacity-60">{row.rank}</span><span className="font-medium">{row.name}</span><span className="font-mono text-sm">{row.score} <span className="ml-1 opacity-50">pts</span></span></div>)}</div><div className="mt-7 flex items-center justify-between border-t border-[var(--paper)]/15 pt-5 text-sm"><span className="text-[var(--paper)]/55">Your next move</span><span className="flex items-center gap-2 text-[var(--lime)]">+{taskPointRules.referral_points} invite <ArrowUpRight size={15} /></span></div></div></div></section>
+
+        <section id="news" className="px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto max-w-[1440px]"><div className="flex flex-col justify-between gap-6 border-b border-[var(--ink)]/15 pb-7 sm:flex-row sm:items-end"><div><SectionMark>From the Pinecrest field notes</SectionMark><h2 className="display-heading mt-5 text-5xl tracking-[-.06em] sm:text-7xl">Worth your attention.</h2></div><Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[.14em] text-[var(--pine)]">All updates <ArrowUpRight size={16} /></Link></div>{loadingNews ? <div className="py-16 text-[var(--ink-muted)]">Loading the latest notes...</div> : newsItems.length === 0 ? <div className="py-16 text-[var(--ink-muted)]">New notes are on their way.</div> : <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_.8fr]">{newsItems.slice(0, 4).map((news, index) => <Link href={`/news/${news.slug}`} key={news.id} className={`news-feature group ${index === 0 ? "lg:row-span-2" : ""}`}><div className={`relative overflow-hidden bg-[var(--ink-soft)] ${index === 0 ? "aspect-[1.1] lg:aspect-auto lg:h-full" : "aspect-[1.8]"}`}>{news.featured_image ? <img src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined} alt={news.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.src = "/Icon.png"; }} /> : <div className="flex h-full items-center justify-center text-[var(--pine)]"><Newspaper size={40} /></div>}<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-5 pt-20 text-[var(--paper)]"><span className="eyebrow text-[var(--lime)]">{news.tags?.[0] || news.category || "Pinecrest"} · {formatDate(news.published_at)}</span><h3 className={`${index === 0 ? "text-3xl sm:text-5xl" : "text-xl"} mt-2 max-w-xl font-semibold leading-[1.02] tracking-[-.045em]`}>{news.title}</h3></div></div></Link>)}</div>}</div></section>
+
+        <section id="about" className="border-t border-[var(--ink)]/10 bg-[var(--paper-deep)] px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[.65fr_1.35fr] lg:gap-28"><div><SectionMark>A note from Pinecrest</SectionMark><p className="mt-5 text-sm uppercase tracking-[.16em] text-[var(--ink-muted)]">Built for people who are already showing up.</p></div><div><p className="max-w-4xl text-3xl leading-[1.08] tracking-[-.045em] sm:text-5xl">We believe the internet should give something back for the attention, care, and consistency people bring to it.</p><div className="mt-10 grid gap-7 border-t border-[var(--ink)]/15 pt-7 sm:grid-cols-3"><div><p className="text-3xl font-semibold tracking-[-.05em]">{taskPointRules.signup_points}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">points to begin</p></div><div><p className="text-3xl font-semibold tracking-[-.05em]">{taskPointRules.referral_points}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">points per referral</p></div><div><p className="text-3xl font-semibold tracking-[-.05em]">100%</p><p className="mt-1 text-sm text-[var(--ink-muted)]">clear progress</p></div></div></div></div></section>
+
+        <section className="bg-[var(--paper)] px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto flex w-full max-w-[1100px] flex-col items-center text-center"><SectionMark>Begin with one small move</SectionMark><h2 className="display-heading mx-auto mt-6 block w-full max-w-4xl text-center text-6xl leading-[.88] tracking-[-.075em] sm:text-8xl">Your next reward is closer than it looks.</h2><p className="mx-auto mt-8 max-w-xl text-center text-lg leading-8 text-[var(--ink-muted)]">Join for free, pick a task, and make the first point count.</p><div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/sign-up" className="pine-button pine-button-dark">Create your account <ArrowUpRight size={18} /></Link><Link href="/sign-in" className="pine-button pine-button-outline">Already a member? Sign in</Link></div></div></section>
+
+        <footer className="bg-[var(--forest)] px-6 py-12 text-[var(--paper)] sm:px-10 lg:px-16"><div className="mx-auto max-w-[1440px]"><div className="flex flex-col justify-between gap-10 border-b border-[var(--paper)]/15 pb-10 md:flex-row md:items-end"><div><Link href="/" className="flex items-center gap-3"><img src="/Icon.png" alt="Pinecrest" className="h-9 w-7 object-contain" /><span className="text-xl font-semibold tracking-[-.04em]">Pinecrest</span></Link><p className="mt-5 max-w-sm text-sm leading-6 text-[var(--paper)]/55">Small actions. Clear progress. A fairer way to earn from showing up online.</p></div><div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-[var(--paper)]/65 sm:grid-cols-3"><Link href="/news" className="hover:text-[var(--lime)]">News</Link><Link href="/leaderboard" className="hover:text-[var(--lime)]">Leaderboard</Link><Link href="/about" className="hover:text-[var(--lime)]">About</Link><Link href="/help" className="hover:text-[var(--lime)]">Help</Link><Link href="/privacy" className="hover:text-[var(--lime)]">Privacy</Link><Link href="/terms" className="hover:text-[var(--lime)]">Terms</Link></div></div><div className="flex flex-col justify-between gap-3 pt-6 text-xs uppercase tracking-[.14em] text-[var(--paper)]/35 sm:flex-row"><span>© {new Date().getFullYear()} Pinecrest</span><span>Make the everyday count.</span></div></div></footer>
       </div>
-      <CinematicFooter />
     </>
   );
 }
-

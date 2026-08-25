@@ -10,11 +10,11 @@ import { siteConfig } from "@/lib/seo-config";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Pinecrest - Share and Earn Rewards | Social Media Engagement Platform",
+    default: "Pinecrest | Make the everyday count",
     template: "%s | Pinecrest"
   },
   description:
-    "Earn points, climb the leaderboard, and win real rewards through social media activities. Share content, complete tasks, and get paid. Join thousands earning daily!",
+    "Turn the small things you already do online into clear progress, weekly recognition, and real rewards.",
   keywords: [
     "earn money online",
     "social media rewards",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "Pinecrest - Share and Earn Rewards",
+    title: "Pinecrest | Make the everyday count",
     description:
-      "Earn points, climb the leaderboard, and win real rewards through social media activities. Share content, complete tasks, and get paid!",
+      "Small actions. Clear progress. A fairer way to earn from showing up online.",
     url: siteConfig.url,
     siteName: "Pinecrest",
     images: [
@@ -56,8 +56,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pinecrest - Share and Earn Rewards",
-    description: "Earn points, climb the leaderboard, and win real rewards through social media activities.",
+    title: "Pinecrest | Make the everyday count",
+    description: "Small actions. Clear progress. A fairer way to earn from showing up online.",
     images: [siteConfig.ogImage],
   },
   robots: {
@@ -97,8 +97,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full overflow-x-hidden overflow-y-hidden">
-      <body className="font-sans antialiased h-full min-h-screen m-0 p-0 overflow-x-hidden overflow-y-auto">
+    <html lang="en" suppressHydrationWarning className="h-full overflow-x-hidden">
+      <body className="font-sans antialiased min-h-screen m-0 p-0 overflow-x-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

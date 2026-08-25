@@ -1,184 +1,26 @@
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft, Users, Trophy, MessageSquare, TrendingUp, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowUpRight, MessageSquare, TrendingUp, Trophy, Users } from "lucide-react";
+
+const features = [
+  { icon: Users, title: "People in motion", copy: "A community of users building small habits that add up." },
+  { icon: Trophy, title: "A visible finish line", copy: "Weekly competition keeps progress tangible and fair." },
+  { icon: MessageSquare, title: "Useful conversation", copy: "Share what works, learn from others, and keep it honest." },
+  { icon: TrendingUp, title: "Growth together", copy: "The strongest wins are the ones other people can repeat." },
+];
+
+const topUsers = [
+  { rank: "01", name: "Alex M.", points: "12,500", coins: "2,500" },
+  { rank: "02", name: "Sarah K.", points: "11,800", coins: "2,300" },
+  { rank: "03", name: "Mike T.", points: "11,200", coins: "2,100" },
+];
 
 export default function CommunityPage() {
-  const features = [
-    {
-      icon: Users,
-      title: "Active Community",
-      description: "Join thousands of users earning rewards and sharing tips",
-    },
-    {
-      icon: Trophy,
-      title: "Weekly Competitions",
-      description: "Compete on leaderboards and win bonus rewards",
-    },
-    {
-      icon: MessageSquare,
-      title: "Share & Learn",
-      description: "Connect with other users and learn winning strategies",
-    },
-    {
-      icon: TrendingUp,
-      title: "Growth Together",
-      description: "Watch the community grow and earn together",
-    },
-  ];
-
-  const topUsers = [
-    { rank: 1, name: "Alex M.", points: 12500, coins: 2500 },
-    { rank: 2, name: "Sarah K.", points: 11800, coins: 2300 },
-    { rank: 3, name: "Mike T.", points: 11200, coins: 2100 },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="container mx-auto px-4 py-16 max-w-6xl">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
-          </Link>
-        </div>
-
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-            PineCrest Community
-          </h1>
-          <p className="text-lg text-slate-600">
-            Join a vibrant community of users earning rewards together
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-emerald-100 rounded-full">
-                      <Icon className="h-6 w-6 text-emerald-600" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-sm text-slate-600">{feature.description}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <Card className="shadow-xl border-0">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <Award className="h-6 w-6 text-emerald-600" />
-                <h2 className="text-2xl font-bold">Top Performers</h2>
-              </div>
-              <div className="space-y-4">
-                {topUsers.map((user) => (
-                  <div
-                    key={user.rank}
-                    className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
-                          user.rank === 1
-                            ? "bg-yellow-500"
-                            : user.rank === 2
-                            ? "bg-slate-400"
-                            : "bg-amber-600"
-                        }`}
-                      >
-                        {user.rank}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="text-sm text-slate-600">
-                          {user.points.toLocaleString()} points
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-emerald-600">
-                        {user.coins.toLocaleString()} coins
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button asChild className="w-full mt-6 bg-gradient-to-r from-emerald-600 to-blue-600">
-                <Link href="/dashboard/leaderboard">View Full Leaderboard</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-xl border-0">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <MessageSquare className="h-6 w-6 text-blue-600" />
-                <h2 className="text-2xl font-bold">Community Guidelines</h2>
-              </div>
-              <div className="space-y-4 text-slate-700">
-                <div>
-                  <h3 className="font-semibold mb-2">Be Respectful</h3>
-                  <p className="text-sm">
-                    Treat all community members with respect and kindness. We're all here to earn
-                    rewards together.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Share Legitimately</h3>
-                  <p className="text-sm">
-                    Only share legitimate tips and strategies. Don't promote cheating or fraudulent
-                    activities.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Help Others</h3>
-                  <p className="text-sm">
-                    Share your knowledge and help newcomers learn the ropes. A strong community
-                    benefits everyone.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Follow Rules</h3>
-                  <p className="text-sm">
-                    Adhere to our terms of service and community guidelines. Violations may result in
-                    account restrictions.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="bg-gradient-to-r from-emerald-50 to-blue-50 border-0">
-          <CardContent className="p-8 text-center">
-            <h3 className="text-2xl font-bold mb-4">Ready to Join the Community?</h3>
-            <p className="text-slate-600 mb-6">
-              Start earning rewards today and connect with other PineCrest users!
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Button asChild className="bg-gradient-to-r from-emerald-600 to-blue-600">
-                <Link href="/sign-up">Create Account</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/dashboard">Go to Dashboard</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      <section className="bg-[var(--forest)] px-6 pb-24 pt-36 text-[var(--paper)] sm:px-10 lg:px-16 lg:pb-32"><div className="mx-auto max-w-[1440px]"><Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--paper)]/55 hover:text-[var(--lime)]"><ArrowLeft size={16} /> Back home</Link><p className="eyebrow mt-20 text-[var(--lime)]"><span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-current" /> The Pinecrest community</p><h1 className="display-heading mt-7 max-w-5xl text-6xl leading-[.86] tracking-[-.075em] sm:text-9xl">Good momentum is contagious.</h1><p className="mt-9 max-w-2xl text-xl leading-8 text-[var(--paper)]/65">A place to compare notes, celebrate progress, and keep the work of earning online grounded in something real.</p></div></section>
+      <section className="px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto max-w-[1440px]"><p className="eyebrow text-[var(--pine)]">The room we are building</p><div className="mt-10 grid gap-x-10 border-t border-[var(--ink)]/15 sm:grid-cols-2 lg:grid-cols-4">{features.map(({ icon: Icon, title, copy }) => <div key={title} className="border-b border-[var(--ink)]/15 py-8 lg:border-r lg:px-7 lg:first:pl-0 lg:last:border-r-0"><Icon size={22} className="text-[var(--pine)]" /><h2 className="mt-6 text-2xl font-semibold tracking-[-.035em]">{title}</h2><p className="mt-3 leading-7 text-[var(--ink-muted)]">{copy}</p></div>)}</div></div></section>
+      <section className="bg-[var(--paper-deep)] px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><div><p className="eyebrow text-[var(--pine)]">A live snapshot</p><h2 className="display-heading mt-5 text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">The people setting the pace.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--ink-muted)]">The top of the board is not a mystery. It is a collection of consistent, verified actions.</p><Link href="/dashboard/leaderboard" className="pine-button pine-button-dark mt-9">View full leaderboard <ArrowUpRight size={18} /></Link></div><div className="border-t border-[var(--ink)]/15">{topUsers.map((user, index) => <div key={user.rank} className="grid grid-cols-[48px_1fr_auto] items-center gap-5 border-b border-[var(--ink)]/15 py-7"><span className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold ${index === 0 ? "bg-[var(--forest)] text-[var(--lime)]" : "bg-[var(--ink)]/10 text-[var(--ink-muted)]"}`}>{user.rank}</span><div><p className="text-xl font-semibold tracking-[-.03em]">{user.name}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">{user.points} points</p></div><p className="text-right font-mono text-sm text-[var(--pine)]">{user.coins}<span className="ml-1 text-[var(--ink-muted)]">coins</span></p></div>)}</div></div></section>
+      <section className="px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[.55fr_1.45fr] lg:gap-28"><div><p className="eyebrow text-[var(--pine)]">Community code</p><p className="mt-5 text-sm uppercase tracking-[.14em] text-[var(--ink-muted)]">A few things worth protecting</p></div><div className="grid gap-8 sm:grid-cols-2"><div><h3 className="text-xl font-semibold">Be useful</h3><p className="mt-3 leading-7 text-[var(--ink-muted)]">Share legitimate tips and strategies that help people participate fairly.</p></div><div><h3 className="text-xl font-semibold">Be respectful</h3><p className="mt-3 leading-7 text-[var(--ink-muted)]">Make space for new users and treat every person as a person.</p></div><div><h3 className="text-xl font-semibold">Be consistent</h3><p className="mt-3 leading-7 text-[var(--ink-muted)]">The best progress is repeatable, not inflated by shortcuts.</p></div><div><h3 className="text-xl font-semibold">Be accountable</h3><p className="mt-3 leading-7 text-[var(--ink-muted)]">Follow the rules so rewards stay meaningful for everyone.</p></div></div></div></section>
+    </main>
   );
 }
-
-

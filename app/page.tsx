@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import HomePage from "@/components/home-page";
 import { siteConfig } from "@/lib/seo-config";
 
-const homepageTitle = "Pinecrest - Earn Rewards from Social Media Tasks";
-const homepageDescription = "Join Pinecrest to earn points from social media tasks, climb weekly leaderboards, and redeem real rewards with a secure AI-verified platform.";
+const homepageTitle = "Pinecrest | Make the everyday count";
+const homepageDescription = "Turn the small things you already do online into clear progress, weekly recognition, and real rewards.";
 const homepageUrl = siteConfig.url;
 const homepageImage = siteConfig.ogImage;
 

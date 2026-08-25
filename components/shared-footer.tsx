@@ -3,67 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const groups = [
+  { title: "Explore", links: [["Leaderboard", "/leaderboard"], ["News", "/news"], ["Community", "/community"]] },
+  { title: "Company", links: [["About", "/about"], ["Contact", "/contact"], ["Help", "/help"]] },
+  { title: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["FAQ", "/faq"]] },
+];
+
 export default function SharedFooter() {
   const pathname = usePathname();
-
-  // Hide footer on dashboard pages and homepage (homepage uses cinematic footer)
-  if (pathname && (pathname.startsWith('/dashboard') || pathname === '/')) {
-    return null;
-  }
+  if (pathname === "/" || pathname?.startsWith("/dashboard")) return null;
 
   return (
-    <footer className="bg-slate-800 text-white py-8 sm:py-10 md:py-14 px-4 relative z-10 safe-bottom">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 md:gap-8">
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center mb-3 sm:mb-4">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
-                <img 
-                  src="/Icon.png" 
-                  alt="PineCrest Logo" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span className="text-base sm:text-lg md:text-xl font-bold ml-2">PineCrest</span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed">
-              Earn weekly points from social activities and compete for top-3 PineCoin rewards.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Quick Links</h3>
-            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
-              <li><Link href="/dashboard" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Dashboard</Link></li>
-              <li><Link href="/leaderboard" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Leaderboard</Link></li>
-              <li><Link href="/about" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">About</Link></li>
-              <li><Link href="/contact" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Contact</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Support</h3>
-            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
-              <li><Link href="/help" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Help Center</Link></li>
-              <li><Link href="/terms" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Privacy Policy</Link></li>
-              <li><Link href="/faq" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">FAQ</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3">Connect</h3>
-            <ul className="space-y-1 sm:space-y-1.5 text-slate-300 text-xs sm:text-sm">
-              <li><Link href="/news" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">News & Updates</Link></li>
-              <li><Link href="/blog" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Blog</Link></li>
-              <li><Link href="/community" className="inline-block py-1 hover:text-white active:text-slate-100 transition-colors touch-target">Community</Link></li>
-            </ul>
-          </div>
+    <footer className="bg-[var(--forest)] px-6 py-12 text-[var(--paper)] sm:px-10 lg:px-16">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="grid gap-12 border-b border-[var(--paper)]/15 pb-12 md:grid-cols-[1.3fr_2fr]">
+          <div><Link href="/" className="flex items-center gap-3"><img src="/Icon.png" alt="" className="h-9 w-7 object-contain" /><span className="text-xl font-semibold tracking-[-.04em]">Pinecrest<span className="text-[var(--lime)]">.</span></span></Link><p className="mt-5 max-w-sm text-sm leading-7 text-[var(--paper)]/55">Small actions. Clear progress. A fairer way to earn from showing up online.</p></div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">{groups.map((group) => <div key={group.title}><p className="eyebrow text-[var(--lime)]">{group.title}</p><ul className="mt-4 space-y-3 text-sm text-[var(--paper)]/60">{group.links.map(([label, href]) => <li key={href}><Link href={href} className="hover:text-[var(--paper)]">{label}</Link></li>)}</ul></div>)}</div>
         </div>
-        
-        <div className="border-t border-slate-700 mt-6 sm:mt-8 md:mt-10 pt-5 sm:pt-6 md:pt-8 text-center text-slate-400 text-xs sm:text-sm">
-          <p className="leading-relaxed">&copy; 2025 PineCrest. All rights reserved. Earn rewards from social media activities.</p>
-        </div>
+        <div className="flex flex-col justify-between gap-3 pt-6 text-xs uppercase tracking-[.14em] text-[var(--paper)]/35 sm:flex-row"><span>© {new Date().getFullYear()} Pinecrest</span><span>Make the everyday count.</span></div>
       </div>
     </footer>
   );

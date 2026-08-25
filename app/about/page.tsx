@@ -1,134 +1,20 @@
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft, Target, Users, Award, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Award, ShieldCheck, Target, TrendingUp, Users } from "lucide-react";
+
+const principles = [
+  { icon: ShieldCheck, title: "Proof over promises", copy: "Tasks are checked before points become part of your progress." },
+  { icon: TrendingUp, title: "Momentum over noise", copy: "Small, repeatable actions are easier to trust and easier to keep." },
+  { icon: Award, title: "Recognition with a reason", copy: "Weekly leaderboards make the finish line visible without empty hype." },
+  { icon: Users, title: "A better online commons", copy: "The platform works best when everyone can participate fairly." },
+];
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
-          </Link>
-        </div>
-
-        <Card className="shadow-xl border-0">
-          <CardContent className="p-8 md:p-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-              About PineCrest
-            </h1>
-            <p className="text-lg text-slate-600 mb-12">
-              Weekly points competition with top-3 PineCoin rewards
-            </p>
-
-            <div className="space-y-12">
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-slate-900 flex items-center gap-2">
-                  <Target className="h-6 w-6 text-emerald-600" />
-                  Our Mission
-                </h2>
-                <p className="text-slate-700 leading-relaxed">
-                  PineCrest is a gamified platform where users earn weekly points from social activities and compete for the top 3 spots.
-                  Weekly points reset every Monday, and the top performers receive PineCoins.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-slate-900 flex items-center gap-2">
-                  <Users className="h-6 w-6 text-emerald-600" />
-                  What We Do
-                </h2>
-                <div className="space-y-4 text-slate-700">
-                  <p>
-                    PineCrest connects users with engaging social media tasks from brands and creators. Complete tasks like 
-                    liking posts, sharing content, following accounts, and watching videos to earn weekly points.
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>Complete verified social media tasks</li>
-                    <li>Earn weekly points for each activity</li>
-                    <li>Compete for top-3 leaderboard positions every week</li>
-                    <li>Receive PineCoins when you finish in the weekly top 3</li>
-                    <li>Track your progress and achievements</li>
-                  </ul>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-slate-900 flex items-center gap-2">
-                  <Award className="h-6 w-6 text-emerald-600" />
-                  Why Choose PineCrest
-                </h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="p-4 bg-emerald-50 rounded-lg">
-                    <h3 className="font-semibold text-slate-900 mb-2">Verified Tasks</h3>
-                    <p className="text-sm text-slate-700">
-                      All tasks are verified using AI technology to ensure authenticity and prevent fraud.
-                    </p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-slate-900 mb-2">Real Rewards</h3>
-                    <p className="text-sm text-slate-700">
-                      Top 3 weekly performers receive PineCoins and can request withdrawals.
-                    </p>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h3 className="font-semibold text-slate-900 mb-2">Fair Competition</h3>
-                    <p className="text-sm text-slate-700">
-                      Weekly leaderboards reset fairly, giving everyone a chance to compete and win.
-                    </p>
-                  </div>
-                  <div className="p-4 bg-amber-50 rounded-lg">
-                    <h3 className="font-semibold text-slate-900 mb-2">Secure Platform</h3>
-                    <p className="text-sm text-slate-700">
-                      Your data and earnings are protected with industry-standard security measures.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4 text-slate-900 flex items-center gap-2">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
-                  Our Values
-                </h2>
-                <div className="space-y-4 text-slate-700">
-                  <p>
-                    At PineCrest, we're committed to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li><strong>Transparency:</strong> Clear rules, fair rewards, and honest communication</li>
-                    <li><strong>Innovation:</strong> Constantly improving our platform with new features and opportunities</li>
-                    <li><strong>Community:</strong> Building a supportive community of engaged users</li>
-                    <li><strong>Integrity:</strong> Ensuring all tasks are legitimate and verified</li>
-                    <li><strong>Reward:</strong> Making sure your efforts are properly compensated</li>
-                  </ul>
-                </div>
-              </section>
-
-              <section className="pt-8 border-t border-slate-200">
-                <h2 className="text-2xl font-semibold mb-4 text-slate-900">
-                  Get Started Today
-                </h2>
-                <p className="text-slate-700 mb-6">
-                  Join PineCrest and start earning weekly points from your social media activities.
-                </p>
-                <Link
-                  href="/sign-up"
-                  className="inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
-                >
-                  Create Your Account
-                </Link>
-              </section>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      <section className="bg-[var(--forest)] px-6 pb-24 pt-36 text-[var(--paper)] sm:px-10 lg:px-16 lg:pb-32"><div className="mx-auto max-w-[1440px]"><Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--paper)]/55 hover:text-[var(--lime)]"><ArrowLeft size={16} /> Back home</Link><p className="eyebrow mt-20 text-[var(--lime)]"><span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-current" /> About Pinecrest</p><h1 className="display-heading mt-7 max-w-5xl text-6xl leading-[.86] tracking-[-.075em] sm:text-9xl">An internet that gives something back.</h1><p className="mt-9 max-w-2xl text-xl leading-8 text-[var(--paper)]/65">Pinecrest makes social participation tangible, with clear tasks, verified progress, and weekly rewards that respect the effort behind every point.</p></div></section>
+      <section className="px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.55fr_1.45fr] lg:gap-28"><div><p className="eyebrow text-[var(--pine)]">The short version</p><p className="mt-5 text-sm uppercase tracking-[.14em] text-[var(--ink-muted)]">Why we exist</p></div><div><p className="max-w-4xl text-3xl leading-[1.1] tracking-[-.045em] sm:text-5xl">The internet runs on attention. We think the people bringing that attention should have a clearer way to benefit from it.</p><div className="mt-12 grid gap-6 border-t border-[var(--ink)]/15 pt-7 sm:grid-cols-3"><div><p className="text-4xl font-semibold tracking-[-.06em]">01</p><p className="mt-2 text-sm text-[var(--ink-muted)]">Choose an action</p></div><div><p className="text-4xl font-semibold tracking-[-.06em]">02</p><p className="mt-2 text-sm text-[var(--ink-muted)]">Get it verified</p></div><div><p className="text-4xl font-semibold tracking-[-.06em]">03</p><p className="mt-2 text-sm text-[var(--ink-muted)]">Keep your reward</p></div></div></div></div></section>
+      <section className="bg-[var(--paper-deep)] px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto max-w-[1440px]"><div className="flex flex-col justify-between gap-6 border-b border-[var(--ink)]/15 pb-7 sm:flex-row sm:items-end"><div><p className="eyebrow text-[var(--pine)]">What guides the work</p><h2 className="display-heading mt-5 text-5xl tracking-[-.06em] sm:text-7xl">Values with a job to do.</h2></div><span className="text-sm text-[var(--ink-muted)]">No shortcuts. No smoke.</span></div><div className="mt-10 grid gap-x-12 sm:grid-cols-2">{principles.map(({ icon: Icon, title, copy }, index) => <div key={title} className="grid grid-cols-[48px_1fr] gap-4 border-b border-[var(--ink)]/15 py-8"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">{index + 1}</span><div><Icon size={20} className="mb-4 text-[var(--pine)]" /><h3 className="text-2xl font-semibold tracking-[-.035em]">{title}</h3><p className="mt-3 max-w-md leading-7 text-[var(--ink-muted)]">{copy}</p></div></div>)}</div></div></section>
+      <section className="px-6 py-24 sm:px-10 lg:px-16 lg:py-32"><div className="mx-auto grid max-w-[1440px] items-end gap-12 lg:grid-cols-[1fr_auto]"><div><p className="eyebrow text-[var(--pine)]">Make the everyday count</p><h2 className="display-heading mt-5 max-w-4xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">Start with one useful action.</h2><p className="mt-7 max-w-xl text-lg leading-8 text-[var(--ink-muted)]">Join for free and turn consistency into something you can actually see.</p></div><Link href="/sign-up" className="pine-button pine-button-dark">Create your account <ArrowUpRight size={18} /></Link></div></section>
+    </main>
   );
 }
-
-
