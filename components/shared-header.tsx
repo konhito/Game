@@ -78,7 +78,7 @@ export default function SharedHeader() {
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-4 sm:px-10 lg:px-16">
         <Link href="/" className={`flex items-center gap-3 ${navClass}`} aria-label="Pinecrest home">
           <img src="/Icon.png" alt="" className="h-9 w-7 object-contain" />
-          <span className="text-lg font-semibold tracking-[-.04em]">Pinecrest.</span>
+          <span className={`text-lg font-semibold tracking-[-.04em] ${onHero ? "text-[var(--paper)]" : "text-[var(--ink)]"}`}>Pinecrest.</span>
         </Link>
 
         <nav className={`hidden items-center gap-8 text-sm font-medium md:flex ${navClass}`} aria-label="Main navigation">
@@ -86,7 +86,7 @@ export default function SharedHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {loading ? <span className={`h-10 w-24 animate-pulse rounded-full ${onHero ? "bg-[var(--paper)]/15" : "bg-[var(--ink)]/10"}`} /> : isAuthenticated ? <Link href="/dashboard" className="pine-button pine-button-lime">Dashboard <MoveUpRight size={16} /></Link> : <><Link href="/sign-in" className={`rounded-full px-4 py-3 text-sm font-semibold ${navClass}`}>Sign in</Link><Link href="/sign-up" className="pine-button pine-button-lime">Get started <MoveUpRight size={16} /></Link></>}
+          {loading ? <span className={`h-10 w-24 animate-pulse rounded-full ${onHero ? "bg-[var(--paper)]/15" : "bg-[var(--ink)]/10"}`} /> : isAuthenticated ? <Link href="/dashboard" className="pine-button pine-button-lime">Dashboard <MoveUpRight size={16} /></Link> : <><Link href="/sign-in" className={`rounded-full px-4 py-3 text-sm font-semibold ${onHero ? "!text-white" : "!text-[var(--ink)]"}`}>Sign in</Link><Link href="/sign-up" className="pine-button pine-button-lime">Get started <MoveUpRight size={16} /></Link></>}
         </div>
 
         <button type="button" className={`flex h-11 w-11 items-center justify-center rounded-full border md:hidden ${onHero ? "border-[var(--paper)]/25 text-[var(--paper)]" : "border-[var(--ink)]/15 text-[var(--ink)]"}`} onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>

@@ -20,7 +20,7 @@ export default function SharedFooter() {
           <div><Link href="/" className="flex items-center gap-3"><img src="/Icon.png" alt="" className="h-9 w-7 object-contain" /><span className="text-xl font-semibold tracking-[-.04em]">Pinecrest.</span></Link><p className="mt-5 max-w-sm text-sm leading-7 text-[var(--paper)]/55">Small actions. Clear progress. A fairer way to earn from showing up online.</p></div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">{groups.map((group) => <div key={group.title}><p className="eyebrow text-[var(--lime)]">{group.title}</p><ul className="mt-4 space-y-3 text-sm text-[var(--paper)]/60">{group.links.map(([label, href]) => <li key={href}><Link href={href} className="hover:text-[var(--paper)]">{label}</Link></li>)}</ul></div>)}</div>
         </div>
-        <div className="flex flex-col justify-between gap-3 pt-6 text-xs uppercase tracking-[.14em] text-[var(--paper)]/35 sm:flex-row"><span>© {new Date().getFullYear()} Pinecrest</span><span>Make the everyday count.</span></div>
+        <div className="flex flex-col justify-between gap-3 pt-6 text-xs uppercase tracking-[.14em] text-[var(--paper)]/70 sm:flex-row"><span>© {new Date().getFullYear()} Pinecrest</span><span>Make the everyday count.</span></div>
       </div>
     </footer>
   );
