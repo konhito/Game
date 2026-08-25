@@ -160,8 +160,8 @@ export default function PrizePoolPage() {
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {prizePools.filter(pool => pool.status === 'active').map((pool) => (
-              <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-purple-300/50 cursor-pointer group">
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200/50">
+              <Card key={pool.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg">
+                <CardHeader className="border-b border-slate-100 bg-slate-50/70 p-5">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
                     <CardTitle className="text-lg sm:text-xl text-slate-800">{pool.title}</CardTitle>
                     {getStatusBadge(pool.status)}
@@ -173,7 +173,7 @@ export default function PrizePoolPage() {
                 <CardContent className="p-4 sm:p-6">
                   {/* Prize Image */}
                   {pool.image_url && (
-                    <div className="mb-4 rounded-xl overflow-hidden border-2 border-slate-200">
+                    <div className="mb-5 overflow-hidden rounded-xl border border-slate-200">
                       <img 
                         src={pool.image_url} 
                         alt={pool.title}
@@ -186,16 +186,16 @@ export default function PrizePoolPage() {
                   )}
                   
                   {/* Prize Amount */}
-                  <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300">
+                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-slate-700">Prize Pool</span>
-                      <Trophy className="w-5 h-5 text-yellow-600" />
+                      <Trophy className="h-5 w-5 text-amber-600" />
                     </div>
                     <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
                   </div>
 
                   {/* Entry Fee */}
-                  <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-white border border-slate-200">
+                  <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-slate-600">Entry Fee</span>
                       <span className="text-lg font-bold text-emerald-600">₽{pool.entry_fee}</span>
@@ -210,7 +210,7 @@ export default function PrizePoolPage() {
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-300"
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-300"
                         style={{ width: `${(pool.current_participants / pool.max_participants) * 100}%` }}
                       ></div>
                     </div>
@@ -235,7 +235,7 @@ export default function PrizePoolPage() {
                     </Button>
                   ) : (
                     <Button 
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 relative overflow-hidden group"
+                      className="relative w-full overflow-hidden bg-emerald-600 font-semibold text-white transition-colors hover:bg-emerald-700"
                       onClick={() => handleJoinPool(pool.id, pool.entry_fee)}
                       disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants || getUserEntriesForPool(pool.id) >= 10}
                     >
@@ -271,8 +271,8 @@ export default function PrizePoolPage() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {prizePools.filter(pool => pool.status === 'upcoming').map((pool) => (
-                <Card key={pool.id} className="bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-blue-300/50 cursor-pointer group">
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50">
+                <Card key={pool.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg">
+                  <CardHeader className="border-b border-slate-100 bg-slate-50/70 p-5">
                     <div className="flex items-center justify-between mb-2">
                       <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
                       {getStatusBadge(pool.status)}
@@ -282,10 +282,10 @@ export default function PrizePoolPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300">
+                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-slate-700">Prize Pool</span>
-                        <Crown className="w-5 h-5 text-yellow-600" />
+                        <Crown className="h-5 w-5 text-amber-600" />
                       </div>
                       <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
                     </div>
@@ -302,7 +302,7 @@ export default function PrizePoolPage() {
                     </div>
 
                     <Button 
-                      className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold transition-all duration-300 cursor-not-allowed"
+                      className="mt-4 w-full cursor-not-allowed bg-slate-200 font-semibold text-slate-500 hover:bg-slate-200"
                       disabled
                     >
                       Coming Soon
