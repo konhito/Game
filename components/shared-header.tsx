@@ -78,7 +78,7 @@ export default function SharedHeader() {
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-4 sm:px-10 lg:px-16">
         <Link href="/" className={`flex items-center gap-3 ${navClass}`} aria-label="Pinecrest home">
           <img src="/Icon.png" alt="" className="h-9 w-7 object-contain" />
-          <span className="text-lg font-semibold tracking-[-.04em]">Pinecrest<span className="text-[var(--lime)]">.</span></span>
+          <span className="text-lg font-semibold tracking-[-.04em]">Pinecrest.</span>
         </Link>
 
         <nav className={`hidden items-center gap-8 text-sm font-medium md:flex ${navClass}`} aria-label="Main navigation">

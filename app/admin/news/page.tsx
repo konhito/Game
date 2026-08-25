@@ -61,6 +61,21 @@ interface NewsArticle {
   updated_at: string;
 }
 
+const emptyArticleForm = {
+  title: "",
+  slug: "",
+  excerpt: "",
+  content: "",
+  featured_image: "",
+  status: "draft" as "draft" | "published",
+  featured: false,
+  tags: [] as string[],
+  category: "general",
+  meta_title: "",
+  meta_description: "",
+  scheduled_publish: "",
+};
+
 const hasMeaningfulText = (value: unknown): value is string => {
   return typeof value === "string" && value.trim().length > 0;
 };
@@ -114,20 +129,7 @@ export default function AdminNewsPage() {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const contentHistoryRef = useRef<string[]>([]);
   const contentRedoRef = useRef<string[]>([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    excerpt: "",
-    content: "",
-    featured_image: "",
-    status: "draft" as "draft" | "published",
-    featured: false,
-    tags: [] as string[],
-    category: "general",
-    meta_title: "",
-    meta_description: "",
-    scheduled_publish: ""
-  });
+  const [formData, setFormData] = useState(emptyArticleForm);
   const [newTag, setNewTag] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -700,6 +702,16 @@ export default function AdminNewsPage() {
     );
   };
 
+  const openCreateForm = () => {
+    setEditingArticle(null);
+    setFormData({ ...emptyArticleForm, tags: [] });
+    setSelectedFile(null);
+    setImagePreview(null);
+    setShowPreview(false);
+    setSubmitError(null);
+    setShowCreateForm(true);
+  };
+
   const stats = getContentStats();
   const categorySuggestions = Array.from(
     new Set([
@@ -716,7 +728,7 @@ export default function AdminNewsPage() {
   ).sort();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -724,17 +736,22 @@ export default function AdminNewsPage() {
             <h1 className="text-3xl font-bold text-slate-800 mb-2">News Management</h1>
             <p className="text-slate-600">Create and manage news articles with advanced features</p>
           </div>
-          <Button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-lg"
+          <a
+            href="#create-article"
+            onClick={(event) => {
+              event.preventDefault();
+              openCreateForm();
+            }}
+            aria-controls="create-article-modal"
+            className="relative z-10 inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create Article
-          </Button>
+            Create New Article
+          </a>
         </div>
 
         {/* Filters and Bulk Actions */}
-        <Card className="mb-6 shadow-lg border-slate-200">
+        <Card className="mb-6 border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex gap-4 items-end flex-wrap">
               <div className="flex-1 min-w-[300px]">
@@ -789,7 +806,7 @@ export default function AdminNewsPage() {
                 key={article.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl transition-shadow"
+                className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
@@ -895,7 +912,7 @@ export default function AdminNewsPage() {
 
         {/* Create/Edit Form Modal */}
         {(showCreateForm || editingArticle) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div id="create-article-modal" className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
