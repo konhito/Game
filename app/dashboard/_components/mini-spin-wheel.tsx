@@ -142,7 +142,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
       <CardContent className="flex flex-1 flex-col items-center px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-1 w-full flex-col items-center justify-center">
           <div className="relative h-40 w-40 sm:h-48 sm:w-48">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-10">
+          <div className="pointer-events-none absolute top-0 left-1/2 z-10" style={{ transform: "translate(-50%, -0.5rem)" }}>
             <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[20px] border-l-transparent border-r-transparent border-t-slate-800 drop-shadow-md"></div>
           </div>
           

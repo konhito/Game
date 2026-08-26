@@ -32,8 +32,8 @@ export default async function DashboardLayout({
             <Navbar />
             
             {/* Main Content Area */}
-            <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
-              <div className="p-4 sm:p-5 lg:p-6 w-full max-w-full">
+            <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
+              <div className="p-0 w-full max-w-full">
                 {children}
               </div>
             </main>
@@ -48,8 +48,8 @@ export default async function DashboardLayout({
         <Navbar />
         
         {/* Main Content Area */}
-        <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
-          <div className="p-4 sm:p-5 lg:p-6 w-full max-w-full">
+        <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
+          <div className="p-0 w-full max-w-full">
             {children}
           </div>
         </main>
@@ -65,8 +65,8 @@ export default async function DashboardLayout({
           <Navbar />
           
           {/* Main Content Area */}
-          <main className="min-h-[calc(100vh-4rem)] bg-gray-50/50 w-full overflow-x-hidden">
-            <div className="p-4 sm:p-5 lg:p-6 w-full max-w-full">
+          <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
+            <div className="p-0 w-full max-w-full">
               {children}
             </div>
           </main>
