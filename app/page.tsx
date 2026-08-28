@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import HomePage from "@/components/home-page";
 import { siteConfig } from "@/lib/seo-config";
 
-const homepageTitle = "Pinecrest | Make the everyday count";
-const homepageDescription = "Turn the small things you already do online into clear progress, weekly recognition, and real rewards.";
+const homepageTitle = "Pinecrest | Share and earn real rewards";
+const homepageDescription = "Sign up, share posts, earn PineCoins, and convert your rewards to Naira.";
 const homepageUrl = siteConfig.url;
 const homepageImage = siteConfig.ogImage;
 

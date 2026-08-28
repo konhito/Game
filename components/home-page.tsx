@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import {
   ArrowDownRight,
   ArrowUpRight,
-  CircleCheck,
-  Clock3,
   Coins,
   Eye,
   Gift,
@@ -14,6 +12,7 @@ import {
   Newspaper,
   ShieldCheck,
   Sparkles,
+  Star,
   Trophy,
   Users,
 } from "lucide-react";
@@ -52,6 +51,29 @@ const defaultTaskPointRules: TaskPointRules = {
   daily_login_points: 5,
 };
 
+const defaultPinecoinRate = 1400;
+
+const testimonials = [
+  {
+    name: "Yakubu Ajayi",
+    role: "Social media influencer",
+    quote: "Pinecrest has transformed how I engage with social media. I'm earning rewards for activities I already love doing!",
+    initials: "YA",
+  },
+  {
+    name: "Nkem Okoye",
+    role: "Content creator",
+    quote: "The referral system makes it easy to share Pinecrest with friends and keep building points together.",
+    initials: "NO",
+  },
+  {
+    name: "Ibrahim Bakak",
+    role: "Student",
+    quote: "I can earn PineCoins while studying and sharing useful educational content. It fits naturally into my day.",
+    initials: "IB",
+  },
+];
+
 const reveal = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
@@ -76,10 +98,41 @@ function SectionMark({ children, light = false }: { children: React.ReactNode; l
   );
 }
 
+function Testimonials() {
+  return (
+    <section className="bg-[var(--paper-deep)] px-6 py-28 sm:px-10 lg:px-16 lg:py-36">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="flex flex-col justify-between gap-5 border-b border-[var(--ink)]/15 pb-7 sm:flex-row sm:items-end">
+          <div>
+            <SectionMark>From the community</SectionMark>
+            <h2 className="display-heading mt-5 max-w-3xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">People are already making it count.</h2>
+          </div>
+          <span className="text-sm text-[var(--ink-muted)]">Real routines. Clear rewards.</span>
+        </div>
+        <div className="mt-10 grid gap-0 md:grid-cols-3">
+          {testimonials.map((testimonial, index) => (
+            <blockquote key={testimonial.name} className={`py-7 md:px-8 md:py-2 ${index > 0 ? "border-t border-[var(--ink)]/15 md:border-l md:border-t-0" : ""}`}>
+              <div className="flex gap-1 text-[var(--pine)]" aria-label="5 out of 5 stars">
+                {Array.from({ length: 5 }, (_, star) => <Star key={star} size={15} fill="currentColor" />)}
+              </div>
+              <p className="mt-6 text-xl leading-[1.25] tracking-[-.025em]">“{testimonial.quote}”</p>
+              <footer className="mt-8 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--forest)] text-xs font-semibold text-[var(--lime)]">{testimonial.initials}</span>
+                <span><cite className="block not-italic text-sm font-semibold">{testimonial.name}</cite><span className="text-sm text-[var(--ink-muted)]">{testimonial.role}</span></span>
+              </footer>
+            </blockquote>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [taskPointRules, setTaskPointRules] = useState(defaultTaskPointRules);
+  const [pinecoinRate, setPinecoinRate] = useState(defaultPinecoinRate);
   const [loadingNews, setLoadingNews] = useState(true);
 
   useEffect(() => {
@@ -102,6 +155,8 @@ export default function HomePage() {
           if (result.data?.task_point_rules) {
             setTaskPointRules((current) => ({ ...current, ...result.data.task_point_rules }));
           }
+          const configuredRate = Number(result.data?.weekly_pool?.buy_rate || result.data?.weekly_pool?.exchange_rate);
+          if (Number.isFinite(configuredRate) && configuredRate > 0) setPinecoinRate(Math.round(configuredRate));
         }
       } catch (error) {
         console.error("Unable to load homepage data:", error);
@@ -130,14 +185,14 @@ export default function HomePage() {
           <div className="mx-auto flex min-h-[780px] w-full max-w-[1440px] flex-col justify-between px-6 pb-10 pt-32 sm:px-10 lg:px-16">
             <div className="grid items-end gap-16 lg:grid-cols-[1.12fr_.88fr]">
               <motion.div initial="hidden" animate="visible" variants={reveal}>
-                <SectionMark light>Social effort, made visible</SectionMark>
-                <h1 className="display-heading mt-7 max-w-5xl text-[clamp(4rem,10vw,10rem)] leading-[.82] tracking-[-.075em] text-[var(--paper)]">
-                  Make the<br />
-                  everyday<br />
-                  <span className="text-[var(--lime)]">count.</span>
+                <SectionMark light>Share and earn</SectionMark>
+                <h1 className="display-heading mt-7 max-w-5xl text-[clamp(3.25rem,8vw,8rem)] leading-[.82] tracking-[-.075em] text-[var(--paper)]">
+                  Share what<br />
+                  matters.<br />
+                  <span className="text-[var(--lime)]">Earn what counts.</span>
                 </h1>
                 <p className="mt-9 max-w-xl text-lg leading-8 text-[var(--paper)]/70 sm:text-xl">
-                  Pinecrest turns the small things you already do online into a clear path to points, recognition, and real weekly rewards.
+                  Sign up, share posts, and earn real rewards. Pinecrest turns verified social activity into PineCoins you can convert to Naira.
                 </p>
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                   <Link href="/sign-up" className="pine-button pine-button-lime">Start earning <ArrowUpRight size={18} /></Link>
@@ -154,6 +209,7 @@ export default function HomePage() {
                     <div className="absolute bottom-4 left-5 text-xs text-[var(--paper)]/45">Mon</div><div className="absolute bottom-4 right-5 text-xs text-[var(--paper)]/45">Sun</div>
                   </div>
                   <div className="mt-5 flex items-end justify-between"><div><p className="text-4xl font-semibold tracking-[-.06em] text-[var(--lime)]">+{taskPointRules.signup_points + taskPointRules.share_social_points}</p><p className="mt-1 text-sm text-[var(--paper)]/50">points available to start</p></div><ArrowUpRight className="text-[var(--lime)]" size={25} /></div>
+                  <div className="mt-6 flex items-center justify-between border-t border-[var(--paper)]/10 pt-5"><div><p className="eyebrow text-[var(--paper)]/45">Convert your reward</p><p className="mt-2 text-xl font-semibold tracking-tight">1 Pinecoin = ₦{pinecoinRate.toLocaleString("en-NG")}</p></div><span className="rounded-full bg-[var(--lime)]/10 px-3 py-1 text-xs font-medium text-[var(--lime)]">Naira</span></div>
                 </div>
               </motion.div>
             </div>
@@ -166,9 +222,11 @@ export default function HomePage() {
 
         <section className="px-6 pb-28 pt-12 sm:px-10 lg:px-16 lg:pb-40 lg:pt-20"><div className="mx-auto max-w-[1440px]"><div className="grid gap-5 lg:grid-cols-4 lg:grid-rows-2"><figure className="group relative min-h-[360px] overflow-hidden rounded-[2rem] bg-[var(--forest)] lg:col-span-2 lg:row-span-2 lg:min-h-[560px]"><img src="/editorial/pinecrest-hero-editorial-v2.png" alt="A person making a small online action at a sunlit table" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-[66%_center] transition-transform duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-r from-[var(--forest)]/90 via-[var(--forest)]/35 to-transparent" /><figcaption className="absolute inset-x-0 bottom-0 p-7 sm:p-10"><SectionMark light>Made of small moments</SectionMark></figcaption></figure><figure className="group relative min-h-[240px] overflow-hidden rounded-[1.5rem] bg-[var(--forest)] lg:col-span-2"><img src="/editorial/pinecrest-community-editorial-v2.png" alt="Two friends sharing an idea on a phone" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /></figure><figure className="group relative min-h-[240px] overflow-hidden rounded-[1.5rem] bg-[var(--forest)]"><img src="/editorial/pinecrest-proof-editorial-v2.png" alt="A completed task marked in a notebook beside a phone" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /></figure><figure className="group relative min-h-[240px] overflow-hidden rounded-[1.5rem] bg-[var(--forest)]"><img src="/editorial/pinecrest-detail-editorial-v2.png" alt="A notebook, pencil, tea, and phone in warm morning light" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /></figure></div></div></section>
 
-        <section id="features" className="px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto grid max-w-[1440px] gap-16 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal}><SectionMark>The Pinecrest method</SectionMark><h2 className="display-heading mt-6 max-w-xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">A better rhythm for showing up.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--ink-muted)]">Progress should feel less like a casino and more like a trail marker. Do the thing. See it verified. Keep moving.</p><Link href="/about" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[.14em] text-[var(--pine)]">Why Pinecrest <MoveUpRight size={16} /></Link></motion.div><div className="space-y-0">{[{ no: "01", title: "Choose a small action", copy: "Share, watch, comment, or check in. The best task is the one that fits naturally into your day.", icon: Eye }, { no: "02", title: "Let the proof do the work", copy: "Every task is checked before it becomes progress, so the number in your account stays meaningful.", icon: CircleCheck }, { no: "03", title: "Turn momentum into reward", copy: "Climb the weekly board, collect your PineCoins, and come back with a little more momentum.", icon: Gift }].map(({ no, title, copy, icon: Icon }) => <motion.div key={no} className="group grid gap-5 border-t border-[var(--ink)]/15 py-8 sm:grid-cols-[64px_1fr_42px] sm:items-start" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .4 }} variants={reveal}><span className="font-mono text-xs tracking-[.16em] text-[var(--pine)]">{no}</span><div><h3 className="text-2xl font-semibold tracking-[-.035em]">{title}</h3><p className="mt-3 max-w-xl leading-7 text-[var(--ink-muted)]">{copy}</p></div><Icon className="mt-1 text-[var(--pine)] transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" size={22} /></motion.div>)}</div></div></section>
+        <section id="features" className="px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto grid max-w-[1440px] gap-16 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal}><SectionMark>The Pinecrest method</SectionMark><h2 className="display-heading mt-6 max-w-xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">A better rhythm for showing up.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--ink-muted)]">Sign up, share a post, and earn. Every step is visible, verified, and built around real participation.</p><Link href="/about" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[.14em] text-[var(--pine)]">Why Pinecrest <MoveUpRight size={16} /></Link></motion.div><div className="space-y-0">{[{ no: "01", title: "Sign up for free", copy: `Create an account and get ${taskPointRules.signup_points} points to start.`, icon: Users }, { no: "02", title: "Share a post", copy: `Choose a verified social task, share it, and earn ${taskPointRules.share_social_points} points when your proof is approved.`, icon: Eye }, { no: "03", title: "Earn real rewards", copy: "Build weekly points, climb the leaderboard, and convert PineCoins to Naira at the current rate.", icon: Gift }].map(({ no, title, copy, icon: Icon }) => <motion.div key={no} className="group grid gap-5 border-t border-[var(--ink)]/15 py-8 sm:grid-cols-[64px_1fr_42px] sm:items-start" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .4 }} variants={reveal}><span className="font-mono text-xs tracking-[.16em] text-[var(--pine)]">{no}</span><div><h3 className="text-2xl font-semibold tracking-[-.035em]">{title}</h3><p className="mt-3 max-w-xl leading-7 text-[var(--ink-muted)]">{copy}</p></div><Icon className="mt-1 text-[var(--pine)] transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" size={22} /></motion.div>)}</div></div></section>
 
         <section id="leaderboard" className="relative overflow-hidden bg-[var(--pine)] px-6 py-24 text-[var(--paper)] sm:px-10 lg:px-16 lg:py-32"><div className="absolute -right-28 top-12 h-72 w-72 rounded-full border border-[var(--lime)]/20" /><div className="absolute -right-6 top-32 h-44 w-44 rounded-full border border-[var(--lime)]/20" /><div className="relative mx-auto grid max-w-[1440px] items-start gap-14 lg:grid-cols-[.8fr_1.2fr] lg:gap-28"><div><SectionMark light>Every week has a story</SectionMark><h2 className="display-heading mt-6 max-w-lg text-5xl leading-[.93] tracking-[-.065em] sm:text-7xl">Bring your name to the top.</h2><p className="mt-7 max-w-md text-lg leading-8 text-[var(--paper)]/65">The leaderboard keeps the finish line visible. Top performers earn recognition and PineCoins when the week closes.</p><Link href="/leaderboard" className="pine-button pine-button-lime mt-9">Open leaderboard <ArrowUpRight size={18} /></Link></div><div className="rounded-[1.75rem] border border-[var(--paper)]/15 bg-[var(--forest)]/35 p-5 sm:p-8"><div className="mb-6 flex items-center justify-between border-b border-[var(--paper)]/15 pb-5"><span className="eyebrow text-[var(--paper)]/50">This week</span><span className="flex items-center gap-2 text-sm text-[var(--lime)]"><span className="h-2 w-2 animate-pulse rounded-full bg-[var(--lime)]" /> Live points</span></div><div className="space-y-1">{[{ rank: "01", name: "The pace setter", score: "2,480" }, { rank: "02", name: "Quiet momentum", score: "2,160" }, { rank: "03", name: "One to watch", score: "1,940" }].map((row, index) => <div key={row.rank} className={`grid grid-cols-[48px_1fr_auto] items-center gap-4 rounded-xl px-4 py-5 ${index === 0 ? "bg-[var(--lime)] text-[var(--forest)]" : "text-[var(--paper)]"}`}><span className="font-mono text-xs opacity-60">{row.rank}</span><span className="font-medium">{row.name}</span><span className="font-mono text-sm">{row.score} <span className="ml-1 opacity-50">pts</span></span></div>)}</div><div className="mt-7 flex items-center justify-between border-t border-[var(--paper)]/15 pt-5 text-sm"><span className="text-[var(--paper)]/55">Your next move</span><span className="flex items-center gap-2 text-[var(--lime)]">+{taskPointRules.referral_points} invite <ArrowUpRight size={15} /></span></div></div></div></section>
+
+        <Testimonials />
 
         <section id="news" className="px-6 py-28 sm:px-10 lg:px-16 lg:py-40"><div className="mx-auto max-w-[1440px]"><div className="flex flex-col justify-between gap-6 border-b border-[var(--ink)]/15 pb-7 sm:flex-row sm:items-end"><div><SectionMark>From the Pinecrest field notes</SectionMark><h2 className="display-heading mt-5 text-5xl tracking-[-.06em] sm:text-7xl">Worth your attention.</h2></div><Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[.14em] text-[var(--pine)]">All updates <ArrowUpRight size={16} /></Link></div>{loadingNews ? <div className="py-16 text-[var(--ink-muted)]">Loading the latest notes...</div> : newsItems.length === 0 ? <div className="py-16 text-[var(--ink-muted)]">New notes are on their way.</div> : <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_.8fr]">{newsItems.slice(0, 4).map((news, index) => <Link href={`/news/${news.slug}`} key={news.id} className={`news-feature group ${index === 0 ? "lg:row-span-2" : ""}`}><div className={`relative overflow-hidden bg-[var(--ink-soft)] ${index === 0 ? "aspect-[1.1] lg:aspect-auto lg:h-full" : "aspect-[1.8]"}`}>{news.featured_image ? <img src={resolveNewsImageUrl(news.featured_image, apiBase) || undefined} alt={news.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.src = "/Icon.png"; }} /> : <div className="flex h-full items-center justify-center text-[var(--pine)]"><Newspaper size={40} /></div>}<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-5 pt-20 text-[var(--paper)]"><span className="eyebrow text-[var(--lime)]">{news.tags?.[0] || news.category || "Pinecrest"} · {formatDate(news.published_at)}</span><h3 className={`${index === 0 ? "text-3xl sm:text-5xl" : "text-xl"} mt-2 max-w-xl font-semibold leading-[1.02] tracking-[-.045em]`}>{news.title}</h3></div></div></Link>)}</div>}</div></section>
 
