@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  Activity, 
   Search, 
   ClipboardList,
   Image as ImageIcon,
@@ -29,7 +28,6 @@ import {
   FileText,
   Trophy,
   Loader2,
-  CheckCircle2,
   X
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
@@ -102,8 +100,6 @@ function getTaskStatusMeta(status: string) {
     return {
       label: 'In progress',
       badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
-      panelClass: 'border-amber-200 bg-amber-50/50',
-      actionTone: 'progress',
     };
   }
 
@@ -111,8 +107,6 @@ function getTaskStatusMeta(status: string) {
     return {
       label: 'Available',
       badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
-      panelClass: 'border-slate-200 bg-white',
-      actionTone: 'available',
     };
   }
 
@@ -120,8 +114,6 @@ function getTaskStatusMeta(status: string) {
     return {
       label: 'Approved',
       badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      panelClass: 'border-slate-200 bg-white',
-      actionTone: 'complete',
     };
   }
 
@@ -129,8 +121,6 @@ function getTaskStatusMeta(status: string) {
     return {
       label: 'Under review',
       badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
-      panelClass: 'border-slate-200 bg-white',
-      actionTone: 'complete',
     };
   }
 
@@ -138,16 +128,12 @@ function getTaskStatusMeta(status: string) {
     return {
       label: 'Rejected',
       badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
-      panelClass: 'border-slate-200 bg-white',
-      actionTone: 'complete',
     };
   }
 
   return {
     label: 'Task',
     badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
-    panelClass: 'border-slate-200 bg-white',
-    actionTone: 'available',
   };
 }
 
@@ -179,35 +165,6 @@ function getPriorityMeta(priority?: string | null) {
     label: 'Normal',
     className: 'border-sky-200 bg-sky-50 text-sky-700',
   };
-}
-
-function ActivitiesStatCard({
-  title,
-  value,
-  hint,
-  icon,
-}: {
-  title: string;
-  value: string | number;
-  hint: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-sm font-medium text-slate-500">{title}</p>
-            <p className="text-2xl font-bold tracking-tight text-slate-900">{value}</p>
-            <p className="text-xs text-slate-500">{hint}</p>
-          </div>
-          <div className="rounded-xl bg-emerald-50 p-3 text-emerald-700">
-            {icon}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
 
 export default function ActivitiesPage() {
@@ -562,12 +519,8 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 overflow-hidden relative pb-12">
-      <div className="absolute inset-0 pointer-events-none opacity-30" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cbd5e1' fill-opacity='0.18'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-      }} />
-
-      <div className="mx-auto max-w-7xl px-4 py-8 space-y-6 relative z-10">
+    <div className="min-h-screen bg-[var(--paper-deep)] pb-12">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -576,7 +529,7 @@ export default function ActivitiesPage() {
         >
           <div className="space-y-3">
             <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="bg-white/80 border-slate-200/60 text-slate-700 hover:bg-white">
+              <Button variant="outline" size="sm" className="border-slate-200 bg-[var(--paper)] text-slate-700 hover:bg-white">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to dashboard
               </Button>
@@ -590,15 +543,15 @@ export default function ActivitiesPage() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="rounded-lg border border-slate-200/70 bg-white/80 px-3 py-2 text-sm text-slate-600 shadow-sm">
-              {filteredTasks.length} visible, {allTasks.length} total
+            <div className="rounded-lg border border-slate-200/70 bg-[var(--paper)] px-3 py-2 text-sm text-slate-600 shadow-sm">
+              {filteredTasks.length} visible of {allTasks.length}
             </div>
             <Button
               size="sm"
               variant="outline"
               onClick={() => user && loadAllTasks(user.id)}
               disabled={refreshingTasks}
-              className="bg-white/80 border-slate-200/60 text-slate-700 hover:bg-white"
+              className="border-slate-200 bg-[var(--paper)] text-slate-700 hover:bg-white"
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${refreshingTasks ? 'animate-spin' : ''}`} />
               {refreshingTasks ? 'Refreshing' : 'Refresh'}
@@ -610,13 +563,21 @@ export default function ActivitiesPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.05 }}
-          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+          className="grid overflow-hidden rounded-2xl border border-slate-200 bg-[var(--paper)] shadow-sm sm:grid-cols-2 xl:grid-cols-5"
         >
-          <ActivitiesStatCard title="Available" value={availableCount} hint="Ready to start" icon={<Target className="h-5 w-5" />} />
-          <ActivitiesStatCard title="In progress" value={startedCount} hint="Needs proof" icon={<Zap className="h-5 w-5" />} />
-          <ActivitiesStatCard title="Completed" value={approvedCount} hint="Approved tasks" icon={<CheckCircle2 className="h-5 w-5" />} />
-          <ActivitiesStatCard title="Earned points" value={earnedPoints} hint="From approved work" icon={<Trophy className="h-5 w-5" />} />
-          <ActivitiesStatCard title="Open points" value={totalPotentialPoints} hint="Still available" icon={<Activity className="h-5 w-5" />} />
+          {[
+            ['Available', availableCount, 'Ready to start'],
+            ['In progress', startedCount, 'Needs proof'],
+            ['Completed', approvedCount, 'Approved tasks'],
+            ['Earned points', earnedPoints, 'From approved work'],
+            ['Open points', totalPotentialPoints, 'Still available'],
+          ].map(([label, value, hint], index) => (
+            <div key={label} className={`px-5 py-4 ${index > 0 ? 'border-t border-slate-200 sm:border-l sm:border-t-0' : ''}`}>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+              <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{value}</p>
+              <p className="mt-1 text-xs text-slate-500">{hint}</p>
+            </div>
+          ))}
         </motion.div>
 
         <AnimatePresence>
@@ -640,7 +601,7 @@ export default function ActivitiesPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+          <Card className="rounded-2xl border border-slate-200 bg-[var(--paper)] shadow-sm">
             <CardContent className="p-4 sm:p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="relative flex-1 max-w-2xl">
@@ -716,11 +677,17 @@ export default function ActivitiesPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
-          className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3"
+          className="overflow-hidden rounded-2xl border border-slate-200 bg-[var(--paper)] shadow-sm"
         >
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">Your task queue</h2>
+              <p className="mt-0.5 text-xs text-slate-500">In-progress work appears first.</p>
+            </div>
+            <span className="text-xs font-medium text-slate-500">{filteredTasks.length} shown</span>
+          </div>
           {filteredTasks.length === 0 ? (
-            <Card className="col-span-full border-slate-200/50 bg-white/90 shadow-md">
-              <CardContent className="flex flex-col items-center px-6 py-16 text-center">
+            <div className="flex flex-col items-center px-6 py-16 text-center">
                 <div className="mb-5 rounded-2xl bg-slate-100 p-5 text-slate-500">
                   <ClipboardList className="h-10 w-10" />
                 </div>
@@ -738,8 +705,7 @@ export default function ActivitiesPage() {
                     ? 'Completed tasks will appear here once they are reviewed.'
                     : 'Your activity workspace is empty right now.'}
                 </p>
-              </CardContent>
-            </Card>
+            </div>
           ) : (
             filteredTasks.map((task, index) => {
               const normalizedStatus = normalizeTaskStatus(task.status);
@@ -756,121 +722,44 @@ export default function ActivitiesPage() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: index * 0.03 }}
-                  className="h-full"
+                  className="border-b border-slate-200 last:border-b-0"
                 >
-                  <Card className={`flex h-full flex-col rounded-2xl border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${statusMeta.panelClass}`}>
-                    <CardHeader className="space-y-4 border-b border-slate-100 pb-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-3 min-w-0">
+                  <div className="p-4 transition-colors hover:bg-[var(--paper-deep)] sm:p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        <div className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${isStarted ? 'bg-amber-500' : isAvailable ? 'bg-sky-600' : isCompleted ? 'bg-emerald-600' : 'bg-slate-400'}`} />
+                        <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge className={`border ${statusMeta.badgeClass}`}>{statusMeta.label}</Badge>
-                            <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
-                              {task.platform}
-                            </Badge>
+                            <span className="text-sm text-slate-500">{task.platform}</span>
+                            <span className="text-slate-300">/</span>
+                            <span className="text-sm text-slate-500">{task.task_type}</span>
                           </div>
-                          <CardTitle className="text-xl leading-tight text-slate-900">{task.title}</CardTitle>
-                        </div>
-
-                        <div className="min-w-[88px] rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-right">
-                          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Reward</div>
-                          <div className="text-2xl font-bold text-emerald-800">{task.reward_points}</div>
-                          <div className="text-xs text-slate-500">points</div>
-                          {task.reward_coins > 0 && (
-                            <div className="mt-2 border-t border-emerald-100 pt-2 text-sm font-semibold text-emerald-800">
-                              {task.reward_coins} coins
-                            </div>
+                          <h2 className="mt-2 text-lg font-semibold leading-snug text-slate-900">{task.title}</h2>
+                          {'description' in task && task.description && (
+                            <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-600">{task.description}</p>
                           )}
+                          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+                            <span className="inline-flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5" />
+                              {new Date(task.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </span>
+                            <Badge className={`border ${priorityMeta.className}`}>Priority: {priorityMeta.label}</Badge>
+                            {'deadline' in task && task.deadline && (
+                              <span>Due {new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      {'description' in task && task.description && (
-                        <CardDescription className="line-clamp-3 text-sm leading-6 text-slate-600">
-                          {task.description}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-
-                    <CardContent className="flex flex-1 flex-col pt-0">
-                      <div className="space-y-4">
-                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500">
-                          <span className="inline-flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            {new Date(task.created_at).toLocaleDateString(undefined, {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </span>
+                      <div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-4 lg:w-80 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                        <div className="shrink-0">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Reward</p>
+                          <p className="mt-1 text-xl font-bold text-slate-900">{task.reward_points} <span className="text-sm font-medium text-slate-500">points</span></p>
+                          {task.reward_coins > 0 && <p className="text-xs font-medium text-emerald-700">+ {task.reward_coins} coins</p>}
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                          <Badge className={`border ${priorityMeta.className}`}>
-                            Priority: {priorityMeta.label}
-                          </Badge>
-                          {'deadline' in task && task.deadline && (
-                            <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-                              End date: {new Date(task.deadline).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {'url' in task && task.url && (
-                          <a
-                            href={task.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-sm text-emerald-800 transition-colors hover:bg-emerald-50"
-                          >
-                            <div className="min-w-0">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Task URL</p>
-                              <p className="truncate font-medium">{task.url}</p>
-                            </div>
-                            <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                          </a>
-                        )}
-
-                        <AnimatePresence initial={false}>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                {'requirements' in task && task.requirements && (
-                                  <div className="space-y-1.5">
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Requirements</p>
-                                    <p className="text-sm leading-6 text-slate-700 whitespace-pre-wrap">{task.requirements}</p>
-                                  </div>
-                                )}
-                                {'url' in task && task.url && (
-                                  <div className="space-y-1.5">
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Destination</p>
-                                    <a
-                                      href={task.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 break-all text-sm text-emerald-700 hover:text-emerald-800"
-                                    >
-                                      {task.url}
-                                      <ArrowRight className="h-4 w-4" />
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      <div className="mt-auto pt-5">
-                        <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
+                        <div className="flex flex-wrap justify-end gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -880,10 +769,10 @@ export default function ActivitiesPage() {
                               e.stopPropagation();
                               setExpandedTaskId(isExpanded ? null : task.id);
                             }}
-                            className="border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            className="border-slate-200 bg-[var(--paper)] text-slate-700 hover:bg-white"
                           >
                             <Eye className="mr-2 h-4 w-4" />
-                            {isExpanded ? 'Hide details' : 'View details'}
+                            {isExpanded ? 'Hide' : 'Details'}
                           </Button>
 
                           {isStarted && (
@@ -894,7 +783,7 @@ export default function ActivitiesPage() {
                                 e.stopPropagation();
                                 openProofDialog(task);
                               }}
-                              className="bg-emerald-600 text-white hover:bg-emerald-700"
+                              className="bg-[var(--pine)] text-[var(--paper)] hover:bg-[var(--forest)]"
                             >
                               <Upload className="mr-2 h-4 w-4" />
                               Submit proof
@@ -909,7 +798,7 @@ export default function ActivitiesPage() {
                                 e.stopPropagation();
                                 openTaskDialog(task);
                               }}
-                              className="bg-slate-900 text-white hover:bg-slate-800"
+                              className="bg-[var(--forest)] text-[var(--paper)] hover:bg-[var(--pine)]"
                             >
                               <Play className="mr-2 h-4 w-4" />
                               Start task
@@ -924,8 +813,40 @@ export default function ActivitiesPage() {
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {'url' in task && task.url && (
+                      <a href={task.url} target="_blank" rel="noopener noreferrer" className="mt-4 flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-800">
+                        <ExternalLink className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Open task link</span>
+                        <span className="truncate text-slate-500">{task.url}</span>
+                      </a>
+                    )}
+
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+                            {'requirements' in task && task.requirements && (
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Requirements</p>
+                                <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">{task.requirements}</p>
+                              </div>
+                            )}
+                            {'url' in task && task.url && (
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Destination</p>
+                                <a href={task.url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-2 break-all text-sm text-emerald-700 hover:text-emerald-800">
+                                  {task.url}
+                                  <ArrowRight className="h-4 w-4" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </motion.div>
               );
             })
