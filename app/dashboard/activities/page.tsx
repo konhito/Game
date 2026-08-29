@@ -906,11 +906,15 @@ export default function ActivitiesPage() {
                       href={selectedTask.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 break-all text-sm text-emerald-700 hover:text-emerald-800"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-100 hover:text-emerald-900"
                     >
-                      {selectedTask.url}
-                      <ExternalLink className="h-4 w-4" />
+                      <span className="min-w-0 break-all">{selectedTask.url}</span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        Open link
+                        <ExternalLink className="h-4 w-4" />
+                      </span>
                     </a>
+                    <p className="text-xs text-slate-500">Opens in a new tab.</p>
                   </div>
                 )}
 

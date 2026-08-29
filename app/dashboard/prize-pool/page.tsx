@@ -1,392 +1,103 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Crown, Gift, Info, Loader2, RefreshCw, ShieldCheck, Target, Trophy, Users, WalletCards } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Gift, Users, Loader2, Calendar, Crown, Target, TrendingUp, Check } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { authService } from "@/lib/auth-service";
 import { prizePoolService, PrizePool, UserParticipation } from "@/lib/prize-pool-service";
+
+function formatPineCoins(value: number) {
+  return `${Number(value || 0).toLocaleString()} PineCoins`;
+}
+
+function formatDate(value?: string) {
+  if (!value) return "Date to be announced";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date to be announced";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function getStatusMeta(status: PrizePool["status"]) {
+  if (status === "active") return { label: "Live now", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+  if (status === "upcoming") return { label: "Coming soon", className: "border-sky-200 bg-sky-50 text-sky-700" };
+  return { label: "Completed", className: "border-slate-200 bg-slate-100 text-slate-600" };
+}
+
+function PrizePoolSkeleton() {
+  return <div className="min-h-screen bg-[var(--paper-deep)] pb-12"><div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="space-y-3"><Skeleton className="h-3 w-28" /><Skeleton className="h-12 w-72" /><Skeleton className="h-5 w-[min(34rem,80vw)]" /></div><Skeleton className="h-10 w-28" /></div><div className="grid gap-3 sm:grid-cols-3">{[1, 2, 3].map((item) => <Skeleton key={item} className="h-24 rounded-2xl" />)}</div><Skeleton className="h-80 rounded-2xl" /><div className="grid gap-4 md:grid-cols-2">{[1, 2].map((item) => <Skeleton key={item} className="h-64 rounded-2xl" />)}</div></div></div>;
+}
+
+function PrizePoolCard({ pool, entries, featured = false, joiningPool, onJoin }: { pool: PrizePool; entries: number; featured?: boolean; joiningPool: number | null; onJoin: (pool: PrizePool) => void }) {
+  const status = getStatusMeta(pool.status);
+  const maxParticipants = Math.max(Number(pool.max_participants) || 0, 1);
+  const currentParticipants = Math.max(Number(pool.current_participants) || 0, 0);
+  const fillPercent = Math.min(100, (currentParticipants / maxParticipants) * 100);
+  const isFull = currentParticipants >= maxParticipants;
+  const maxEntriesReached = entries >= 10;
+  const isJoining = joiningPool === pool.id;
+
+  return <Card className={`overflow-hidden rounded-2xl border-slate-200/80 bg-[var(--paper)] shadow-sm ${featured ? "lg:col-span-2" : ""}`}><div className={`grid ${featured ? "lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]" : ""}`}><div className={`relative min-h-44 overflow-hidden ${featured ? "lg:min-h-full" : ""}`}>{pool.image_url ? <img src={pool.image_url} alt={pool.title} className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : null}<div className={`absolute inset-0 ${pool.image_url ? "bg-gradient-to-t from-[var(--forest)]/85 via-[var(--forest)]/20 to-transparent" : "bg-[var(--forest)]"}`} /><div className="relative flex h-full min-h-44 flex-col justify-between p-5 text-[var(--paper)] sm:p-6"><div className="flex items-start justify-between gap-3"><span className="inline-flex items-center gap-2 rounded-full bg-[var(--paper)]/15 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm"><Gift className="h-3.5 w-3.5" />Prize pool</span><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${pool.image_url ? "border-[var(--paper)]/30 bg-[var(--paper)]/15 text-[var(--paper)]" : "border-[var(--lime)]/40 bg-[var(--lime)]/10 text-[var(--lime)]"}`}>{status.label}</span></div><div className="mt-10"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--paper)]/65">Prize value</p><p className="mt-1 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{formatPineCoins(pool.prize_amount)}</p></div></div></div><CardContent className="flex flex-col justify-between gap-6 p-5 sm:p-7"><div><div className="mb-3 flex items-center gap-2"><Badge variant="outline" className={status.className}>{status.label}</Badge>{entries > 0 && <Badge variant="outline" className="border-[var(--lime)]/50 bg-[var(--lime)]/15 text-[var(--forest)]">{entries} {entries === 1 ? "entry" : "entries"} yours</Badge>}</div><h3 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">{pool.title}</h3><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--ink-muted)]">{pool.description || "Join this pool before it closes to be included in the draw."}</p></div><div className="grid gap-3 border-y border-[var(--ink)]/10 py-4 sm:grid-cols-3"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">Entry fee</p><p className="mt-1 font-semibold text-[var(--ink)]">{formatPineCoins(pool.entry_fee)}</p></div><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">Closes</p><p className="mt-1 font-semibold text-[var(--ink)]">{formatDate(pool.end_date)}</p></div><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">Your entries</p><p className="mt-1 font-semibold text-[var(--ink)]">{entries} / 10</p></div></div><div><div className="mb-2 flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2 text-[var(--ink-muted)]"><Users className="h-4 w-4" />Participation</span><span className="font-semibold text-[var(--ink)]">{currentParticipants.toLocaleString()} / {maxParticipants.toLocaleString()}</span></div><div className="h-2 overflow-hidden rounded-full bg-[var(--paper-deep)]"><div className="h-full rounded-full bg-[var(--pine)] transition-[width] duration-500" style={{ width: `${fillPercent}%` }} /></div></div><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="flex items-center gap-2 text-xs text-[var(--ink-muted)]"><CalendarDays className="h-4 w-4" />Started {formatDate(pool.start_date)}</p><Button onClick={() => onJoin(pool)} disabled={isJoining || isFull || maxEntriesReached} className="w-full bg-[var(--forest)] text-[var(--paper)] hover:bg-[var(--pine)] sm:w-auto">{isJoining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : maxEntriesReached ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <ArrowRight className="mr-2 h-4 w-4" />}{isJoining ? "Joining" : maxEntriesReached ? "Entry limit reached" : isFull ? "Pool full" : `Join for ${formatPineCoins(pool.entry_fee)}`}</Button></div></CardContent></div></Card>;
+}
 
 export default function PrizePoolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [prizePools, setPrizePools] = useState<PrizePool[]>([]);
   const [userParticipations, setUserParticipations] = useState<UserParticipation[]>([]);
   const [joiningPool, setJoiningPool] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadPage = useCallback(async (silent = false) => {
+    if (silent) setRefreshing(true); else setLoading(true);
+    setError(null);
+    try {
+      const [poolsResponse, participationsResponse] = await Promise.all([prizePoolService.getAllPrizePools(), prizePoolService.getUserParticipations()]);
+      if (!poolsResponse.success || !poolsResponse.data) throw new Error(poolsResponse.error || "Failed to load prize pools");
+      if (!participationsResponse.success || !participationsResponse.data) throw new Error(participationsResponse.error || "Failed to load your entries");
+      setPrizePools(Array.isArray(poolsResponse.data.pools) ? poolsResponse.data.pools : []);
+      setUserParticipations(Array.isArray(participationsResponse.data.participations) ? participationsResponse.data.participations : []);
+    } catch (loadError: any) {
+      console.error("Error loading prize pools:", loadError);
+      setError(loadError?.message || "Prize pools could not be loaded.");
+    } finally { setLoading(false); setRefreshing(false); }
+  }, []);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const user = authService.getUser();
-      const token = authService.getToken();
-      
-      if (!user || !token) {
-        router.push("/sign-in");
-        return;
-      }
-      
-      setCurrentUser(user);
-      await fetchPrizePools();
-      await fetchUserParticipations();
-    };
+    const user = authService.getUser();
+    if (!user || !authService.getToken()) { router.push("/sign-in"); return; }
+    setCurrentUser(user);
+    void loadPage();
+  }, [loadPage, router]);
 
-    checkAuth();
-  }, [router]);
+  const activePools = useMemo(() => prizePools.filter((pool) => pool.status === "active"), [prizePools]);
+  const upcomingPools = useMemo(() => prizePools.filter((pool) => pool.status === "upcoming"), [prizePools]);
+  const completedPools = useMemo(() => prizePools.filter((pool) => pool.status === "completed"), [prizePools]);
+  const totalLivePrize = useMemo(() => activePools.reduce((sum, pool) => sum + Number(pool.prize_amount || 0), 0), [activePools]);
+  const getEntriesForPool = (poolId: number) => userParticipations.filter((entry) => entry.pool_id === poolId).length;
 
-  const fetchPrizePools = async () => {
+  const handleJoinPool = async (pool: PrizePool) => {
+    if (!currentUser || joiningPool !== null) return;
+    setJoiningPool(pool.id);
     try {
-      setLoading(true);
-      const response = await prizePoolService.getAllPrizePools();
-      
-      if (response.success && response.data) {
-        setPrizePools(response.data.pools);
-      }
-    } catch (error) {
-      console.error("Error fetching prize pools:", error);
-    } finally {
-      setLoading(false);
-    }
+      const response = await prizePoolService.joinPrizePool(pool.id);
+      if (!response.success) throw new Error(response.error || "Could not join this pool");
+      toast.success(`You joined ${pool.title}`);
+      await loadPage(true);
+    } catch (joinError: any) {
+      console.error("Error joining prize pool:", joinError);
+      toast.error(joinError?.message || "Could not join this pool. Please try again.");
+    } finally { setJoiningPool(null); }
   };
 
-  const fetchUserParticipations = async () => {
-    try {
-      const response = await prizePoolService.getUserParticipations();
-      
-      if (response.success && response.data) {
-        setUserParticipations(response.data.participations);
-      }
-    } catch (error) {
-      console.error("Error fetching participations:", error);
-    }
-  };
+  if (loading) return <PrizePoolSkeleton />;
 
-  const handleJoinPool = async (poolId: number, entryFee: number) => {
-    if (!currentUser) return;
-    
-    try {
-      setJoiningPool(poolId);
-      
-      const response = await prizePoolService.joinPrizePool(poolId);
-      
-      if (response.success) {
-        // Refresh prize pools and participations
-        await fetchPrizePools();
-        await fetchUserParticipations();
-        
-        alert(`Successfully joined the prize pool! Entry fee: ₽${entryFee}`);
-      }
-    } catch (error: any) {
-      console.error("Error joining prize pool:", error);
-      alert(error.message || "Failed to join prize pool. Please try again.");
-    } finally {
-      setJoiningPool(null);
-    }
-  };
-
-  const getUserEntriesForPool = (poolId: number) => {
-    return userParticipations.filter(p => p.pool_id === poolId).length;
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500 text-white">Active</Badge>;
-      case 'upcoming':
-        return <Badge className="bg-blue-500 text-white">Upcoming</Badge>;
-      case 'completed':
-        return <Badge className="bg-gray-500 text-white">Completed</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
-          <p className="text-slate-600">Loading prize pools...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 relative">
-          <div className="absolute inset-0 flex items-center justify-center opacity-5">
-            <Gift className="w-96 h-96" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 mb-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                <Gift className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                Prize Pools
-              </h1>
-            </div>
-            <p className="text-slate-600 text-sm sm:text-lg">Join prize pools and win amazing rewards! 🎁</p>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6 mt-4 text-sm text-slate-500">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>Compete with players</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                <span>Win big prizes</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Active Prize Pools */}
-        <div className="mb-12">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <Target className="w-6 h-6 text-green-500" />
-            Active Prize Pools
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {prizePools.filter(pool => pool.status === 'active').map((pool) => (
-              <Card key={pool.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg">
-                <CardHeader className="border-b border-slate-100 bg-slate-50/70 p-5">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
-                    <CardTitle className="text-lg sm:text-xl text-slate-800">{pool.title}</CardTitle>
-                    {getStatusBadge(pool.status)}
-                  </div>
-                  <CardDescription className="text-slate-600">
-                    {pool.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-6">
-                  {/* Prize Image */}
-                  {pool.image_url && (
-                    <div className="mb-5 overflow-hidden rounded-xl border border-slate-200">
-                      <img 
-                        src={pool.image_url} 
-                        alt={pool.title}
-                        className="w-full h-48 object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Prize Amount */}
-                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">Prize Pool</span>
-                      <Trophy className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
-                  </div>
-
-                  {/* Entry Fee */}
-                  <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">Entry Fee</span>
-                      <span className="text-lg font-bold text-emerald-600">₽{pool.entry_fee}</span>
-                    </div>
-                  </div>
-
-                  {/* Participants */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
-                      <span>Participants</span>
-                      <span className="font-medium">{pool.current_participants}/{pool.max_participants}</span>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                        style={{ width: `${(pool.current_participants / pool.max_participants) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="mb-4 text-sm text-slate-600 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>Ends: {formatDate(pool.end_date)}</span>
-                    </div>
-                  </div>
-
-                  {/* Join Button */}
-                  {getUserEntriesForPool(pool.id) >= 10 ? (
-                    <Button 
-                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold transition-all duration-300 cursor-not-allowed"
-                      disabled
-                    >
-                      <Check className="w-5 h-5 mr-2" />
-                      Max 10 Entries Reached
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="relative w-full overflow-hidden bg-emerald-600 font-semibold text-white transition-colors hover:bg-emerald-700"
-                      onClick={() => handleJoinPool(pool.id, pool.entry_fee)}
-                      disabled={joiningPool === pool.id || pool.current_participants >= pool.max_participants || getUserEntriesForPool(pool.id) >= 10}
-                    >
-                      {joiningPool === pool.id ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Joining...
-                        </>
-                      ) : getUserEntriesForPool(pool.id) >= 10 ? (
-                        'Max Entries Reached'
-                      ) : pool.current_participants >= pool.max_participants ? (
-                        'Pool Full'
-                      ) : (
-                        <>
-                          <Gift className="w-5 h-5 mr-2" />
-                          Join Pool (₽{pool.entry_fee})
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Upcoming Prize Pools */}
-        {prizePools.filter(pool => pool.status === 'upcoming').length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-blue-500" />
-              Upcoming Prize Pools
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {prizePools.filter(pool => pool.status === 'upcoming').map((pool) => (
-                <Card key={pool.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg">
-                  <CardHeader className="border-b border-slate-100 bg-slate-50/70 p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <CardTitle className="text-xl text-slate-800">{pool.title}</CardTitle>
-                      {getStatusBadge(pool.status)}
-                    </div>
-                    <CardDescription className="text-slate-600">
-                      {pool.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-slate-700">Prize Pool</span>
-                        <Crown className="h-5 w-5 text-amber-600" />
-                      </div>
-                      <p className="text-3xl font-bold text-slate-800 mt-1">₽{pool.prize_amount.toLocaleString()}</p>
-                    </div>
-
-                    <div className="text-sm text-slate-600 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>Starts: {formatDate(pool.start_date)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        <span>Entry Fee: ₽{pool.entry_fee}</span>
-                      </div>
-                    </div>
-
-                    <Button 
-                      className="mt-4 w-full cursor-not-allowed bg-slate-200 font-semibold text-slate-500 hover:bg-slate-200"
-                      disabled
-                    >
-                      Coming Soon
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Info Section */}
-        <Card className="bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 text-white border-0 shadow-2xl">
-          <CardContent className="p-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Trophy className="w-6 h-6" />
-                  How It Works
-                </h3>
-                <div className="space-y-3 text-white/90">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="font-bold">1</span>
-                    </div>
-                    <p>Choose a prize pool.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="font-bold">2</span>
-                    </div>
-                    <p>Pay the entry fee using your pinecoins.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="font-bold">3</span>
-                    </div>
-                    <p>Wait for the prize pool to end, and the winner will be automatically selected at random by the system AI.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="font-bold">4</span>
-                    </div>
-                    <p>Win amazing prizes in either physical items or pinecoins.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="font-bold">5</span>
-                    </div>
-                    <p>You can only enter a prize pool multiple times, but not more than ten time.</p>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6" />
-                  Tips to Win
-                </h3>
-                <div className="space-y-3 text-white/90">
-                  <div className="flex items-center gap-2">
-                    <span>🎯</span>
-                    <p>Complete daily tasks to boost your chances</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🔥</span>
-                    <p>Maintain your daily streak for bonus points</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🎮</span>
-                    <p>Spin the wheel daily for extra points</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>💪</span>
-                    <p>Stay active and engaged throughout the competition</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+  return <main className="min-h-screen bg-[var(--paper-deep)] pb-14"><div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8"><header className="flex flex-col gap-5 border-b border-[var(--ink)]/10 pb-7 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-2xl"><p className="eyebrow text-[var(--pine)]">Weekly prize pools</p><h1 className="display-heading mt-4 text-5xl leading-[0.94] tracking-[-0.065em] text-[var(--ink)] sm:text-7xl">Put your points to work.</h1><p className="mt-5 max-w-xl text-base leading-7 text-[var(--ink-muted)]">Enter live pools with PineCoins, track your entries, and see exactly when each draw closes.</p></div><Button variant="outline" onClick={() => void loadPage(true)} disabled={refreshing} className="w-full border-[var(--ink)]/15 bg-[var(--paper)] text-[var(--ink)] hover:bg-[var(--paper)] sm:w-auto"><RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />{refreshing ? "Refreshing" : "Refresh pools"}</Button></header>{error && <div className="flex flex-col gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm">{error}</p><Button variant="outline" onClick={() => void loadPage()} className="border-rose-200 bg-[var(--paper)] text-rose-700 hover:bg-rose-100">Try again</Button></div>}<section className="grid overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-[var(--paper)] shadow-sm sm:grid-cols-3" aria-label="Prize pool summary"><div className="border-b border-[var(--ink)]/10 p-5 sm:border-b-0 sm:border-r"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">Live pools</p><p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-[var(--ink)]">{activePools.length}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">Open for entry now</p></div><div className="border-b border-[var(--ink)]/10 p-5 sm:border-b-0 sm:border-r"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">Your entries</p><p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-[var(--ink)]">{userParticipations.length}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">Across all pools</p></div><div className="p-5"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]">Live prize value</p><p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-[var(--pine)]">{formatPineCoins(totalLivePrize)}</p><p className="mt-1 text-sm text-[var(--ink-muted)]">Combined active pools</p></div></section><section aria-labelledby="live-pools-heading"><div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="eyebrow text-[var(--pine)]">Open now</p><h2 id="live-pools-heading" className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">Choose your pool.</h2></div><p className="text-sm text-[var(--ink-muted)]">Each account can enter a pool up to 10 times.</p></div>{activePools.length === 0 ? <Card className="rounded-2xl border-dashed border-[var(--ink)]/20 bg-[var(--paper)] shadow-none"><CardContent className="flex flex-col items-center justify-center px-6 py-14 text-center"><Clock3 className="h-9 w-9 text-[var(--pine)]" /><h3 className="mt-4 text-xl font-semibold text-[var(--ink)]">No live pools right now</h3><p className="mt-2 max-w-md text-sm leading-6 text-[var(--ink-muted)]">Check back soon. Upcoming pools will appear below as soon as they are scheduled.</p></CardContent></Card> : <div className="grid gap-5 md:grid-cols-2">{activePools.map((pool, index) => <PrizePoolCard key={pool.id} pool={pool} entries={getEntriesForPool(pool.id)} featured={index === 0} joiningPool={joiningPool} onJoin={handleJoinPool} />)}</div>}</section><div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]"><section aria-labelledby="your-entries-heading"><div className="mb-4"><p className="eyebrow text-[var(--pine)]">Your activity</p><h2 id="your-entries-heading" className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">Your entries.</h2></div><Card className="rounded-2xl border-[var(--ink)]/10 bg-[var(--paper)] shadow-sm"><CardContent className="p-0">{userParticipations.length === 0 ? <div className="p-6"><WalletCards className="h-8 w-8 text-[var(--pine)]" /><p className="mt-4 font-semibold text-[var(--ink)]">Nothing entered yet.</p><p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Join a live pool and your entries will show here.</p></div> : <div className="divide-y divide-[var(--ink)]/10">{userParticipations.slice(0, 5).map((entry, index) => <div key={`${entry.pool_id}-${entry.joined_at}-${index}`} className="flex items-center justify-between gap-4 p-5"><div className="min-w-0"><p className="truncate font-semibold text-[var(--ink)]">{entry.pool_title}</p><p className="mt-1 text-xs text-[var(--ink-muted)]">Joined {formatDate(entry.joined_at)}</p></div><div className="shrink-0 text-right"><p className="text-sm font-semibold text-[var(--pine)]">{formatPineCoins(entry.prize_amount)}</p><p className="mt-1 text-xs text-[var(--ink-muted)]">{entry.is_winner ? "Winner" : entry.pool_status}</p></div></div>)}</div>}</CardContent></Card></section><section aria-labelledby="upcoming-pools-heading"><div className="mb-4 flex items-end justify-between gap-4"><div><p className="eyebrow text-[var(--pine)]">Plan ahead</p><h2 id="upcoming-pools-heading" className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">Coming next.</h2></div><CalendarDays className="h-6 w-6 text-[var(--pine)]" /></div><Card className="rounded-2xl border-[var(--ink)]/10 bg-[var(--paper)] shadow-sm"><CardContent className="p-0">{upcomingPools.length === 0 ? <p className="p-6 text-sm text-[var(--ink-muted)]">No upcoming pools have been scheduled.</p> : <div className="divide-y divide-[var(--ink)]/10">{upcomingPools.map((pool) => <div key={pool.id} className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center"><div><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-[var(--ink)]">{pool.title}</h3><Badge variant="outline" className={getStatusMeta(pool.status).className}>Coming soon</Badge></div><p className="mt-1 text-sm text-[var(--ink-muted)]">Starts {formatDate(pool.start_date)} · Entry {formatPineCoins(pool.entry_fee)}</p></div><p className="font-semibold text-[var(--pine)]">{formatPineCoins(pool.prize_amount)}</p></div>)}</div>}</CardContent></Card></section></div>{completedPools.length > 0 && <section aria-labelledby="past-pools-heading"><div className="mb-4"><p className="eyebrow text-[var(--pine)]">History</p><h2 id="past-pools-heading" className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">Past pools.</h2></div><div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">{completedPools.map((pool) => <Card key={pool.id} className="rounded-2xl border-[var(--ink)]/10 bg-[var(--paper)] shadow-sm"><CardContent className="p-5"><div className="flex items-start justify-between gap-3"><Trophy className="h-5 w-5 text-[var(--pine)]" /><Badge variant="outline" className={getStatusMeta(pool.status).className}>Completed</Badge></div><h3 className="mt-5 font-semibold text-[var(--ink)]">{pool.title}</h3><p className="mt-1 text-sm text-[var(--ink-muted)]">{formatPineCoins(pool.prize_amount)} · Closed {formatDate(pool.end_date)}</p>{pool.winner_name && <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--pine)]">Winner: {pool.winner_name}</p>}</CardContent></Card>)}</div></section>}<section className="rounded-2xl bg-[var(--forest)] p-6 text-[var(--paper)] sm:p-8" aria-labelledby="how-it-works-heading"><div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between"><div className="max-w-sm"><p className="eyebrow text-[var(--lime)]">Clear rules</p><h2 id="how-it-works-heading" className="mt-3 text-3xl font-semibold tracking-[-0.05em]">How a pool works.</h2><p className="mt-3 text-sm leading-6 text-[var(--paper)]/65">Every pool shows its fee, capacity, timing, and prize before you enter.</p></div><div className="grid flex-1 gap-5 sm:grid-cols-3 lg:max-w-3xl">{[{ icon: Target, title: "Choose", text: "Pick a live pool that fits your balance." }, { icon: ShieldCheck, title: "Enter", text: "Pay the entry fee and receive a recorded entry." }, { icon: Crown, title: "Wait", text: "When it closes, the winner is selected from entries." }].map(({ icon: Icon, title, text }, index) => <div key={title} className="border-t border-[var(--paper)]/20 pt-4"><div className="flex items-center gap-3 text-[var(--lime)]"><span className="font-mono text-xs">0{index + 1}</span><Icon className="h-4 w-4" /></div><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--paper)]/65">{text}</p></div>)}</div></div><div className="mt-8 flex items-start gap-3 border-t border-[var(--paper)]/15 pt-5 text-xs leading-5 text-[var(--paper)]/60"><Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lime)]" /><p>Entries are limited to 10 per pool. Pool availability and participation counts update when you refresh.</p></div></section>
+    </div></main>;
 }
-
-
-

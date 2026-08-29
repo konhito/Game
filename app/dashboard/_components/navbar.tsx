@@ -324,7 +324,7 @@ export function Navbar() {
 
           {/* Clean Navigation - Only Essential Items */}
           <nav
-            className={`hidden xl:flex flex-1 flex-nowrap items-center justify-center gap-1.5 mx-auto min-w-0 overflow-x-auto scrollbar-hide ${
+            className={`relative z-10 hidden xl:flex flex-1 flex-nowrap items-center justify-center gap-1.5 mx-auto min-w-0 overflow-visible ${
               isAdmin ? "max-w-4xl" : "max-w-3xl"
             }`}
           >
@@ -336,7 +336,7 @@ export function Navbar() {
                           item.href === "/dashboard/rewards" ? "nav-rewards" :
                           item.href === "/dashboard/prize-pool" ? "nav-prize-pool" :
                           item.href === "/dashboard/settings" ? "nav-settings" : undefined}
-                className={`relative shrink-0 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`relative z-0 shrink-0 rounded-xl font-medium transition-all duration-200 whitespace-nowrap hover:z-10 focus-visible:z-10 ${
                   isAdmin
                     ? "px-2.5 lg:px-3.5 py-1.5 lg:py-2 text-[11px] lg:text-[12px]"
                     : "px-3 lg:px-6 py-2 lg:py-3 text-xs lg:text-sm"
