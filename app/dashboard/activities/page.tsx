@@ -92,6 +92,24 @@ type TaskItem = AvailableTask | (TaskActivity & { description?: string; requirem
 
 type FilterKey = 'all' | 'available' | 'started' | 'completed';
 
+function renderLinkedText(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/gi).map((part, index) => {
+    if (!/^https?:\/\//i.test(part)) return <span key={index}>{part}</span>;
+
+    const trailing = part.match(/[),.!?:;]+$/)?.[0] || '';
+    const href = trailing ? part.slice(0, -trailing.length) : part;
+
+    return (
+      <span key={index}>
+        <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-800">
+          {href}
+        </a>
+        {trailing}
+      </span>
+    );
+  });
+}
+
 function normalizeTaskStatus(status?: string | null) {
   return status?.toLowerCase().trim() || '';
 }
@@ -885,7 +903,7 @@ export default function ActivitiesPage() {
                   <div className="space-y-2">
                     <Label className="text-slate-700">Description</Label>
                     <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
-                      {selectedTask.description}
+                      {renderLinkedText(selectedTask.description)}
                     </div>
                   </div>
                 )}
@@ -894,7 +912,7 @@ export default function ActivitiesPage() {
                   <div className="space-y-2">
                     <Label className="text-slate-700">Requirements</Label>
                     <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700 whitespace-pre-wrap">
-                      {selectedTask.requirements}
+                      {renderLinkedText(selectedTask.requirements)}
                     </div>
                   </div>
                 )}
