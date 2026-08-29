@@ -72,32 +72,9 @@ export function Navbar() {
         }
       } else {
         console.error('Navbar: Failed to fetch user stats:', response.status);
-        // Set default values if API fails
-        setUser(prevUser => ({
-          ...prevUser,
-          name: prevUser?.name || "Player",
-          email: prevUser?.email || "player@example.com",
-          avatar: prevUser?.avatar || null,
-          role: prevUser?.role || "user",
-          pineCoins: 0,
-          weeklyPoints: 0
-        }));
       }
     } catch (error) {
       console.error('Navbar: Error fetching user stats:', error);
-      // Set default values if API fails
-      setUser(prevUser => ({
-        ...prevUser,
-        name: prevUser?.name || "Player",
-        email: prevUser?.email || "player@example.com",
-        avatar: prevUser?.avatar || null,
-        role: prevUser?.role || "user",
-        pineCoins: 0,
-        weeklyPoints: 0
-      }));
-    } finally {
-      // Set loading to false after stats are fetched
-      setLoading(false);
     }
   };
 
@@ -158,7 +135,7 @@ export function Navbar() {
   const allNavigation = [...navigation, ...adminNavigation];
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         // Check localStorage first (most reliable and complete)
         let token: string | null = null;
@@ -190,7 +167,7 @@ export function Navbar() {
             });
             
             // Fetch real user stats from backend
-            fetchUserStats(userData.id);
+            await fetchUserStats(userData.id);
             return;
           } catch (error) {
             console.error('Navbar: Error parsing localStorage user data:', error);
@@ -224,7 +201,7 @@ export function Navbar() {
             });
             
             // Fetch real user stats from backend
-            fetchUserStats(userData.id);
+            await fetchUserStats(userData.id);
             return;
           } catch (parseError) {
             console.error('Navbar: Failed to parse cookie data:', parseError);

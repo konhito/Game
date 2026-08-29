@@ -61,11 +61,11 @@ const wheelSegments = [
 ];
 
 const spinPrices = [
-  { spins: 3, price: 1, discount: "0%" },
-  { spins: 10, price: 2.6, discount: "13%" },
-  { spins: 30, price: 6.25, discount: "17%" },
-  { spins: 50, price: 8.8, discount: "12%" },
-  { spins: 100, price: 15.85, discount: "21%" },
+  { spins: 3, price: 30, discount: "0%" },
+  { spins: 10, price: 100, discount: "0%" },
+  { spins: 30, price: 300, discount: "0%" },
+  { spins: 50, price: 500, discount: "0%" },
+  { spins: 100, price: 1000, discount: "0%" },
 ];
 
 export default function SpinWheelPage() {
@@ -117,7 +117,7 @@ export default function SpinWheelPage() {
 
             if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
               const rewards = rules.spin_rewards
-                .map((value: number) => Number(value))
+                .map((value: any) => Number(typeof value === 'object' ? value?.points : value))
                 .filter((value: number) => Number.isFinite(value) && value > 0);
               if (rewards.length > 0) {
                 setWheelSegmentsData((prev) =>
@@ -157,28 +157,21 @@ export default function SpinWheelPage() {
 
       // Weighted probabilities favoring low points
       // Map each segment to its probability based on points
-      const segmentProbabilities = wheelSegmentsData.map(seg => {
-        if (seg.points === 10) return 0.70; // 70% for 10 points
-        if (seg.points === 25) return 0.20; // 20% for 25 points
-        if (seg.points === 50) return 0.08; // 8% for 50 points
-        if (seg.points === 100) return 0.015; // 1.5% for 100 points
-        if (seg.points === 200) return 0.004; // 0.4% for 200 points
-        if (seg.points === 500) return 0.001; // 0.1% for 500 points
-        return 0;
-      });
-
-      // Select segment based on weighted probability
-      const random = Math.random();
-      let cumulativeProbability = 0;
-      let selectedSegmentIndex = 0;
-      
-      for (let i = 0; i < segmentProbabilities.length; i++) {
-        cumulativeProbability += segmentProbabilities[i];
-        if (random <= cumulativeProbability) {
-          selectedSegmentIndex = i;
-          break;
-        }
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin();
+      if (!updateResponse.success) {
+        setError(updateResponse.error || 'Failed to update stats');
+        return;
       }
+
+      const awardedPoints = Number(updateResponse.data?.points_awarded || 0);
+      if (updateResponse.data) {
+        coinEventEmitter.emitCoinUpdate({
+          pineCoins: Number(updateResponse.data.total_coins || 0),
+          weeklyPoints: Number(updateResponse.data.weekly_points || 0),
+        });
+      }
+      const matchingIndex = wheelSegmentsData.findIndex((segment) => segment.points === awardedPoints);
+      const selectedSegmentIndex = matchingIndex >= 0 ? matchingIndex : 0;
 
       // Get the selected segment BEFORE calculating rotation
       const selectedSegment = wheelSegmentsData[selectedSegmentIndex];
@@ -239,12 +232,10 @@ export default function SpinWheelPage() {
       await new Promise(resolve => setTimeout(resolve, 4000));
       
       // Update user stats on backend
-      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points);
+      setResult({ ...selectedSegment, points: awardedPoints, label: String(awardedPoints) });
+      setShowResult(true);
+      setSpinsRemaining(Number(updateResponse.data?.spins_remaining ?? Math.max(0, spinsRemaining - 1)));
       
-      if (updateResponse.success) {
-        setResult(selectedSegment);
-        setShowResult(true);
-        setSpinsRemaining(prev => prev - 1);
         console.log('✅ Spin successful - Points:', selectedSegment.points);
         
         // Emit coin update event to refresh navbar
@@ -274,10 +265,6 @@ export default function SpinWheelPage() {
         } catch (err) {
           console.error('Failed to emit coin update:', err);
         }
-      } else {
-        setError(updateResponse.error || 'Failed to update stats');
-      }
-      
     } catch (err) {
       console.error('Error spinning wheel:', err);
       setError('Failed to spin wheel. Please try again.');
@@ -286,10 +273,20 @@ export default function SpinWheelPage() {
     }
   };
 
-  const buySpins = (spins: number, price: number) => {
-    // TODO: Implement PineCoin purchase logic
-    console.log(`Buying ${spins} spins for ${price} PineCoins`);
-    setSpinsRemaining(prev => prev + spins);
+  const buySpins = async (spins: number) => {
+    try {
+      const response = await dashboardService.buySpin(spins);
+      if (!response.success) throw new Error(response.error || 'Failed to buy spin');
+      setSpinsRemaining(response.data?.spinsRemaining || 0);
+      if (response.data) {
+        coinEventEmitter.emitCoinUpdate({
+          pineCoins: Number(response.data.coinsRemaining || 0),
+          weeklyPoints: Number(response.data.weeklyPoints || 0),
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to buy spins');
+    }
   };
 
   if (loading) {
@@ -585,7 +582,7 @@ export default function SpinWheelPage() {
                       <div className="text-left sm:text-right">
                         <p className="font-black text-xl text-yellow-300">{offer.price} PineCoins</p>
                         <Button 
-                          onClick={() => buySpins(offer.spins, offer.price)}
+                          onClick={() => buySpins(offer.spins)}
                           size="sm"
                           className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold rounded-full px-6 py-2 shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-110 active:scale-95"
                         >

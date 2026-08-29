@@ -20,12 +20,11 @@ class CoinEventEmitter {
     pineCoins: number;
     weeklyPoints: number;
   }) {
+    if (typeof window === 'undefined') return;
+
     // Emit via custom event for cross-tab communication
     const event = new CustomEvent('coinUpdate', { detail: data });
     window.dispatchEvent(event);
-
-    // Also notify local listeners
-    this.listeners.forEach(listener => listener(data));
   }
 
   /**

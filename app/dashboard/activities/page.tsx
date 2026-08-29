@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +31,7 @@ import {
   X
 } from 'lucide-react';
 import { taskService } from '@/lib/task-service';
+import config from '@/lib/config';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -184,6 +185,7 @@ export default function ActivitiesPage() {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const tasksRequestRef = useRef(0);
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -205,6 +207,7 @@ export default function ActivitiesPage() {
   }, [router]);
 
   const loadAllTasks = async (userId: number) => {
+    const requestId = ++tasksRequestRef.current;
     try {
       setLoading(true);
       setRefreshingTasks(true);
@@ -214,6 +217,8 @@ export default function ActivitiesPage() {
         taskService.getAvailableTasks({ limit: 50 }),
         taskService.getUserTaskHistory({ limit: 50 })
       ]);
+
+      if (requestId !== tasksRequestRef.current) return;
 
       const available: AvailableTask[] = availableResult.success ? (availableResult.data.tasks || []) : [];
       const history: TaskActivity[] = historyResult.success ? (historyResult.data.tasks || []) : [];
@@ -257,8 +262,10 @@ export default function ActivitiesPage() {
       console.error('Error loading all tasks:', err);
       setError('Failed to load tasks. Please try again.');
     } finally {
-      setLoading(false);
-      setRefreshingTasks(false);
+      if (requestId === tasksRequestRef.current) {
+        setLoading(false);
+        setRefreshingTasks(false);
+      }
     }
   };
 
@@ -402,7 +409,7 @@ export default function ActivitiesPage() {
           try {
             const token = localStorage.getItem('auth_token');
             if (token) {
-              const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/api/users/stats`, {
+              const response = await fetch(`${config.API_BASE}/api/users/stats`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json',

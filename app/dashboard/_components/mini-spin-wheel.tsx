@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw, Play, CircleDollarSign } from "lucide-react";
 import { dashboardService } from "@/lib/dashboard-service";
+import { coinEventEmitter } from "@/lib/coin-event-emitter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -38,7 +39,7 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
           const rules = leaderboardResponse.data.task_point_rules;
           if (Array.isArray(rules.spin_rewards) && rules.spin_rewards.length > 0) {
             const rewards = rules.spin_rewards
-              .map((value: number) => Number(value))
+              .map((value: any) => Number(typeof value === 'object' ? value?.points : value))
               .filter((value: number) => Number.isFinite(value) && value > 0);
             if (rewards.length > 0) {
               setWheelSegments((prev) =>
@@ -67,28 +68,21 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
       setError(null);
       setLastWin(null);
 
-      const segmentProbabilities = wheelSegments.map(seg => {
-        if (seg.points === 10) return 0.70;
-        if (seg.points === 25) return 0.20;
-        if (seg.points === 50) return 0.08;
-        if (seg.points === 100) return 0.015;
-        if (seg.points === 200) return 0.004;
-        if (seg.points === 500) return 0.001;
-        return 0;
-      });
-
-      const random = Math.random();
-      let cumulativeProbability = 0;
-      let selectedSegmentIndex = 0;
-      
-      for (let i = 0; i < segmentProbabilities.length; i++) {
-        cumulativeProbability += segmentProbabilities[i];
-        if (random <= cumulativeProbability) {
-          selectedSegmentIndex = i;
-          break;
-        }
+      const updateResponse = await dashboardService.updateUserStatsAfterSpin();
+      if (!updateResponse.success) {
+        setError(updateResponse.error || 'Failed to update stats');
+        return;
       }
 
+      const awardedPoints = Number(updateResponse.data?.points_awarded || 0);
+      if (updateResponse.data) {
+        coinEventEmitter.emitCoinUpdate({
+          pineCoins: Number(updateResponse.data.total_coins || 0),
+          weeklyPoints: Number(updateResponse.data.weekly_points || 0),
+        });
+      }
+      const matchingIndex = wheelSegments.findIndex((segment) => segment.points === awardedPoints);
+      const selectedSegmentIndex = matchingIndex >= 0 ? matchingIndex : 0;
       const selectedSegment = wheelSegments[selectedSegmentIndex];
       const segmentAngle = 360 / wheelSegments.length;
       const segmentStartAngle = selectedSegmentIndex * segmentAngle - 90;
@@ -112,15 +106,9 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
 
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      const updateResponse = await dashboardService.updateUserStatsAfterSpin(selectedSegment.points);
-      
-      if (updateResponse.success) {
-        setSpinsRemaining(prev => prev - 1);
-        setLastWin(selectedSegment.points);
-        onSpinComplete();
-      } else {
-        setError(updateResponse.error || 'Failed to update stats');
-      }
+      setSpinsRemaining(Number(updateResponse.data?.spins_remaining ?? Math.max(0, spinsRemaining - 1)));
+      setLastWin(awardedPoints);
+      onSpinComplete();
     } catch (err) {
       setError('Spin failed. Please try again.');
     } finally {

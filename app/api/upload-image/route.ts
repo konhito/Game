@@ -7,6 +7,10 @@ export const config = {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!req.cookies.get("custom_auth_token")?.value && !req.headers.get("authorization")) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
     // Parse the form data
     const formData = await req.formData();
     const file = formData.get("file") as File | null;

@@ -40,18 +40,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Sort by weekly_points only (highest first)
-    const sorted: any[] = [...result.data.users].sort((a: any, b: any) => {
-      return (b.weekly_points ?? 0) - (a.weekly_points ?? 0);
-    });
-
-    // Re-assign rank after sort
-    const ranked = sorted.map((entry, index) => ({ ...entry, rank: index + 1 }));
-
     return NextResponse.json({
       success: true,
       data: {
-        users: ranked,
+        users: result.data.users,
         weekly_pool: result.data.weekly_pool,
         weekly_rewards: result.data.weekly_rewards,
         task_point_rules: result.data.task_point_rules,

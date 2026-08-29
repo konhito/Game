@@ -762,12 +762,12 @@ class DashboardService {
   }
 
   // Update user stats after spinning wheel
-  async updateUserStatsAfterSpin(points: number): Promise<ApiResponse> {
+  async updateUserStatsAfterSpin(): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ action: 'spin_wheel', points }),
+        body: JSON.stringify({ action: 'spin_wheel' }),
       });
 
       if (!response.ok) {
@@ -783,12 +783,13 @@ class DashboardService {
   }
 
   // Buy additional spins
-  async buySpin(): Promise<ApiResponse<{ spinsRemaining: number; coinsRemaining: number; spinCost: number }>> {
+  async buySpin(count = 1): Promise<ApiResponse<{ spinsRemaining: number; coinsRemaining: number; weeklyPoints: number; spinCost: number; spinsPurchased: number }>> {
     try {
       const response = await fetch(`${API_BASE}/api/users/buy-spin`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         credentials: 'include',
+        body: JSON.stringify({ count }),
       });
 
       if (!response.ok) {

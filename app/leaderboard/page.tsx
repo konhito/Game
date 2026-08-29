@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
   const [weeklyPool, setWeeklyPool] = useState<WeeklyPool | null>(null);
   const [weeklyRewardConfig, setWeeklyRewardConfig] = useState<WeeklyRewardConfig[]>([]);
   const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
-  const isFetchingRef = useRef(false);
+  const leaderboardRequestRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     fetchLeaderboard({ showLoader: true });
@@ -79,13 +79,13 @@ export default function LeaderboardPage() {
   }, []);
 
   const fetchLeaderboard = async (options?: { showLoader?: boolean; silent?: boolean }) => {
-    if (isFetchingRef.current) return;
-    isFetchingRef.current = true;
+    if (leaderboardRequestRef.current) return leaderboardRequestRef.current;
 
     const showLoader = Boolean(options?.showLoader);
     const silent = Boolean(options?.silent);
 
-    try {
+    const request = (async () => {
+      try {
       if (showLoader) {
         setLoading(true);
       }
@@ -105,12 +105,7 @@ export default function LeaderboardPage() {
       const result = await response.json();
       
       if (result.success && result.data.users) {
-        // Add rank to each entry based on weekly_points
-        const rankedData = result.data.users.map((entry: any, index: number) => ({
-          ...entry,
-          rank: index + 1
-        }));
-        setLeaderboardData(rankedData);
+        setLeaderboardData(result.data.users);
         
         // Set weekly pool data if available
         if (result.data.weekly_pool) {
@@ -127,16 +122,23 @@ export default function LeaderboardPage() {
         }
         setErrorMessage(null);
       }
-    } catch (error) {
+      } catch (error) {
       console.error("Error fetching leaderboard:", error);
       if (!silent) {
         setErrorMessage("Leaderboard is temporarily unavailable. Retrying every 5 seconds.");
       }
-    } finally {
+      } finally {
       if (showLoader) {
         setLoading(false);
       }
-      isFetchingRef.current = false;
+      }
+    })();
+
+    leaderboardRequestRef.current = request;
+    try {
+      await request;
+    } finally {
+      if (leaderboardRequestRef.current === request) leaderboardRequestRef.current = null;
     }
   };
 

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Forward request to backend
     const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
-    const response = await fetch(`${API_BASE}/api/admin/leaderboard-rewards/distribute`, {
+    const response = await fetch(`${API_BASE}/api/admin/weekly-settlement`, {
       method: 'POST',
       headers: {
         'Authorization': authHeader,

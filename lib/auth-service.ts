@@ -414,34 +414,8 @@ class AuthService {
           throw new Error(`Backend authentication failed: ${response.status}`);
         }
       } catch (backendError) {
-        console.error('Backend authentication failed, using local fallback:', backendError);
-        
-        // Fallback: Create user object from Google data for local storage
-        const user: User = {
-          id: Date.now(), // Temporary ID for Google users
-          name: googleUser.name || googleUser.displayName || 'Google User',
-          email: googleUser.email,
-          role: 'user',
-          image: googleUser.picture || googleUser.photoURL,
-          created_at: new Date().toISOString(),
-        };
-
-        // Generate a temporary token for Google users (fallback)
-        const token = `google_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        console.log('Setting Google auth (local fallback):', { token, user });
-        this.setAuth(token, user);
-        
-        // Wait a moment for cookies to be set
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Verify authentication state
-        const isAuth = this.isAuthenticated();
-        console.log('Post-fallback auth verification:', isAuth);
-        
-        if (!isAuth) {
-          throw new Error('Authentication state not properly set after fallback auth');
-        }
+        console.error('Backend Google authentication failed:', backendError);
+        throw backendError;
       }
       
       // Log the successful Google authentication

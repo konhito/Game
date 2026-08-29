@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
 import { dashboardService, LeaderboardEntry, UserActivity, UserStats } from "@/lib/dashboard-service";
 import { authService } from "@/lib/auth-service";
 import { isTokenExpired } from "@/lib/token-utils";
+import { coinEventEmitter } from "@/lib/coin-event-emitter";
 import { MiniSpinWheel } from "./_components/mini-spin-wheel";
 
 type DashboardData = {
@@ -34,11 +35,11 @@ type DashboardData = {
   }>;
 };
 
-function toLocalDayKey(dateLike?: string | null) {
+function toUtcDayKey(dateLike?: string | null) {
   if (!dateLike) return null;
   const d = new Date(dateLike);
   if (Number.isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  return d.toISOString().slice(0, 10);
 }
 
 function formatActivityTime(value?: string) {
@@ -100,10 +101,11 @@ export default function DashboardPage() {
     leaderboard: [],
     availableTasks: [],
   });
+  const dashboardRequestRef = useRef(0);
 
   const isDailyClaimedToday = useMemo(() => {
-    const todayKey = toLocalDayKey(new Date().toISOString());
-    const claimedKey = toLocalDayKey(dashboardData.userStats?.last_daily_claim_date || null);
+    const todayKey = toUtcDayKey(new Date().toISOString());
+    const claimedKey = toUtcDayKey(dashboardData.userStats?.last_daily_claim_date || null);
     return Boolean(todayKey && claimedKey && todayKey === claimedKey);
   }, [dashboardData.userStats?.last_daily_claim_date]);
 
@@ -113,6 +115,7 @@ export default function DashboardPage() {
   }, [dashboardData.leaderboard, user?.id]);
 
   const fetchDashboardData = async ({ silent = false }: { silent?: boolean } = {}) => {
+    const requestId = ++dashboardRequestRef.current;
     if (!silent) setLoading(true);
 
     try {
@@ -123,19 +126,21 @@ export default function DashboardPage() {
         dashboardService.getAvailableTasks(),
       ]);
 
-      const nextState: DashboardData = {
+      if (requestId !== dashboardRequestRef.current) return;
+
+      setDashboardData((previous) => ({
         userStats:
           statsRes.status === "fulfilled" && statsRes.value.success
             ? statsRes.value.data.users[0] || null
-            : dashboardData.userStats,
+            : previous.userStats,
         recentActivities:
           activitiesRes.status === "fulfilled" && activitiesRes.value.success
             ? activitiesRes.value.data.activities || []
-            : dashboardData.recentActivities,
+            : previous.recentActivities,
         leaderboard:
           leaderboardRes.status === "fulfilled" && leaderboardRes.value.success
-            ? (leaderboardRes.value.data.users || []).map((u, index) => ({ ...u, rank: index + 1 }))
-            : dashboardData.leaderboard,
+            ? leaderboardRes.value.data.users || []
+            : previous.leaderboard,
         availableTasks:
           tasksRes.status === "fulfilled" && tasksRes.value.success
             ? (tasksRes.value.data.tasks || []).map((task) => ({
@@ -144,14 +149,12 @@ export default function DashboardPage() {
                 platform: task.platform,
                 reward_points: task.reward_points,
               }))
-            : dashboardData.availableTasks,
-      };
-
-      setDashboardData(nextState);
+            : previous.availableTasks,
+      }));
     } catch (error) {
       console.error("Dashboard fetch error", error);
     } finally {
-      if (!silent) setLoading(false);
+      if (!silent && requestId === dashboardRequestRef.current) setLoading(false);
     }
   };
 
@@ -211,6 +214,12 @@ export default function DashboardPage() {
       }
 
       await fetchDashboardData({ silent: true });
+      if (response.data) {
+        coinEventEmitter.emitCoinUpdate({
+          pineCoins: Number(response.data.total_coins || 0),
+          weeklyPoints: Number(response.data.weekly_points || 0),
+        });
+      }
       const awardedPoints = Number(response?.data?.points_awarded || 0);
       const bonusSpins = Number(response?.data?.bonus_spins_awarded || 0);
       setDailyMessage({

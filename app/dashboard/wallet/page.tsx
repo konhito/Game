@@ -90,7 +90,7 @@ export default function WalletPage() {
   const fetchUserStats = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${config.API_BASE}/api/dashboard/stats`, {
+      const response = await fetch(`${config.API_BASE}/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -98,7 +98,7 @@ export default function WalletPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setUserStats(data.data);
+        setUserStats(data.data?.user || data.data);
       }
     } catch (error) {
       console.error('Error fetching user stats:', error);

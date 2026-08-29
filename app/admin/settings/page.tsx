@@ -430,26 +430,12 @@ export default function AdminSettingsPage() {
     try {
       setDistributingRewards(true);
       const authToken = localStorage.getItem("auth_token");
-      // Calculate current week dates
-      const now = new Date();
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
-      weekStart.setHours(0, 0, 0, 0);
-      
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
-      weekEnd.setHours(23, 59, 59, 999);
-
-      const response = await fetch(`${config.API_BASE}/api/admin/leaderboard-rewards/distribute`, {
+      const response = await fetch(`${config.API_BASE}/api/admin/weekly-settlement`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          week_start: weekStart.toISOString(),
-          week_end: weekEnd.toISOString()
-        }),
       });
 
       const data = await response.json();
@@ -458,7 +444,7 @@ export default function AdminSettingsPage() {
         throw new Error(data.error || "Failed to distribute rewards");
       }
 
-      toast.success(`Successfully distributed rewards to ${data.data.distributed?.length || 0} users!`);
+      toast.success(`Settlement completed for ${data.data?.settlement?.winners?.length || 0} winners.`);
     } catch (error: any) {
       console.error("Error distributing rewards:", error);
       toast.error(error.message || "Failed to distribute leaderboard rewards");

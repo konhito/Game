@@ -22,6 +22,7 @@ import {
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { coinEventEmitter } from '@/lib/coin-event-emitter';
+import config from '@/lib/config';
 
 interface Reward {
   id: number;
@@ -62,7 +63,7 @@ export default function RewardsPage() {
   const fetchUserStats = async () => {
     try {
       const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      const response = await fetch(`https://pinecrest.konhito.me/api/dashboard/stats`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -71,7 +72,7 @@ export default function RewardsPage() {
       
       if (response.ok) {
         const data = await response.json();
-        setUserStats(data.data);
+        setUserStats(data.data?.user || data.data);
       }
     } catch (error) {
       console.error('Error fetching user stats:', error);
@@ -80,6 +81,29 @@ export default function RewardsPage() {
 
   const fetchRewards = async () => {
     try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/achievements`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to fetch achievements');
+
+      const data = await response.json();
+      const achievements = data.data?.achievements || [];
+      setRewards(achievements.map((achievement: any, index: number) => ({
+        id: index + 1,
+        name: achievement.name,
+        description: `${achievement.description} (${achievement.progress}/${achievement.max_progress})`,
+        points_required: 0,
+        coins_required: 0,
+        category: 'special',
+        rarity: achievement.unlocked ? 'rare' : 'common',
+        icon: achievement.icon,
+        claimed: Boolean(achievement.unlocked),
+        available: Boolean(achievement.unlocked),
+      })));
+      return;
+
       // Mock rewards data - in a real app, this would come from an API
       const mockRewards: Reward[] = [
         {
@@ -219,7 +243,7 @@ export default function RewardsPage() {
     try {
       const token = localStorage.getItem('auth_token');
       if (token) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/api/users/stats`, {
+        const response = await fetch(`${config.API_BASE}/api/users/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -238,7 +262,7 @@ export default function RewardsPage() {
             });
             console.log('Rewards: Emitted coin update after reward claim');
             // Also update local userStats state
-            setUserStats(statsResult.data);
+            setUserStats(statsResult.data.user);
           }
         }
       }
