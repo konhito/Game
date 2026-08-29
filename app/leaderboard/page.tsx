@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, TrendingUp, Crown, Calendar, Loader2, RefreshCw, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { normalizeLeaderboardRanks } from "@/lib/dashboard-service";
 
 interface LeaderboardEntry {
   id: number;
@@ -105,7 +106,7 @@ export default function LeaderboardPage() {
       const result = await response.json();
       
       if (result.success && result.data.users) {
-        setLeaderboardData(result.data.users);
+        setLeaderboardData(normalizeLeaderboardRanks(result.data.users));
         
         // Set weekly pool data if available
         if (result.data.weekly_pool) {

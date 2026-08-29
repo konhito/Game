@@ -49,6 +49,16 @@ export interface LeaderboardEntry {
   rank?: number;
 }
 
+export function normalizeLeaderboardRanks<T extends { rank?: number | string }>(entries: T[]): Array<T & { rank: number }> {
+  return entries.map((entry, index) => {
+    const backendRank = Number(entry.rank);
+    return {
+      ...entry,
+      rank: Number.isInteger(backendRank) && backendRank > 0 ? backendRank : index + 1,
+    };
+  });
+}
+
 export interface WeeklyPool {
   pinecoins: number;
   naira: number;
@@ -384,7 +394,7 @@ class DashboardService {
         return {
           success: true,
           data: {
-            users: result.data.users,
+            users: normalizeLeaderboardRanks(result.data.users),
             weekly_pool: result.data.weekly_pool,
             weekly_rewards: result.data.weekly_rewards,
             task_point_rules: result.data.task_point_rules,
