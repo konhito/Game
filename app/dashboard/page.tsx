@@ -21,6 +21,7 @@ import { dashboardService, LeaderboardEntry, UserActivity, UserStats } from "@/l
 import { authService } from "@/lib/auth-service";
 import { isTokenExpired } from "@/lib/token-utils";
 import { coinEventEmitter } from "@/lib/coin-event-emitter";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MiniSpinWheel } from "./_components/mini-spin-wheel";
 
 type DashboardData = {
@@ -47,6 +48,40 @@ function formatActivityTime(value?: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "just now";
   return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-[var(--paper-deep)] pb-12" aria-busy="true" aria-label="Loading dashboard">
+      <span className="sr-only">Loading workspace...</span>
+      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-3">
+            <Skeleton className="h-9 w-44 bg-slate-200" />
+            <Skeleton className="h-4 w-72 max-w-full bg-slate-200" />
+          </div>
+          <div className="flex gap-3">
+            <Skeleton className="h-9 w-24 rounded-md bg-slate-200" />
+            <Skeleton className="h-9 w-28 rounded-md bg-slate-200" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {["weekly-points", "current-rank", "login-streak"].map((key) => (
+            <Skeleton key={key} className="h-36 rounded-xl border border-slate-200/50 bg-white/80" />
+          ))}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-[440px] rounded-xl border border-slate-200/50 bg-white/80" />
+          <div className="space-y-6 lg:col-span-2">
+            <Skeleton className="h-[360px] rounded-xl border border-slate-200/50 bg-white/80" />
+            <Skeleton className="h-[220px] rounded-xl border border-slate-200/50 bg-white/80" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function StatCard({
@@ -236,14 +271,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="text-sm font-medium">Loading workspace...</span>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   const weeklyPoints = dashboardData.userStats?.weekly_points ?? 0;
