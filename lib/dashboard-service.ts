@@ -777,15 +777,25 @@ class DashboardService {
       const response = await fetch(`${API_BASE}/api/users/stats`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ action: 'spin_wheel' }),
       });
 
+      const result = await response.json().catch(() => null);
+      if (response.status === 401) {
+        const error = new Error('Authentication expired');
+        (error as any).status = 401;
+        throw error;
+      }
       if (!response.ok) {
-        throw new Error('Failed to update user stats');
+        return {
+          success: false,
+          data: result?.data,
+          error: result?.error || `Spin failed with status ${response.status}`,
+        };
       }
 
-      const result = await response.json();
-      return result;
+      return result || { success: false, data: undefined, error: 'Empty response from spin service' };
     } catch (error) {
       console.error('DashboardService: Error updating user stats after spin:', error);
       throw new Error('Failed to update user stats');

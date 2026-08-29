@@ -70,6 +70,10 @@ export function MiniSpinWheel({ onSpinComplete }: { onSpinComplete: () => void }
 
       const updateResponse = await dashboardService.updateUserStatsAfterSpin();
       if (!updateResponse.success) {
+        const latestStats = await dashboardService.getUserStats(0).catch(() => null);
+        if (latestStats?.success) {
+          setSpinsRemaining(Number(latestStats.data.users[0]?.spins_remaining || 0));
+        }
         setError(updateResponse.error || 'Failed to update stats');
         return;
       }
