@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, CheckCircle, Star, Zap, Loader2, Target, UserPlus } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Share2, Loader2, Target, UserPlus } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
 import { robustRedirect, verifyAuthState } from "@/lib/redirection-utils";
@@ -31,9 +31,13 @@ function SignUpContent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const authCheckStarted = useRef(false);
 
   // Check for existing user on component mount and redirect if authenticated
   useEffect(() => {
+    if (authCheckStarted.current) return;
+    authCheckStarted.current = true;
+
     const checkAuthAndRedirect = async () => {
       try {
         const user = authService.getUser();
@@ -230,66 +234,33 @@ function SignUpContent() {
   // Show loading screen while checking authentication
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-[var(--paper)] text-[var(--ink)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-slate-600">Checking authentication...</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-[var(--ink)]/15 border-t-[var(--pine)]"></div>
+          <p className="text-sm text-[var(--ink-muted)]">Checking your session...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 relative overflow-hidden">
-      {/* Floating Background Elements */}
-      <motion.div
-        className="absolute top-20 left-10 text-emerald-400/20"
-        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      >
-        <Trophy size={60} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute top-40 right-20 text-blue-400/20"
-        animate={{ rotate: -360, scale: [1, 1.1, 1] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      >
-        <Gift size={50} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute bottom-40 left-20 text-emerald-400/20"
-        animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      >
-        <Users size={70} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute bottom-20 right-10 text-blue-400/20"
-        animate={{ rotate: -360, scale: [1, 1.2, 1] }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-      >
-        <Trophy size={55} />
-      </motion.div>
-
-      <div className="container relative z-10 mx-auto flex min-h-screen flex-col items-center justify-center py-12">
+    <div className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+      <div className="container relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-[1440px] flex-col items-center justify-center px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-32 lg:px-16">
         <Link
           href="/"
-          className="absolute top-8 left-8 flex items-center text-slate-600 hover:text-emerald-600 transition-colors"
+          className="absolute left-4 top-24 inline-flex items-center rounded-full border border-[var(--ink)]/12 px-4 py-2 text-sm text-[var(--ink-muted)] transition-colors hover:border-[var(--pine)]/40 hover:text-[var(--pine)] sm:left-6 sm:top-28 lg:left-16"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="grid w-full max-w-7xl grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid w-full max-w-6xl grid-cols-1 items-start gap-10 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
           {/* Benefits Section */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col justify-center space-y-8"
+            className="flex flex-col justify-center space-y-8 lg:pt-10"
           >
             <div className="text-center lg:text-left">
               <div className="mx-auto lg:mx-0 w-16 h-16 flex items-center justify-center mb-6">
@@ -299,77 +270,78 @@ function SignUpContent() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h1 className="text-4xl font-bold text-slate-800 mb-4">
-                Earn Points For Real Activity
+              <p className="eyebrow text-[var(--pine)]">Start with one useful move</p>
+              <h1 className="display-heading mt-5 max-w-xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">
+                Make the first move count.
               </h1>
-              <p className="text-slate-600 text-lg">
-                Create your account, complete social actions, and climb the leaderboard with points.
+              <p className="mt-6 max-w-lg text-lg leading-8 text-[var(--ink-muted)]">
+                Create your account, choose a task, and turn the consistency you already have into visible progress.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-3">
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <Share2 className="w-7 h-7 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <Share2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Share News Posts</h3>
-                  <p className="text-slate-600">Share approved news posts and earn points for each one.</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Share News Posts</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Share approved news posts and earn points for each one.</p>
                 </div>
               </motion.div>
 
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <UserPlus className="w-7 h-7 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <UserPlus className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Invite Friends</h3>
-                  <p className="text-slate-600">Use a referral code during signup so successful invites award points.</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Invite Friends</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Use a referral code during signup so successful invites award points.</p>
                 </div>
               </motion.div>
 
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center p-6 bg-white/60 border border-slate-200/50 rounded-xl shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center mr-5 shadow-lg">
-                  <Target className="w-7 h-7 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <Target className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">Simple Point Tasks</h3>
-                  <p className="text-slate-600">Start with signup points, then keep earning through shares and referrals.</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Simple Point Tasks</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Start with signup points, then keep earning through shares and referrals.</p>
                 </div>
               </motion.div>
             </div>
 
             {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-4 pt-6">
+            <div className="grid grid-cols-3 gap-4 border-t border-[var(--ink)]/15 pt-6">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 rounded-lg"
+                className="text-center"
               >
-                <div className="text-2xl font-bold text-emerald-600">50</div>
-                <div className="text-sm text-emerald-600">Signup Points</div>
+                <div className="text-2xl font-semibold tracking-[-.05em] text-[var(--pine)]">50</div>
+                <div className="mt-1 text-xs text-[var(--ink-muted)]">Signup points</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="text-center p-4 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/50 rounded-lg"
+                className="text-center"
               >
-                <div className="text-2xl font-bold text-violet-600">10</div>
-                <div className="text-sm text-violet-600">Share Points</div>
+                <div className="text-2xl font-semibold tracking-[-.05em] text-[var(--ink)]">10</div>
+                <div className="mt-1 text-xs text-[var(--ink-muted)]">Share points</div>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="text-center p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-lg"
+                className="text-center"
               >
-                <div className="text-2xl font-bold text-amber-600">30</div>
-                <div className="text-sm text-amber-600">Referral Points</div>
+                <div className="text-2xl font-semibold tracking-[-.05em] text-[var(--ink)]">30</div>
+                <div className="mt-1 text-xs text-[var(--ink-muted)]">Referral points</div>
               </motion.div>
             </div>
           </motion.div>
@@ -381,25 +353,25 @@ function SignUpContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col justify-center"
           >
-            <Card className="bg-white/80 border-slate-200/50 backdrop-blur-sm shadow-xl">
-              <CardHeader className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                  <Users className="w-8 h-8 text-white" />
+            <Card className="rounded-[1.75rem] border-[var(--ink)]/12 bg-[var(--paper)] py-7 shadow-[0_24px_80px_rgba(20,48,35,0.12)] sm:py-9">
+              <CardHeader className="space-y-4 px-6 sm:px-9">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <UserPlus className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold text-slate-800">
-                    Create Your Account
+                  <CardTitle className="text-3xl font-semibold tracking-[-.045em] text-[var(--ink)]">
+                    Create your account
                   </CardTitle>
-                  <CardDescription className="text-slate-600 mt-2">
-                    Join the leaderboard and start earning points today
+                  <CardDescription className="mt-2 max-w-md text-base leading-6 text-[var(--ink-muted)]">
+                    A few details, then you are ready to start earning.
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 px-6 sm:px-9">
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-slate-700 font-medium">
+                      <Label htmlFor="firstName" className="text-sm font-medium text-[var(--ink)]">
                         First Name
                       </Label>
                       <Input
@@ -411,12 +383,12 @@ function SignUpContent() {
                         onChange={handleInputChange}
                         disabled={isLoading}
                         autoComplete="given-name"
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
+                        className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-slate-700 font-medium">
+                      <Label htmlFor="lastName" className="text-sm font-medium text-[var(--ink)]">
                         Last Name
                       </Label>
                       <Input
@@ -428,14 +400,14 @@ function SignUpContent() {
                         onChange={handleInputChange}
                         disabled={isLoading}
                         autoComplete="family-name"
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
+                        className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-700 font-medium">
+                    <Label htmlFor="email" className="text-sm font-medium text-[var(--ink)]">
                       Email
                     </Label>
                     <Input
@@ -447,14 +419,14 @@ function SignUpContent() {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       autoComplete="email"
-                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
+                      className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="referralCode" className="text-slate-700 font-medium">
-                      Referral Code <span className="text-slate-400">(Optional)</span>
+                    <Label htmlFor="referralCode" className="text-sm font-medium text-[var(--ink)]">
+                      Referral Code <span className="text-[var(--ink-muted)]">(Optional)</span>
                     </Label>
                     <Input
                       id="referralCode"
@@ -465,15 +437,15 @@ function SignUpContent() {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       autoComplete="off"
-                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 disabled:opacity-50"
+                      className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                     />
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs leading-5 text-[var(--ink-muted)]">
                       If someone invited you, paste their code here before creating your account.
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-slate-700 font-medium">
+                    <Label htmlFor="password" className="text-sm font-medium text-[var(--ink)]">
                       Password
                     </Label>
                     <div className="relative">
@@ -486,13 +458,13 @@ function SignUpContent() {
                         onChange={handleInputChange}
                         disabled={isLoading}
                         autoComplete="new-password"
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10 disabled:opacity-50"
+                        className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] pr-10 text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] transition-colors hover:text-[var(--pine)]"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -500,7 +472,7 @@ function SignUpContent() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-slate-700 font-medium">
+                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-[var(--ink)]">
                       Confirm Password
                     </Label>
                     <div className="relative">
@@ -513,13 +485,13 @@ function SignUpContent() {
                         onChange={handleInputChange}
                         disabled={isLoading}
                         autoComplete="new-password"
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 pr-10 disabled:opacity-50"
+                        className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] pr-10 text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] transition-colors hover:text-[var(--pine)]"
                       >
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -531,29 +503,29 @@ function SignUpContent() {
                       type="checkbox"
                       id="terms"
                       disabled={isLoading}
-                      className="mt-1 h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-50"
+                      className="mt-1 h-4 w-4 rounded border-[var(--ink)]/25 text-[var(--pine)] focus:ring-[var(--pine)] disabled:opacity-50"
                       required
                     />
-                    <Label htmlFor="terms" className="text-sm text-slate-600">
+                    <Label htmlFor="terms" className="text-sm leading-6 text-[var(--ink-muted)]">
                       I agree to the{" "}
-                      <Link href="/terms" className="text-violet-600 hover:text-violet-700">
+                      <Link href="/terms" className="text-[var(--pine)] underline-offset-4 hover:underline">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="text-violet-600 hover:text-violet-700">
+                      <Link href="/privacy" className="text-[var(--pine)] underline-offset-4 hover:underline">
                         Privacy Policy
                       </Link>
                     </Label>
                   </div>
 
                   {error && (
-                    <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                       {error}
                     </div>
                   )}
 
                   {success && (
-                    <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
                       {success}
                     </div>
                   )}
@@ -561,7 +533,7 @@ function SignUpContent() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="pine-button pine-button-dark h-12 w-full rounded-full font-semibold disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
@@ -576,10 +548,10 @@ function SignUpContent() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-200" />
+                    <span className="w-full border-t border-[var(--ink)]/12" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white/80 px-2 text-slate-500">Or continue with</span>
+                    <span className="bg-[var(--paper)] px-2 text-xs text-[var(--ink-muted)]">Or continue with</span>
                   </div>
                 </div>
 
@@ -588,15 +560,15 @@ function SignUpContent() {
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
                     isLoading={isGoogleLoading}
-                    className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-emerald-400 transition-all duration-200"
+                    className="h-12 w-full rounded-full border-[var(--ink)]/15 text-[var(--ink)] transition-colors hover:border-[var(--pine)]/50 hover:bg-[var(--paper-deep)]"
                   />
                 </div>
 
                 <div className="text-center">
-                  <span className="text-slate-600">Already have an account? </span>
+                  <span className="text-[var(--ink-muted)]">Already have an account? </span>
                   <Link
                     href="/sign-in"
-                    className="text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                    className="font-semibold text-[var(--pine)] transition-colors hover:text-[var(--forest)]"
                   >
                     Sign in here
                   </Link>
@@ -609,12 +581,16 @@ function SignUpContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 p-6 bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200 rounded-xl text-center"
+              className="mt-5 flex items-center justify-between gap-4 rounded-[1.25rem] border border-[var(--pine)]/20 bg-[var(--paper-deep)] px-5 py-4"
             >
-              <div className="text-2xl font-bold text-emerald-800 mb-2">Welcome Points</div>
-              <p className="text-emerald-700">
-                Get <span className="font-semibold">50 points</span> instantly when you create your account
-              </p>
+              <div>
+                <div className="text-sm font-semibold text-[var(--ink)]">Welcome points</div>
+                <p className="mt-1 text-xs leading-5 text-[var(--ink-muted)]">Added as soon as your account is created.</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="text-2xl font-semibold tracking-[-.05em] text-[var(--pine)]">+50</div>
+                <div className="text-xs text-[var(--ink-muted)]">points</div>
+              </div>
             </motion.div>
           </motion.div>
         </div>
@@ -626,10 +602,10 @@ function SignUpContent() {
 export default function SignUpPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-[var(--paper)] text-[var(--ink)]">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-emerald-600" />
-          <p className="text-slate-600">Loading...</p>
+          <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-[var(--pine)]" />
+          <p className="text-sm text-[var(--ink-muted)]">Loading signup...</p>
         </div>
       </div>
     }>
