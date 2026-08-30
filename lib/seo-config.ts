@@ -4,7 +4,7 @@ const siteConfig = {
   name: 'Pinecrest',
   description: 'Earn points, climb the leaderboard, and win real rewards through social media activities and tasks.',
   url: 'https://pinecrest247.com',
-  ogImage: 'https://pinecrest247.com/Logo1.png',
+  ogImage: 'https://pinecrest247.com/pinecrest-share-preview.png',
   keywords: [
     'earn money online',
     'social media rewards',
@@ -85,4 +85,3 @@ export function generateMetadata({
 }
 
 export { siteConfig };
-
