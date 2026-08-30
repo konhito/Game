@@ -129,6 +129,13 @@ function SignUpContent() {
       });
 
       console.log("Registration successful:", result);
+
+      if (result.referral?.applied) {
+        sessionStorage.setItem("pinecoin_pending_referral_signup_reward", JSON.stringify({
+          signupPoints: result.referral.signup_points,
+          referralPoints: result.referral.referral_points,
+        }));
+      }
       
       // Verify authentication state
       if (!verifyAuthState(authService)) {
@@ -519,12 +526,12 @@ function SignUpContent() {
                   </div>
                   </div>
 
-                  <div className="flex items-start space-x-2">
+                  <div className="flex items-start gap-2">
                     <input
                       type="checkbox"
                       id="terms"
                       disabled={isLoading}
-                      className="mt-1 w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 disabled:opacity-50"
+                      className="mt-1 h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-50"
                       required
                     />
                     <Label htmlFor="terms" className="text-sm text-slate-600">

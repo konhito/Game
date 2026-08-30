@@ -19,6 +19,11 @@ export interface AuthResponse {
   message: string;
   token: string;
   user: User;
+  referral?: {
+    applied: boolean;
+    signup_points: number;
+    referral_points: number;
+  };
 }
 
 export interface LoginRequest {
@@ -627,4 +632,3 @@ class AuthService {
 
 // Create and export a singleton instance
 export const authService = new AuthService();
-

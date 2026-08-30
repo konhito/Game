@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, Coins, LogOut, Settings, User, Wallet, Menu, Home, Trophy, Gamepad2, Gift, Target, BarChart3, Shield, Newspaper } from "lucide-react";
+import { Bell, Coins, LogOut, Settings, User, Wallet, Menu, Home, Trophy, Gamepad2, Gift, Target, BarChart3, Shield, Newspaper, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -512,6 +512,15 @@ export function Navbar() {
                     <Link href="/dashboard/wallet" className="flex items-center gap-3 w-full">
                       <Wallet className="h-4 w-4 text-blue-600" />
                     <span className="truncate">Wallet</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                  <Link href="/dashboard/referrals" className="flex items-center gap-3 w-full">
+                    <UserPlus className="h-4 w-4 text-emerald-600" />
+                    <div className="flex flex-col">
+                      <span>Referrals</span>
+                      <span className="text-xs text-slate-500">Share your code and invite friends</span>
+                    </div>
                   </Link>
                 </DropdownMenuItem>
                 {/* Profile Section */}

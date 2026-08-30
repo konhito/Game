@@ -38,7 +38,7 @@ export default function ReferralsPage() {
     if (!user) return "";
     const explicitCode = user.referral_code?.trim();
     if (explicitCode) return explicitCode;
-    return `USER${user.id}`;
+    return "";
   }, [user]);
 
   const inviteLink = useMemo(() => {

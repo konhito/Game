@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { authService } from "@/lib/auth-service";
 import { 
   X, 
   ChevronRight, 
@@ -111,18 +112,29 @@ export function OnboardingTour() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Check if user has completed tour
-    const tourCompleted = localStorage.getItem("pinecoin_tour_completed");
-    const isNewUser = !tourCompleted;
+  const getTourStorageKey = () => {
+    const userId = authService.getUser()?.id;
+    return `pinecoin_tour_completed:${userId || "anonymous"}`;
+  };
 
-    if (isNewUser) {
-      // Small delay to ensure page is fully loaded
-      setTimeout(() => {
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const showTourWhenReady = () => {
+      if (sessionStorage.getItem("pinecoin_pending_referral_signup_reward")) return;
+      if (localStorage.getItem(getTourStorageKey())) return;
+
+      timer = setTimeout(() => {
         setIsVisible(true);
         updateOverlay();
       }, 1000);
-    }
+    };
+
+    showTourWhenReady();
+    window.addEventListener("referralSignupRewardAcknowledged", showTourWhenReady);
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("referralSignupRewardAcknowledged", showTourWhenReady);
+    };
   }, []);
 
   useEffect(() => {
@@ -201,7 +213,7 @@ export function OnboardingTour() {
   };
 
   const handleComplete = () => {
-    localStorage.setItem("pinecoin_tour_completed", "true");
+    localStorage.setItem(getTourStorageKey(), "true");
     setIsVisible(false);
   };
 
@@ -495,4 +507,3 @@ export function OnboardingTour() {
     </AnimatePresence>
   );
 }
-

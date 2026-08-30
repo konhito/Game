@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Navbar } from "./_components/navbar";
 import AuthWrapper from "./_components/auth-wrapper";
+import { OnboardingTour } from "@/components/dashboard/onboarding-tour";
+import { ReferralSignupRewardDialog } from "@/components/dashboard/referral-signup-reward-dialog";
 
 export default async function DashboardLayout({
   children,
@@ -30,6 +32,8 @@ export default async function DashboardLayout({
           <div className="min-h-screen bg-background overflow-x-hidden w-full">
             {/* Top Navigation Bar */}
             <Navbar />
+            <ReferralSignupRewardDialog />
+            <OnboardingTour />
             
             {/* Main Content Area */}
             <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
@@ -46,6 +50,8 @@ export default async function DashboardLayout({
       <div className="min-h-screen bg-background overflow-x-hidden w-full">
         {/* Top Navigation Bar */}
         <Navbar />
+        <ReferralSignupRewardDialog />
+        <OnboardingTour />
         
         {/* Main Content Area */}
         <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
@@ -63,6 +69,8 @@ export default async function DashboardLayout({
         <div className="min-h-screen bg-background overflow-x-hidden w-full">
           {/* Top Navigation Bar */}
           <Navbar />
+          <ReferralSignupRewardDialog />
+          <OnboardingTour />
           
           {/* Main Content Area */}
           <main className="min-h-[calc(100vh-4rem)] bg-[var(--paper-deep)] w-full overflow-x-hidden">
