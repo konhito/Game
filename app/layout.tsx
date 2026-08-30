@@ -81,13 +81,12 @@ export const metadata: Metadata = {
     canonical: siteConfig.url,
   },
   icons: {
-    // Use the Pinecrest brand logo consistently across favicon targets.
     icon: [
-      { url: '/Logo1.png', sizes: '32x32', type: 'image/png' },
-      { url: '/Logo1.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico', sizes: '64x64', type: 'image/x-icon' },
     ],
-    shortcut: '/Logo1.png',
-    apple: '/Logo1.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
   },
 };
 

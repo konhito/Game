@@ -31,7 +31,7 @@ function buildInviteLink(code: string) {
 export default function ReferralsPage() {
   const [copiedField, setCopiedField] = useState<"code" | "link" | null>(null);
   const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
-  const user = authService.getUser();
+  const [user, setUser] = useState(() => authService.getUser());
   const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
 
   const referralCode = useMemo(() => {
@@ -44,6 +44,23 @@ export default function ReferralsPage() {
   const inviteLink = useMemo(() => {
     if (!referralCode) return "";
     return buildInviteLink(referralCode);
+  }, [referralCode]);
+
+  useEffect(() => {
+    if (referralCode) return;
+
+    let isCurrent = true;
+    authService.getProfile()
+      .then((profile) => {
+        if (isCurrent) setUser(profile);
+      })
+      .catch((error) => {
+        console.error("Failed to refresh referral code", error);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [referralCode]);
 
   useEffect(() => {
@@ -153,8 +170,8 @@ export default function ReferralsPage() {
                   </Badge>
                 </div>
                 <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <code className="break-all text-base font-semibold text-slate-900">{referralCode}</code>
-                  <Button type="button" variant="outline" onClick={() => copyText(referralCode, "code")}>
+                  <code className="break-all text-base font-semibold text-slate-900">{referralCode || "Loading your code..."}</code>
+                  <Button type="button" variant="outline" disabled={!referralCode} onClick={() => copyText(referralCode, "code")}>
                     {copiedField === "code" ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
                     {copiedField === "code" ? "Copied" : "Copy Code"}
                   </Button>
