@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, Share2, Trophy, Gift, Users, Loader2, DollarSign, Target } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Share2, Users, Loader2, DollarSign, Target } from "lucide-react";
 import { authService } from "@/lib/auth-service";
 import GoogleAuthButton from "@/components/google-auth-button";
-import { robustRedirect, checkPageAfterDelay, forceRedirect, verifyAuthState } from "@/lib/redirection-utils";
+import { robustRedirect, verifyAuthState } from "@/lib/redirection-utils";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -246,99 +246,66 @@ export default function SignInPage() {
   // Show loading screen while checking authentication
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 flex items-center justify-center">
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-[var(--paper)] text-[var(--ink)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-slate-600">Checking authentication...</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-[var(--ink)]/15 border-t-[var(--pine)]"></div>
+          <p className="text-sm text-[var(--ink-muted)]">Checking your session...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-blue-50 relative overflow-hidden">
-      {/* Floating Background Elements */}
-      <motion.div
-        className="absolute top-20 left-10 text-emerald-400/20"
-        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      >
-        <Trophy size={60} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute top-40 right-20 text-blue-400/20"
-        animate={{ rotate: -360, scale: [1, 1.1, 1] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      >
-        <Gift size={50} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute bottom-40 left-20 text-emerald-400/20"
-        animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      >
-        <Users size={70} />
-      </motion.div>
-      
-      <motion.div
-        className="absolute bottom-20 right-10 text-blue-400/20"
-        animate={{ rotate: -360, scale: [1, 1.2, 1] }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-      >
-        <Trophy size={55} />
-      </motion.div>
-
-      <div className="container relative z-10 mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+    <div className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+      <div className="container relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-[1440px] flex-col items-center justify-center px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-32 lg:px-16">
         <Link
           href="/"
-          className="relative mb-6 flex w-full max-w-6xl items-center text-slate-600 hover:text-emerald-600 transition-colors sm:absolute sm:left-8 sm:top-8 sm:mb-0 sm:w-auto"
+          className="absolute left-4 top-24 inline-flex items-center rounded-full border border-[var(--ink)]/12 px-4 py-2 text-sm text-[var(--ink-muted)] transition-colors hover:border-[var(--pine)]/40 hover:text-[var(--pine)] sm:left-6 sm:top-28 lg:left-16"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="grid w-full max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="grid w-full max-w-6xl grid-cols-1 items-start gap-10 lg:grid-cols-[1.15fr_.85fr] lg:gap-20">
           {/* Main Sign In Card */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col justify-center"
+            className="flex flex-col justify-center lg:pt-10"
           >
-            <Card className="bg-white/80 border-slate-200/50 backdrop-blur-sm shadow-xl">
-              <CardHeader className="text-center space-y-4 p-5 sm:p-6">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center">
+            <Card className="rounded-[1.75rem] border-[var(--ink)]/12 bg-[var(--paper)] py-7 shadow-[0_24px_80px_rgba(20,48,35,0.12)] sm:py-9">
+              <CardHeader className="space-y-4 px-6 sm:px-9">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
                   <img 
                     src="/Icon.png" 
-                    alt="PineCrest Logo" 
-                    className="w-full h-full object-contain"
+                    alt="Pinecrest logo"
+                    className="h-7 w-7 object-contain"
                   />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold text-slate-800 sm:text-3xl">
-                    Welcome Back!
+                  <CardTitle className="text-3xl font-semibold tracking-[-.045em] text-[var(--ink)]">
+                    Welcome back
                   </CardTitle>
-                  <CardDescription className="text-slate-600 mt-2">
-                    Sign in to your PineCrest account and continue earning rewards
+                  <CardDescription className="mt-2 max-w-md text-base leading-6 text-[var(--ink-muted)]">
+                    Pick up where you left off and keep your progress moving.
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-5 p-5 sm:space-y-6 sm:p-6">
+              <CardContent className="space-y-6 px-6 sm:px-9">
                 {/* User Switching Alert */}
                 {isUserSwitching && currentUser && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                          <Users className="w-4 h-4 text-amber-600" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                          <Users className="h-4 w-4 text-amber-600" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-amber-800">
                             Currently signed in as {currentUser.name || currentUser.email}
                           </p>
-                          <p className="text-xs text-amber-600">
+                          <p className="text-xs leading-5 text-amber-600">
                             To sign in with a different account, please sign out first
                           </p>
                         </div>
@@ -347,7 +314,7 @@ export default function SignInPage() {
                         onClick={handleSwitchUser}
                         variant="outline"
                         size="sm"
-                        className="text-amber-700 border-amber-300 hover:bg-amber-100"
+                        className="rounded-full border-amber-300 text-amber-700 hover:bg-amber-100"
                       >
                         Switch User
                       </Button>
@@ -357,7 +324,7 @@ export default function SignInPage() {
                 
                 <form onSubmit={handleEmailSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-700 font-medium">
+                    <Label htmlFor="email" className="text-sm font-medium text-[var(--ink)]">
                       Email
                     </Label>
                     <Input
@@ -369,12 +336,12 @@ export default function SignInPage() {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       autoComplete="email"
-                      className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20 disabled:opacity-50"
+                      className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-slate-700 font-medium">
+                    <Label htmlFor="password" className="text-sm font-medium text-[var(--ink)]">
                       Password
                     </Label>
                     <div className="relative">
@@ -387,13 +354,13 @@ export default function SignInPage() {
                         onChange={handleInputChange}
                         disabled={isLoading}
                         autoComplete="current-password"
-                        className="bg-white/50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-400/20 pr-10 disabled:opacity-50"
+                        className="h-12 rounded-xl border-[var(--ink)]/15 bg-[var(--paper-deep)] pr-10 text-[var(--ink)] placeholder:text-[var(--ink-muted)]/70 focus:border-[var(--pine)] focus:ring-[var(--pine)]/20 disabled:opacity-50"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] transition-colors hover:text-[var(--pine)]"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -401,12 +368,12 @@ export default function SignInPage() {
                   </div>
                   
                   {error && (
-                    <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                       {error}
                     </div>
                   )}
                   {success && (
-                    <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                     <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
                       {success}
                     </div>
                   )}
@@ -414,7 +381,7 @@ export default function SignInPage() {
                   <div className="flex items-center justify-between">
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-violet-600 hover:text-violet-700 transition-colors"
+                      className="text-sm font-semibold text-[var(--pine)] transition-colors hover:text-[var(--forest)]"
                     >
                       Forgot password?
                     </Link>
@@ -422,7 +389,7 @@ export default function SignInPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="pine-button pine-button-dark h-12 w-full rounded-full font-semibold disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
@@ -437,10 +404,10 @@ export default function SignInPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-200" />
+                    <span className="w-full border-t border-[var(--ink)]/12" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white/80 px-2 text-slate-500">Or continue with</span>
+                    <span className="bg-[var(--paper)] px-2 text-xs text-[var(--ink-muted)]">Or continue with</span>
                   </div>
                 </div>
 
@@ -449,15 +416,15 @@ export default function SignInPage() {
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
                     isLoading={isGoogleLoading}
-                    className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-violet-400 transition-all duration-200"
+                    className="h-12 w-full rounded-full border-[var(--ink)]/15 text-[var(--ink)] transition-colors hover:border-[var(--pine)]/50 hover:bg-[var(--paper-deep)]"
                   />
                 </div>
 
                 <div className="text-center">
-                  <span className="text-slate-600">Don&apos;t have an account? </span>
+                  <span className="text-[var(--ink-muted)]">Don&apos;t have an account? </span>
                   <Link
                     href="/sign-up"
-                    className="text-violet-600 hover:text-violet-700 font-medium transition-colors"
+                    className="font-semibold text-[var(--pine)] transition-colors hover:text-[var(--forest)]"
                   >
                     Sign up now
                   </Link>
@@ -471,54 +438,52 @@ export default function SignInPage() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="hidden flex-col justify-center space-y-6 lg:flex"
+            className="flex flex-col justify-center space-y-8 lg:pt-10"
           >
             <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-slate-800 mb-4">
-                Share and Earn Money
+              <p className="eyebrow text-[var(--pine)]">Your progress is waiting</p>
+              <h2 className="display-heading mt-5 max-w-xl text-5xl leading-[.94] tracking-[-.065em] sm:text-7xl">
+                Keep your momentum.
               </h2>
-              <p className="text-slate-600 text-lg mb-8">
-                Share social media links, complete tasks, and earn real money with PineCoins!
+              <p className="mt-6 max-w-lg text-lg leading-8 text-[var(--ink-muted)]">
+                Pick up a verified task, see your points add up, and stay in the rhythm.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <Share2 className="w-6 h-6 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <Share2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Share Social Media Links</h3>
-                  <p className="text-slate-600 text-sm">Post links on your social media and earn money</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Share Social Media Links</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Post links on your social media and earn money.</p>
                 </div>
               </motion.div>
 
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <DollarSign className="w-6 h-6 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <DollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Earn Real Money</h3>
-                  <p className="text-slate-600 text-sm">Convert your points to real cash rewards</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Earn Real Money</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Convert your points to real cash rewards.</p>
                 </div>
               </motion.div>
 
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center p-4 bg-white/60 border border-slate-200/50 rounded-lg shadow-lg"
+                className="flex items-center gap-4 rounded-[1.25rem] border border-[var(--ink)]/10 bg-[var(--paper-deep)] p-4 transition-colors hover:border-[var(--pine)]/30 sm:p-5"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                  <Target className="w-6 h-6 text-white" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-[var(--lime)]">
+                  <Target className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-800">Complete Tasks</h3>
-                  <p className="text-slate-600 text-sm">Simple social media tasks for guaranteed earnings</p>
+                  <h3 className="text-lg font-semibold tracking-[-.02em] text-[var(--ink)]">Complete Tasks</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">Simple social media tasks for clear progress.</p>
                 </div>
               </motion.div>
             </div>

@@ -503,7 +503,7 @@ function SignUpContent() {
                       type="checkbox"
                       id="terms"
                       disabled={isLoading}
-                      className="mt-1 h-4 w-4 rounded border-[var(--ink)]/25 text-[var(--pine)] focus:ring-[var(--pine)] disabled:opacity-50"
+                      className="mt-1 h-3.5 w-3.5 shrink-0 rounded border-[var(--ink)]/25 text-[var(--pine)] focus:ring-[var(--pine)] disabled:opacity-50"
                       required
                     />
                     <Label htmlFor="terms" className="text-sm leading-6 text-[var(--ink-muted)]">
