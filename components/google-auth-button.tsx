@@ -35,7 +35,16 @@ export default function GoogleAuthButton({
   useEffect(() => {
     // Load Google Identity Services script
     const loadGoogleScript = () => {
-      if (window.google || isGoogleLoaded.current) return;
+      // The script stays in the document across Next.js client-side navigations,
+      // while this button's container is recreated. Re-initialize it so Google
+      // renders into the newly mounted container.
+      if (window.google) {
+        isGoogleLoaded.current = true;
+        initializeGoogleAuth();
+        return;
+      }
+
+      if (isGoogleLoaded.current) return;
 
       const script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
