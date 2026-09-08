@@ -1,4 +1,5 @@
 import config from './config';
+import { getRegistrationDeviceIdentity } from './device-identity';
 
 const API_BASE = config.API_BASE;
 
@@ -19,6 +20,18 @@ export interface AuthResponse {
   message: string;
   token: string;
   user: User;
+  referral?: {
+    applied: boolean;
+    signup_points: number;
+    referral_points: number;
+  };
+}
+
+export interface RegistrationResponse {
+  message: string;
+  verification_required: true;
+  user: Pick<User, 'id' | 'name' | 'email'>;
+  verification_url?: string;
   referral?: {
     applied: boolean;
     signup_points: number;
@@ -232,14 +245,19 @@ class AuthService {
   }
 
   // Register new user with email/password
-  async register(data: RegisterRequest): Promise<AuthResponse> {
+  async register(data: RegisterRequest): Promise<RegistrationResponse> {
     try {
+      const device = getRegistrationDeviceIdentity();
       const response = await fetch(`${API_BASE}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          device_id: device.deviceId,
+          device_fingerprint: device.fingerprint,
+        }),
         credentials: 'include',
       });
 
@@ -253,9 +271,7 @@ class AuthService {
         throw new Error(errorData.error || errorData.message || 'Registration failed');
       }
 
-      const result: AuthResponse = await response.json();
-      this.setAuth(result.token, result.user);
-      return result;
+      return response.json();
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -350,10 +366,8 @@ class AuthService {
   }
 
   // Handle Google OAuth success
-  async handleGoogleAuth(googleUser: any): Promise<void> {
+  async handleGoogleAuth(idToken: string): Promise<void> {
     try {
-      console.log('Google OAuth user data:', googleUser);
-      
       // Clear any existing authentication data before proceeding
       console.log('Clearing existing authentication data before Google login...');
       this.clearAuth();
@@ -365,25 +379,13 @@ class AuthService {
       try {
         console.log('Attempting backend Google OAuth authentication...');
         console.log('API Base URL:', config.API_BASE);
-        console.log('Google User Data:', {
-          googleId: googleUser.sub || googleUser.id,
-          name: googleUser.name || googleUser.displayName || 'Google User',
-          email: googleUser.email,
-          image: googleUser.picture || googleUser.photoURL,
-        });
-
         const response = await fetch(`${config.API_BASE}/api/users/auth/google`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({
-            googleId: googleUser.sub || googleUser.id,
-            name: googleUser.name || googleUser.displayName || 'Google User',
-            email: googleUser.email,
-            image: googleUser.picture || googleUser.photoURL,
-          }),
+          body: JSON.stringify({ idToken }),
         });
 
         console.log('Backend response status:', response.status);

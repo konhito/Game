@@ -100,7 +100,7 @@ export default function GoogleAuthButton({
 
     const handleGoogleResponse = async (response: any) => {
       try {
-        console.log("Google OAuth response received:", response);
+        if (!response.credential) throw new Error("Google did not return an ID token");
         
         // Check if there's already a logged-in user
         const currentUser = authService.getUser();
@@ -111,23 +111,7 @@ export default function GoogleAuthButton({
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        // Decode the JWT token to get user info
-        const payload = JSON.parse(atob(response.credential.split('.')[1]));
-        console.log("Decoded Google payload:", payload);
-
-        // Create user object from Google response
-        const googleUser = {
-          id: payload.sub,
-          name: payload.name,
-          email: payload.email,
-          picture: payload.picture,
-          email_verified: payload.email_verified,
-        };
-
-        console.log("Processing Google authentication for user:", googleUser.email);
-        
-        // Handle the Google authentication
-        await authService.handleGoogleAuth(googleUser);
+        await authService.handleGoogleAuth(response.credential);
         
         // Verify authentication was successful
         const isAuthenticated = authService.isAuthenticated();
