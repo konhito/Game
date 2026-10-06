@@ -40,6 +40,7 @@ const moderatorAllowedHrefs = new Set([
 const adminPages = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Referrals', href: '/admin/referrals', icon: Users },
   { name: 'Tasks', href: '/admin/tasks', icon: ClipboardList },
   { name: 'Create Task', href: '/admin/create-task', icon: Plus },
   { name: 'Pending Proofs', href: '/admin/pending-proofs', icon: Eye },

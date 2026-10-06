@@ -7,13 +7,20 @@ export interface TelegramConnectionStatus {
     telegram_user_id: string;
     telegram_username?: string | null;
     telegram_first_name?: string | null;
+    referral_channel_joined?: boolean;
+    referral_channel_checked_at?: string | null;
     linked_at: string;
   } | null;
   token?: string;
   link_value?: string;
 }
 
-async function request(path: string, init?: RequestInit): Promise<TelegramConnectionStatus> {
+export interface TelegramChannelVerification {
+  channel_joined: boolean;
+  checked_at: string;
+}
+
+async function request<T = TelegramConnectionStatus>(path: string, init?: RequestInit): Promise<T> {
   const token = authService.getToken();
   if (!token) throw new Error("Please sign in again");
 
@@ -29,10 +36,11 @@ async function request(path: string, init?: RequestInit): Promise<TelegramConnec
   if (!response.ok || !payload.success) {
     throw new Error(payload.error || "Telegram connection request failed");
   }
-  return payload.data;
+  return payload.data as T;
 }
 
 export const telegramService = {
   getStatus: () => request("/api/telegram/status"),
   createLink: () => request("/api/telegram/link", { method: "POST" }),
+  verifyReferralChannel: () => request<TelegramChannelVerification>("/api/telegram/referral-channel/verify", { method: "POST" }),
 };

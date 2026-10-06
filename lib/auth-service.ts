@@ -366,7 +366,7 @@ class AuthService {
   }
 
   // Handle Google OAuth success
-  async handleGoogleAuth(idToken: string): Promise<void> {
+  async handleGoogleAuth(idToken: string, referralCode?: string): Promise<void> {
     try {
       // Clear any existing authentication data before proceeding
       console.log('Clearing existing authentication data before Google login...');
@@ -385,7 +385,7 @@ class AuthService {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ idToken }),
+          body: JSON.stringify({ idToken, referral_code: referralCode }),
         });
 
         console.log('Backend response status:', response.status);

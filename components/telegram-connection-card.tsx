@@ -13,6 +13,7 @@ export function TelegramConnectionCard() {
   const [status, setStatus] = useState<TelegramConnectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     telegramService.getStatus()
@@ -38,7 +39,29 @@ export function TelegramConnectionCard() {
     toast.success("Telegram connection link copied");
   };
 
+  const verifyChannel = async () => {
+    setVerifying(true);
+    try {
+      const result = await telegramService.verifyReferralChannel();
+      setStatus((current) => current?.account ? {
+        ...current,
+        account: {
+          ...current.account,
+          referral_channel_joined: result.channel_joined,
+          referral_channel_checked_at: result.checked_at,
+        },
+      } : current);
+      if (result.channel_joined) toast.success("Telegram channel membership confirmed");
+      else toast.info("Join the channel first, then verify again");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not verify channel membership");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+  const referralChannelUrl = process.env.NEXT_PUBLIC_TELEGRAM_REFERRAL_CHANNEL_URL;
 
   return (
     <Card>
@@ -61,6 +84,13 @@ export function TelegramConnectionCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {referralChannelUrl && (
+          <Button variant="outline" asChild>
+            <a href={referralChannelUrl} target="_blank" rel="noreferrer">
+              Join Pinecrest Telegram channel <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        )}
         {loading ? (
           <div className="space-y-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-4 w-2/3" /></div>
         ) : status?.linked ? (
@@ -75,6 +105,14 @@ export function TelegramConnectionCard() {
               <p className="mt-1 text-sm text-muted-foreground">
                 This connection is permanent. Contact support if you need it removed.
               </p>
+              <p className="mt-2 text-sm">
+                {status.account?.referral_channel_joined
+                  ? "Channel membership verified for referrals."
+                  : "Join the channel and verify membership to qualify referrals."}
+              </p>
+              <Button className="mt-3" variant="outline" onClick={verifyChannel} disabled={verifying}>
+                {verifying ? "Checking membership..." : "Verify channel membership"}
+              </Button>
             </div>
           </div>
         ) : status?.link_value ? (

@@ -198,6 +198,13 @@ export default function AdminDashboard() {
       color: "purple"
     },
     {
+      title: "Referral Program",
+      description: "Review agents and signups",
+      href: "/admin/referrals",
+      icon: Users,
+      color: "green"
+    },
+    {
       title: "Manage Tasks",
       description: `${safeStats.total_tasks} tasks`,
       href: "/admin/tasks",

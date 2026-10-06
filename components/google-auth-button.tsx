@@ -11,6 +11,7 @@ interface GoogleAuthButtonProps {
   onError?: (error: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
+  referralCode?: string;
   children?: React.ReactNode;
   className?: string;
 }
@@ -26,6 +27,7 @@ export default function GoogleAuthButton({
   onError,
   isLoading = false,
   disabled = false,
+  referralCode,
   children,
   className = "",
 }: GoogleAuthButtonProps) {
@@ -111,7 +113,7 @@ export default function GoogleAuthButton({
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        await authService.handleGoogleAuth(response.credential);
+        await authService.handleGoogleAuth(response.credential, referralCode);
         
         // Verify authentication was successful
         const isAuthenticated = authService.isAuthenticated();
@@ -149,7 +151,7 @@ export default function GoogleAuthButton({
         }
       }
     };
-  }, [onSuccess, onError]);
+  }, [onSuccess, onError, referralCode]);
 
   const googleClientId = config.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "969315225443-6s71jgef0skd6u3bknouj255tui4b97c.apps.googleusercontent.com";
   

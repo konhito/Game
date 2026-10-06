@@ -527,6 +527,7 @@ function SignUpContent() {
                   <GoogleAuthButton
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
+                    referralCode={formData.referralCode.trim() || searchParams.get("ref")?.trim() || undefined}
                     isLoading={isGoogleLoading}
                     className="h-12 w-full rounded-full border-[var(--ink)]/15 text-[var(--ink)] transition-colors hover:border-[var(--pine)]/50 hover:bg-[var(--paper-deep)]"
                   />

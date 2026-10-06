@@ -106,7 +106,7 @@ export default function ReferralsPage() {
             <p className="text-sm font-medium text-emerald-700">Referrals</p>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Invite people with your code</h1>
             <p className="max-w-2xl text-sm text-slate-600">
-              Share your referral code or invite link. When a new user signs up with it, you earn points.
+              Each referral earns ₦25 after the new account verifies email, links Telegram, and joins the Pinecrest channel. Payout unlocks at 1,000 qualified signups.
             </p>
           </div>
           <Button asChild variant="outline" className="w-full sm:w-auto">
@@ -117,7 +117,19 @@ export default function ReferralsPage() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Card className="border-emerald-200 bg-emerald-50/90 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-emerald-700">Cash per qualified referral</p>
+                <p className="text-2xl font-semibold text-slate-900">₦25</p>
+                <p className="text-xs text-slate-600">Payout unlocks at 1,000</p>
+              </div>
+            </CardContent>
+          </Card>
           <Card className="border-slate-200 bg-white/90 shadow-sm">
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
