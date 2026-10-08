@@ -375,8 +375,15 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pt-4">
                 {dashboardData.availableTasks.length === 0 ? (
-                  <div className="py-6 text-center text-sm text-slate-500 border border-dashed border-slate-200 rounded-lg">
-                    No pending tasks
+                  <div className="rounded-lg border border-dashed border-slate-200 px-4 py-5 text-center">
+                    <p className="text-sm text-slate-500">No quick tasks available right now.</p>
+                    <Button
+                      variant="ghost"
+                      className="mt-2 text-sm text-slate-700"
+                      onClick={() => router.push("/dashboard/activities")}
+                    >
+                      Browse all tasks <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">

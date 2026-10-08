@@ -1,41 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Gift, Sparkles, Trophy, Users } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth-service";
 
-type TourStep = {
-  title: string;
-  description: string;
-  icon: typeof Sparkles;
-};
-
 const PENDING_REFERRAL_REWARD_KEY = "pinecoin_pending_referral_signup_reward";
-
-const tourSteps: TourStep[] = [
-  {
-    title: "Welcome to Pinecrest",
-    description: "Your dashboard keeps your points, prizes, and next actions in one place.",
-    icon: Sparkles,
-  },
-  {
-    title: "Complete activities",
-    description: "Open Tasks to complete verified activities and add points to this week's leaderboard score.",
-    icon: Gift,
-  },
-  {
-    title: "Track your progress",
-    description: "Your weekly points determine your leaderboard position. Check the board often to see where you stand.",
-    icon: Trophy,
-  },
-  {
-    title: "Invite your circle",
-    description: "Share your five-digit referral code from the account menu to earn points when an invite signs up.",
-    icon: Users,
-  },
-];
 
 function getTourStorageKey() {
   const userId = authService.getUser()?.id;
@@ -43,7 +15,7 @@ function getTourStorageKey() {
 }
 
 export function OnboardingTour() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -69,10 +41,10 @@ export function OnboardingTour() {
     setIsVisible(false);
   };
 
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === tourSteps.length - 1;
-  const step = tourSteps[currentStep];
-  const StepIcon = step.icon;
+  const startFirstTask = () => {
+    completeTour();
+    router.push("/dashboard/activities");
+  };
 
   return (
     <AnimatePresence>
@@ -108,42 +80,22 @@ export function OnboardingTour() {
             </div>
 
             <div className="mt-6 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-              <StepIcon className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </div>
             <h2 className="mt-4 text-2xl font-semibold text-slate-950" id="onboarding-title">
-              {step.title}
+              Start with one task
             </h2>
             <p className="mt-2 max-w-[38ch] text-sm leading-6 text-slate-600" id="onboarding-description">
-              {step.description}
+              Pick an activity, follow its instructions, then submit proof for review. Approved tasks add points to your weekly total.
             </p>
 
-            <div className="mt-7 flex gap-1.5" aria-label={`Step ${currentStep + 1} of ${tourSteps.length}`}>
-              {tourSteps.map((tourStep, index) => (
-                <span
-                  aria-hidden="true"
-                  className={`h-1.5 flex-1 ${index <= currentStep ? "bg-emerald-600" : "bg-slate-200"}`}
-                  key={tourStep.title}
-                />
-              ))}
-            </div>
-
-            <div className="mt-7 grid grid-cols-2 gap-3">
+            <div className="mt-7">
               <Button
-                disabled={isFirstStep}
-                onClick={() => setCurrentStep((stepIndex) => Math.max(0, stepIndex - 1))}
-                type="button"
-                variant="outline"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-              <Button
-                className="bg-emerald-700 hover:bg-emerald-800"
-                onClick={() => (isLastStep ? completeTour() : setCurrentStep((stepIndex) => stepIndex + 1))}
+                className="w-full bg-emerald-700 hover:bg-emerald-800"
+                onClick={startFirstTask}
                 type="button"
               >
-                {isLastStep ? "Start earning" : "Continue"}
-                {!isLastStep && <ArrowRight className="ml-2 h-4 w-4" />}
+                Browse tasks
               </Button>
             </div>
           </motion.section>
