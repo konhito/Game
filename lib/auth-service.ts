@@ -446,6 +446,21 @@ class AuthService {
     }
   }
 
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE}/api/users/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Email verification failed');
+    }
+
+    return response.json();
+  }
+
   // Forgot password (email only)
   async forgotPassword(data: ForgotPasswordRequest): Promise<{ message: string }> {
     try {
