@@ -56,7 +56,7 @@ export default function HelpPage() {
     },
     {
       question: "How do I contact support?",
-      answer: "You can contact our support team through the contact page, or email us at support@pinecrest.com. We typically respond within 24-48 hours.",
+      answer: "You can contact our support team through the contact page.",
     },
   ];
 
@@ -74,7 +74,7 @@ export default function HelpPage() {
         </div>
 
         <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--pine)]">
             Help Center
           </h1>
           <p className="text-lg text-slate-600">

@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="max-w-lg w-full text-center">
         {/* 404 number - large and clear */}
         <div className="relative mb-6">
-          <span className="text-[10rem] sm:text-[12rem] font-black bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 bg-clip-text text-transparent leading-none select-none">
+          <span className="text-[10rem] sm:text-[12rem] font-black text-[var(--pine)] leading-none select-none">
             404
           </span>
         </div>
@@ -55,10 +55,10 @@ export default function NotFound() {
               News
             </Link>
             <Link
-              href="/pricing"
+              href="/help"
               className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium"
             >
-              Pricing
+              Help
             </Link>
             <Link
               href="/faq"

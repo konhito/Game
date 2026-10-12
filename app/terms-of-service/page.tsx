@@ -18,7 +18,7 @@ export default function TermsOfService() {
 
         <Card className="shadow-xl border-0">
           <CardContent className="p-8 md:p-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--pine)]">
               Terms of Service — Pinecrest
             </h1>
             <p className="text-sm text-slate-600 mb-8">
@@ -54,7 +54,7 @@ export default function TermsOfService() {
                 </h2>
                 <p className="leading-relaxed">
                   You&apos;re responsible for your credentials and all activity under your account. Notify{" "}
-                  <a href="mailto:support@pinecrest247.com" className="text-emerald-600 hover:underline">support@pinecrest247.com</a> of any breach. We may require 2FA.
+                  <a href="/contact" className="text-emerald-600 hover:underline">Pinecrest support</a> of any breach. We may require 2FA.
                 </p>
               </section>
 
@@ -281,7 +281,7 @@ export default function TermsOfService() {
                   19) Contact
                 </h2>
                 <p className="leading-relaxed">
-                  <a href="mailto:support@pinecrest247.com" className="text-emerald-600 hover:underline">support@pinecrest247.com</a>
+                  <a href="/contact" className="text-emerald-600 hover:underline">Contact Pinecrest support</a>
                 </p>
               </section>
 

@@ -489,6 +489,11 @@ function SignUpContent() {
                   {error && (
                     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                       {error}
+                      {error.includes("This device already has a Pinecrest account") && (
+                        <p className="mt-2">
+                          Already registered? <Link href="/sign-in" className="font-semibold underline underline-offset-4">Sign in to your account</Link>.
+                        </p>
+                      )}
                     </div>
                   )}
 

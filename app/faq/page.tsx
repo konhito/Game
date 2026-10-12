@@ -118,11 +118,11 @@ export default function FAQPage() {
       questions: [
         {
           q: "Reporting a bug or vulnerability?",
-          a: "Email info@pinecrest247.com (PGP available). We appreciate responsible disclosure.",
+          a: "Use the contact page to report a bug or vulnerability. We appreciate responsible disclosure.",
         },
         {
           q: "Contact support",
-          a: "support@pinecrest247.com | In-app chat | @pinecrest247 (social)",
+          a: "Use the contact page to send our support team a message.",
         },
       ],
     },
@@ -156,7 +156,7 @@ export default function FAQPage() {
         </div>
 
         <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--pine)]">
             Frequently Asked Questions
           </h1>
           <p className="text-lg text-slate-600">
@@ -211,7 +211,7 @@ export default function FAQPage() {
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <a
-                href="mailto:support@pinecrest247.com"
+                href="/contact"
                 className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
               >
                 Contact Support

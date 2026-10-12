@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ArrowLeft, Mail, MessageSquare, Send, CheckCircle } from "lucide-react";
-import { toast } from "sonner";
+import config from "@/lib/config";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -19,18 +19,30 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission (replace with actual API call)
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError("");
+    try {
+      const response = await fetch(`${config.API_BASE}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Message could not be sent. Please try again.");
+      }
       setIsSubmitted(true);
-      toast.success("Message sent successfully! We'll get back to you soon.");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    }, 1000);
+    } catch (cause) {
+      setError(cause instanceof TypeError ? "Could not connect to Pinecrest. Refresh and try again." : cause instanceof Error ? cause.message : "Message could not be sent. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -74,11 +86,11 @@ export default function ContactPage() {
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--pine)]">
               Get in Touch
             </h1>
             <p className="text-lg text-slate-600 mb-8">
-              Have a question or need help? We're here to assist you. Send us a message and we'll respond as soon as possible.
+              Have a question or need help? Send us a message through this form.
             </p>
 
             <div className="space-y-6">
@@ -88,7 +100,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900 mb-1">Email</h3>
-                  <p className="text-slate-600">support@pinecrest.com</p>
+                  <p className="text-slate-600">Use the form to send us a message.</p>
                 </div>
               </div>
 
@@ -98,7 +110,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900 mb-1">Response Time</h3>
-                  <p className="text-slate-600">We typically respond within 24-48 hours</p>
+                      <p className="text-slate-600">We&apos;ll reply to the email address you provide.</p>
                 </div>
               </div>
             </div>
@@ -114,6 +126,8 @@ export default function ContactPage() {
                     name="name"
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
                     value={formData.name}
                     onChange={handleChange}
                     className="mt-1"
@@ -128,6 +142,7 @@ export default function ContactPage() {
                     name="email"
                     type="email"
                     required
+                    maxLength={254}
                     value={formData.email}
                     onChange={handleChange}
                     className="mt-1"
@@ -142,6 +157,8 @@ export default function ContactPage() {
                     name="subject"
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={120}
                     value={formData.subject}
                     onChange={handleChange}
                     className="mt-1"
@@ -155,6 +172,8 @@ export default function ContactPage() {
                     id="message"
                     name="message"
                     required
+                    minLength={10}
+                    maxLength={5000}
                     value={formData.message}
                     onChange={handleChange}
                     className="mt-1 min-h-[120px]"
@@ -176,6 +195,7 @@ export default function ContactPage() {
                     </>
                   )}
                 </Button>
+                {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
               </form>
             </CardContent>
           </Card>

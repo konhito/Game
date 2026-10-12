@@ -32,7 +32,6 @@ export const organizationSchema = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "Customer Support",
-    email: "support@pinecrest.com",
     availableLanguage: ["English"]
   }
 };

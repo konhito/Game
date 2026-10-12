@@ -274,6 +274,9 @@ class AuthService {
       return response.json();
     } catch (error) {
       console.error('Registration error:', error);
+      if (error instanceof TypeError) {
+        throw new Error('Could not connect to Pinecrest. Check your connection, refresh the page, and try again.');
+      }
       throw error;
     }
   }
