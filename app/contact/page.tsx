@@ -109,7 +109,7 @@ export default function ContactPage() {
                   <MessageSquare className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-1">Response Time</h3>
+                  <h3 className="font-semibold text-slate-900 mb-1">Replies</h3>
                       <p className="text-slate-600">We&apos;ll reply to the email address you provide.</p>
                 </div>
               </div>
