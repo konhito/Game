@@ -419,9 +419,8 @@ class AuthService {
             throw new Error('Invalid response format from backend');
           }
         } else {
-          const errorText = await response.text();
-          console.error('Backend authentication failed - HTTP error:', response.status, errorText);
-          throw new Error(`Backend authentication failed: ${response.status}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Google authentication failed: ${response.status}`);
         }
       } catch (backendError) {
         console.error('Backend Google authentication failed:', backendError);
