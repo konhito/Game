@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Forward request to backend
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com';
     const response = await fetch(`${API_BASE}/api/admin/leaderboard-rewards`, {
       method: 'GET',
       headers: {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Forward request to backend
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com';
     const response = await fetch(`${API_BASE}/api/admin/weekly-settlement`, {
       method: 'POST',
       headers: {

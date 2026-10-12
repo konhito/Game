@@ -26,7 +26,7 @@ interface NewsArticle {
 }
 
 export default function NewsPage() {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://api.pinecrest247.com";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +52,7 @@ export default function NewsPage() {
       const params = new URLSearchParams();
       params.append('limit', '100');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?${params}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/news?${params}`);
 
       if (response.ok) {
         const result = await response.json();

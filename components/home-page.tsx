@@ -129,7 +129,7 @@ function Testimonials() {
 }
 
 export default function HomePage() {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://api.pinecrest247.com";
   const [newsItems, setNewsItems] = useState<NewsArticle[]>([]);
   const [taskPointRules, setTaskPointRules] = useState(defaultTaskPointRules);
   const [pinecoinRate, setPinecoinRate] = useState(defaultPinecoinRate);

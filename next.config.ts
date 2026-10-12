@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "pinecrest.konhito.me",
+        hostname: "api.pinecrest247.com",
         pathname: "/uploads/**",
       },
     ],

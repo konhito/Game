@@ -32,7 +32,7 @@ export default function ReferralsPage() {
   const [copiedField, setCopiedField] = useState<"code" | "link" | null>(null);
   const [taskPointRules, setTaskPointRules] = useState<TaskPointRules>(defaultTaskPointRules);
   const [user, setUser] = useState(() => authService.getUser());
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://api.pinecrest247.com";
 
   const referralCode = useMemo(() => {
     if (!user) return "";

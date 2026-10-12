@@ -90,7 +90,7 @@ export default function LeaderboardPage() {
       if (showLoader) {
         setLoading(true);
       }
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com';
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4500);
       const response = await fetch(`${API_BASE}/api/users/leaderboard/public?limit=50`, {

@@ -7,7 +7,7 @@ console.log("Environment variables:", {
 
 export const config = {
   // API Configuration - use env or fallback
-  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me',
+  API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com',
   
   // App Configuration
   APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'PineCoin',

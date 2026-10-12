@@ -43,7 +43,7 @@ export function NewsImage({ src, alt, className = "", width = 400, height = 300 
   } else {
     // Extract filename if it's a path
     const filename = src.includes('/') ? src.split('/').pop() : src;
-    imageUrl = `${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/images/${filename}`;
+    imageUrl = `${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/news/images/${filename}`;
   }
 
   return (

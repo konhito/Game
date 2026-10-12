@@ -329,7 +329,7 @@ export default function DuplicateImagesPage() {
                               <img
                                 src={submission.proof_image.startsWith('data:') 
                                   ? submission.proof_image 
-                                  : `https://pinecrest.konhito.me/${submission.proof_image}`
+                                  : `https://api.pinecrest247.com/${submission.proof_image}`
                                 }
                                 alt="Proof"
                                 className="w-full h-full object-cover"

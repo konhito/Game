@@ -1,6 +1,6 @@
 // Centralized API configuration for all admin and client requests
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me',
+  BASE_URL: process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com',
   ENDPOINTS: {
     // Admin
     ADMIN_DASHBOARD: '/api/admin/dashboard/stats',

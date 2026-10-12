@@ -6,7 +6,7 @@ This project implements a hybrid authentication system that supports both **Goog
 
 ### 🔐 Dual Authentication Methods
 - **Google OAuth**: Uses Better Auth for seamless Google sign-in
-- **Email/Password**: Connects to hosted backend at `https://pinecrest.konhito.me`
+- **Email/Password**: Connects to hosted backend at `https://api.pinecrest247.com`
 ### 🚀 Authentication Flow
 
 #### Google OAuth
@@ -94,7 +94,7 @@ authService.logout();
 
 ## Backend Integration
 
-The hosted backend (`https://pinecrest.konhito.me`) provides:
+The hosted backend (`https://api.pinecrest247.com`) provides:
 
 - User registration and login
 - JWT token generation and validation
@@ -107,7 +107,7 @@ The hosted backend (`https://pinecrest.konhito.me`) provides:
 ### Environment Variables
 ```bash
 # Backend API URL (optional, defaults to hosted backend)
-NEXT_PUBLIC_API_URL=https://pinecrest.konhito.me
+NEXT_PUBLIC_API_BASE=https://api.pinecrest247.com
 ```
 
 ### Testing

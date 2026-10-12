@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com';
 
 export async function GET(request: NextRequest) {
   try {

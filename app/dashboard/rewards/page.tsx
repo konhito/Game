@@ -63,7 +63,7 @@ export default function RewardsPage() {
   const fetchUserStats = async () => {
     try {
       const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/stats`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/users/stats`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -82,7 +82,7 @@ export default function RewardsPage() {
   const fetchRewards = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/achievements`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/users/achievements`, {
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
       });

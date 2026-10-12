@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch dynamic news articles
   let newsArticles: Array<{ url: string; lastModified: Date; changeFrequency: 'weekly'; priority: number }> = [];
   try {
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me';
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(`${apiBase}/api/news?limit=100`, {

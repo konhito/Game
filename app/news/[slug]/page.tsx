@@ -29,7 +29,7 @@ interface NewsArticle {
 }
 
 export default function ArticlePage() {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://pinecrest.konhito.me";
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "https://api.pinecrest247.com";
   const params = useParams();
   const router = useRouter();
   const [article, setArticle] = useState<NewsArticle | null>(null);
@@ -52,7 +52,7 @@ export default function ArticlePage() {
       setError(null);
 
       const encodedSlug = encodeURIComponent(slug);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news/${encodedSlug}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/news/${encodedSlug}`);
 
       if (response.ok) {
         const result = await response.json();
@@ -87,7 +87,7 @@ export default function ArticlePage() {
       // Ensure tagParam is a valid string
       if (!tagParam || typeof tagParam !== 'string') return;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/news?tag=${encodeURIComponent(tagParam)}&limit=3`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/news?tag=${encodeURIComponent(tagParam)}&limit=3`);
 
       if (response.ok) {
         const result = await response.json();

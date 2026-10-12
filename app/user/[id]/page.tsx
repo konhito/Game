@@ -113,7 +113,7 @@ export default function UserProfilePage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://pinecrest.konhito.me'}/api/users/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'https://api.pinecrest247.com'}/api/users/${userId}`, {
         headers,
       });
 
